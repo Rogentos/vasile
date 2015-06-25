@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# 
+# Script to build Kogaion Linux packages in a clean squashfs + overlayfs chroot
+# Using predefined targets : kernel.target, libs.target, x11.target, sound.target, artwork.target etc
+# Targets are passed as arguments, and will remain private...for now (not all of them are stable yet)
+# Author	: V3n3RiX @ RogentOS
+# Deps		: squashfs + overlayfs kernel support
+# Todo		: squashfs checksum verification
+#			: add squashfs portage tree	
+#			: sync build.git
+#			: sync overlays
+#			: setup profiles
+#			: auto push built packages to repos (maybe, really needed?!?)
+
+lowerdir="kogaiondevelx64"
+upperdir="upperdirx64"
+overlaydir="overlaydirx64"
+env_user="root"
+env_targets="$@"
+env_build_cmd="emerge -av "$env_targets""
+
+envprepare () {
+	# create the directories needed for squashfs + overlayfs mount
+	mkdir "$lowerdir"
+	mkdir "$upperdir"
+	mkdir "$overlaydir"
+}
+
+envstart () {
+	# mount ro squashfs + add rw overlayfs layer to enable clean package building
+	mount -t squashfs "$lowerdir".squashfs "$lowerdir"
+	mount -t overlayfs -o lowerdir="$lowerdir",upperdir="$upperdir" overlayfs "$overlaydir"
+	mount -o bind /proc "$overlaydir"/proc
+	mount -o bind /sys "$overlaydir"/sys
+	mount -o bind /dev "$overlaydir"/dev
+	mount -o bind /dev/pts "$overlaydir"/dev/pts
+	mount -o bind /dev/shm "$overlaydir"/dev/shm
+	mount -o bind /tmp "$overlaydir"/tmp
+}
+
+envstop () {
+	# umount squashfs + overlayfs chroot
+	umount -l "$overlaydir"/proc
+	umount -l "$overlaydir"/sys
+	umount -l "$overlaydir"/dev/pts
+	umount -l "$overlaydir"/dev/shm
+	umount -l "$overlaydir"/dev
+	umount -l "$overlaydir"/tmp
+	umount -l "$overlaydir"
+	umount -l "$lowerdir"
+}
+
+envbuild () {
+	# build packages in squashfs + overlayfs chroot
+	chroot "$overlaydir" su - "$env_user" -c "$env_build_cmd"
+}
+
+envchroot() {
+	# enter squashfs + overlayfs chroot to push packages, or debug build errors
+	echo -e ""
+	echo -e "#################################################################"
+	echo -e "#       ENTERING CHROOT ENV FOR YOU TO PUSH BUILT PACKAGES      #"
+	echo -e "#               OR TO FIX EVENTUAL BUILD ERRORS                 #"
+	echo -e "#################################################################"
+	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
+	echo -e "#################################################################"
+	echo -e "#            EXITING NOW WILL DESTROY ALL YOUR WORK             #"
+	echo -e "#   DO NOT EXIT CHROOT UNTIL ALL PACKAGES ARE PUSHED TO REPOS   #"
+	echo -e "#  OR, IN CASE OF BUILD FAILURES, UNTIL ALL FIXES ARE COMMITED  #"
+	echo -e "#################################################################"
+	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"	
+	echo -e "#################################################################"
+	echo -e ""
+	echo -e ""
+	chroot "$overlaydir" su - "$env_user"
+}
+
+envcleanup () {
+	# cleanup build environment
+	rm -rf "$overlaydir"
+	rm -rf "$upperdir"
+	rm -rf "$lowerdir"
+}
+
+main () {
+	envprepare
+	envstart
+	envbuild
+	envchroot
+	envstop
+	envcleanup
+}
+
+main 
+exit 0
