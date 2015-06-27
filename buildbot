@@ -5,25 +5,34 @@
 # Targets are passed as arguments, and will remain private...for now (not all of them are stable yet)
 # Author	: V3n3RiX @ RogentOS
 # Deps		: squashfs + overlayfs kernel support
-# Todo		: squashfs checksum verification
-#			: add squashfs portage tree	
-#			: sync build.git
-#			: sync overlays
-#			: setup profiles
-#			: auto push built packages to repos (maybe, really needed?!?)
+# Todo		: add squashfs portage tree && overlays sync && build.git sync && profile setup
+# Todo		: auto push built packages to repos (maybe, really needed?!?)
 
-export local lowerdir="kogaiondevelx64"
-export local upperdir="upperdirx64"
-export local overlaydir="overlaydirx64"
+export local sqfsroot="kogaiondevelx64.squashfs"
+export local sqfsroothash="fb2afc5f3b387412a0954f242df54927"
+export local rodir="rodir"
+export local rwdir="rwdir"
+export local overlaydir="overlaydir"
 export local envuser="root"
 export local envtargets="$@"
 export local envbuildcmd="emerge -av "$envtargets""
 
 
+envintegrity() {
+	# check if our squashfs chroot somehow got corrupted, abort if so
+	while : true ; do
+		if [[ "$(md5sum "$sqfsroot" | awk {'print $1'})" = "$sqfsroothash" ]]; then
+			break
+		else
+			exit 1
+		fi
+	done
+}
+
 envstart () {
 	# mount ro squashfs + add rw overlayfs layer to enable clean package building
-	mount -t squashfs "$lowerdir".squashfs "$lowerdir"
-	mount -t overlayfs -o lowerdir="$lowerdir",upperdir="$upperdir" overlayfs "$overlaydir"
+	mount -t squashfs "$sqfsroot" "$rodir"
+	mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
 	mount -o bind /proc "$overlaydir"/proc
 	mount -o bind /sys "$overlaydir"/sys
 	mount -o bind /dev "$overlaydir"/dev
@@ -41,7 +50,7 @@ envstop () {
 	umount -l "$overlaydir"/dev
 	umount -l "$overlaydir"/tmp
 	umount -l "$overlaydir"
-	umount -l "$lowerdir"
+	umount -l "$rodir"
 }
 
 envbuild () {
@@ -74,15 +83,15 @@ envprepare () {
 	# if safe, trigger start && break the loop to build packages
 	# else trigger stop && cleanup && check again
 	while : true ; do
-		if [[ ! -d "$lowerdir" && ! -d "$upperdir" && ! -d "$overlaydir" ]]; then
-			for i in "$lowerdir" "$upperdir" "$overlaydir" ; do
+		if [[ ! -d "$rodir" && ! -d "$rwdir" && ! -d "$overlaydir" ]]; then
+			for i in "$rodir" "$rwdir" "$overlaydir" ; do
 				mkdir "$i"
 			done
 			envstart
 			break
 		elif [[ -d "$overlaydir" && -f "$overlaydir/usr/bin/emerge" ]] ; then
 			envstop
-			for i in "$lowerdir" "$upperdir" "$overlaydir" ; do
+			for i in "$rodir" "$rwdir" "$overlaydir" ; do
 				rm -rf "$i"
 			done
 			continue
@@ -91,6 +100,7 @@ envprepare () {
 }
 
 main () {
+	envintegrity
 	envprepare
 	envbuild
 	envchroot
