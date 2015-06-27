@@ -12,19 +12,13 @@
 #			: setup profiles
 #			: auto push built packages to repos (maybe, really needed?!?)
 
-lowerdir="kogaiondevelx64"
-upperdir="upperdirx64"
-overlaydir="overlaydirx64"
-env_user="root"
-env_targets="$@"
-env_build_cmd="emerge -av "$env_targets""
+export local lowerdir="kogaiondevelx64"
+export local upperdir="upperdirx64"
+export local overlaydir="overlaydirx64"
+export local envuser="root"
+export local envtargets="$@"
+export local envbuildcmd="emerge -av "$envtargets""
 
-envprepare () {
-	# create the directories needed for squashfs + overlayfs mount
-	mkdir "$lowerdir"
-	mkdir "$upperdir"
-	mkdir "$overlaydir"
-}
 
 envstart () {
 	# mount ro squashfs + add rw overlayfs layer to enable clean package building
@@ -52,7 +46,7 @@ envstop () {
 
 envbuild () {
 	# build packages in squashfs + overlayfs chroot
-	chroot "$overlaydir" su - "$env_user" -c "$env_build_cmd"
+	chroot "$overlaydir" su - "$envuser" -c "$envbuildcmd"
 }
 
 envchroot() {
@@ -64,7 +58,7 @@ envchroot() {
 	echo -e "#################################################################"
 	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
 	echo -e "#################################################################"
-	echo -e "#            EXITING NOW WILL DESTROY ALL YOUR WORK             #"
+	echo -e "#       NEXT RUN OF THIS SCRIPT WILL DESTROY ALL YOUR WORK      #"
 	echo -e "#   DO NOT EXIT CHROOT UNTIL ALL PACKAGES ARE PUSHED TO REPOS   #"
 	echo -e "#  OR, IN CASE OF BUILD FAILURES, UNTIL ALL FIXES ARE COMMITED  #"
 	echo -e "#################################################################"
@@ -72,23 +66,34 @@ envchroot() {
 	echo -e "#################################################################"
 	echo -e ""
 	echo -e ""
-	chroot "$overlaydir" su - "$env_user"
+	chroot "$overlaydir" su - "$envuser"
 }
 
-envcleanup () {
-	# cleanup build environment
-	rm -rf "$overlaydir"
-	rm -rf "$upperdir"
-	rm -rf "$lowerdir"
+envprepare () {
+	# first let's check our environment for sanity
+	# if safe, trigger start && break the loop to build packages
+	# else trigger stop && cleanup && check again
+	while : true ; do
+		if [[ ! -d "$lowerdir" && ! -d "$upperdir" && ! -d "$overlaydir" ]]; then
+			for i in "$lowerdir" "$upperdir" "$overlaydir" ; do
+				mkdir "$i"
+			done
+			envstart
+			break
+		elif [[ -d "$overlaydir" && -f "$overlaydir/usr/bin/emerge" ]] ; then
+			envstop
+			for i in "$lowerdir" "$upperdir" "$overlaydir" ; do
+				rm -rf "$i"
+			done
+			continue
+		fi
+	done
 }
 
 main () {
 	envprepare
-	envstart
 	envbuild
 	envchroot
-	envstop
-	envcleanup
 }
 
 main 
