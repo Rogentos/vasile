@@ -43,7 +43,7 @@ envkogaionsquashfsintegrity () {
 					sleep 1
 					break
 				else
-					echo "Ooops, x86_64 squashed chroot cheksum FAILED ... aborting"
+					echo "Ooops, x86_64 squashed chroot checksum FAILED ... aborting"
 					exit 1
 				fi
 			else
@@ -66,7 +66,7 @@ envkogaionsquashfsintegrity () {
 					echo "Ooops, i686 squashed chroot checksum FAILED ... aborting"
 				fi
 			else
-				echo "Ooops, i686 squashed chroot of cheksum file NOT FOUND ... aborting"
+				echo "Ooops, i686 squashed chroot of checksum file NOT FOUND ... aborting"
 				exit 1
 			fi
 		fi
