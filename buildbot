@@ -26,55 +26,48 @@ export local envkogaionoverlay="layman -f -a kogaion -o https://raw.github.com/R
 export local envkogaiondesktopoverlay="layman -f -a kogaion-desktop -o https://raw.github.com/Rogentos/kogaion-desktop/master/overlay.xml"
 
 
-envkogaionsquashfsroot () {
+envkogaionsquashfsintegrity () {
 	# our bare metal buildserver is x86_64 but we want to build 32bit packages as well
 	# run this script with linux32 to fool it we run i686 and to build 32bit packages
-	if [[ "$(uname -m)" = "x86_64" ]] ; then
-		if [[ -f "kogaiondevelx64.squashfs" ]] ; then
-			echo "Good, x86_64 squashed chroot FOUND ... verifying checksum"
-			echo ""
-			sleep 1
-			export local sqfsroot="kogaiondevelx64.squashfs"
-			export local sqfsroothash="812028d126ee5774845942b1f9e41dbf" # if YOU changed squashed chroot on purpose, modify this
-		else
-			echo "Ooops, x86_64 squashed chroot NOT FOUND ... aborting"
-			exit 1
-		fi
-	elif [[ "$(uname -m)" = "i686" ]] ; then
-		if [[ -f "kogaiondevelx86.squashfs" ]] ; then
-			echo "Good, i686 squashed chroot FOUND ... verifying checksum"
-			echo ""
-			sleep 1
-			export local sqfsroot="kogaiondevelx86.squashfs"
-			export local sqfsroothash="insert checksum in here" # if YOU changed squashed chroot on purpose, modify this
-		else
-			echo "Ooops, i686 squashed chroot NOT FOUND ... aborting"
-			exit 1
-		fi
-	fi
-}
-
-envkogaionsquashfsintegrity() {
-	# verify squashfs root integrity, abort if not correct
 	while : true ; do
 		if [[ "$(uname -m)" = "x86_64" ]] ; then
-			if [[ "$(md5sum "$sqfsroot" | awk {'print $1'})" = "$sqfsroothash" ]] ; then
-				echo "Good, x86_64 squashed chroot checksum PASSED ... starting environment"
+			export local sqfsroot="kogaiondevelx64.squashfs"
+			export local sqfsrootmd5file=""$sqfsroot".md5"
+			export local sqfsrootmd5="$(cat "$sqfsrootmd5file" | awk {'print $1'})"
+			if [[ -f "$sqfsroot" && -f "$sqfsrootmd5file" ]] ; then
+				echo "Good, x86_64 squashed chroot && checksum file FOUND ... verifying integrity"
 				echo ""
-				sleep 1
-				break
+				if [[ "$(md5sum "$sqfsroot" | awk {'print $1'})" = "$sqfsrootmd5" ]] ; then
+					echo "Good, x86_64 squashed chroot checksum PASSED ... starting environment"
+					echo ""
+					sleep 1
+					break
+				else
+					echo "Ooops, x86_64 squashed chroot cheksum FAILED ... aborting"
+					exit 1
+				fi
 			else
-				echo "Ooops, x86_64 squashed chroot checksum FAILED ... aborting"
+				echo "Ooops, x86_64 squashed chroot or checksum file NOT FOUND ... aborting"
 				exit 1
 			fi
 		elif [[ "$(uname -m)" = "i686" ]] ; then
-			if [[ "$(md5sum "$sqfsroot" | awk {'print $1'})" = "$sqfsroothash" ]] ; then
-				echo "Good, i686 squashed chroot checksum PASSED ... starting environment"
+			export local sqfsroot="kogaiondevelx86.squashfs"
+			export local sqfsrootmd5file=""$sqfsroot".md5"
+			export local sqfsrootmd5="$(cat "$sqfsrootmd5file" | awk {'print $1'})"
+			if [[ -f "$sqfsroot" && -f "$sqfsrootmd5file" ]] ; then
+				echo "Good, i686 squashed chroot && checksum FOUND ... verifying integrity"
 				echo ""
-				sleep 1
-				break
+				if [[ "$(md5sum "$sqfsroot" | awk {'print $1'})" = "$sqfsrootmd5" ]] ; then
+					echo "Good, i686 squashed chroot checksum PASSED ... starting environment"
+					echo ""
+					sleep 1
+					break
+				else
+					echo "Ooops, i686 squashed chroot checksum FAILED ... aborting"
+				fi
 			else
-				echo "Ooops, i686 squashed chroot checksum FAILED ... aborting"
+				echo "Ooops, i686 squashed chroot of cheksum file NOT FOUND ... aborting"
+				exit 1
 			fi
 		fi
 	done
@@ -204,7 +197,6 @@ envkogaionprepare () {
 }
 
 main () {
-	envkogaionsquashfsroot
 	envkogaionsquashfsintegrity
 	envkogaionprepare
 	envkogaionbuildsystem
