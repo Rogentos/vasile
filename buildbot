@@ -55,7 +55,7 @@ envkogaionsquashfsintegrity () {
 			export local sqfsrootmd5file=""$sqfsroot".md5"
 			export local sqfsrootmd5="$(cat "$sqfsrootmd5file" | awk {'print $1'})"
 			if [[ -f "$sqfsroot" && -f "$sqfsrootmd5file" ]] ; then
-				echo "Good, i686 squashed chroot && checksum FOUND ... verifying integrity"
+				echo "Good, i686 squashed chroot && checksum file FOUND ... verifying integrity"
 				echo ""
 				if [[ "$(md5sum "$sqfsroot" | awk {'print $1'})" = "$sqfsrootmd5" ]] ; then
 					echo "Good, i686 squashed chroot checksum PASSED ... starting environment"
