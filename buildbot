@@ -26,6 +26,15 @@ export local envkogaionoverlay="layman -f -a kogaion -o https://raw.github.com/R
 export local envkogaiondesktopoverlay="layman -f -a kogaion-desktop -o https://raw.github.com/Rogentos/kogaion-desktop/master/overlay.xml"
 
 
+envcheckroot () {
+	if [[ "$(whoami)" != root ]] ; then
+		echo ""
+		echo "You're not root?...No cookies for you, go away !!!"
+		echo ""
+		exit 1
+	fi
+}
+	
 envkogaionsquashfsintegrity () {
 	# our bare metal buildserver is x86_64 but we want to build 32bit packages as well
 	# run this script with linux32 to fool it we run i686 and to build 32bit packages
@@ -197,11 +206,13 @@ envkogaionprepare () {
 }
 
 main () {
-	envkogaionsquashfsintegrity
-	envkogaionprepare
-	envkogaionbuildsystem
-	envkogaionbuild
-	envkogaionchroot
+	if envcheckroot ; then
+		envkogaionsquashfsintegrity
+		envkogaionprepare
+		envkogaionbuildsystem
+		envkogaionbuild
+		envkogaionchroot
+	fi
 }
 
 main 
