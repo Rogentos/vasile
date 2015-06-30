@@ -3,7 +3,7 @@
 # Say Hello to Vasile , a script to build Kogaion Linux packages in a clean squashfs + overlayfs chroot
 # using predefined targets : kernel.target, libs.target, x11.target, sound.target, artwork.target etc
 # Targets are passed as arguments, and will remain private...for now (not all of them are stable yet)
-# Author : Ghiunhan Mamut (aka V3n3RiX) @ RogentOS
+# Author : Ghiunhan Mamut (aka V3n3RiX) @ RogentOS Linux Group
 # Dependencies : squashfs + overlayfs kernel support
 
 
