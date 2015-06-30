@@ -161,11 +161,9 @@ envkogaionbuildsystem() {
 		echo "Adding Kogaion Linux X86_64 Buildsystem && Setting up Portage && Setting up make.conf"
 		echo ""
 		sleep 1
-		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionbuildgit"
-		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionportageconfig"
-		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionmakeconf"
-		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionprofile"
-		chroot "$overlaydir" su - "$engkogaionuser" -c "$envkogaionenvupdate"
+		for cmd in "$envkogaionbuildgit" "$envkogaionportageconfig" "$envkogaionmakeconf" "$envkogaionprofile" "$envkogaionenvupdate" ; do
+			chroot "$overlaydir" su - "$envkogaionuser" -c "$cmd"
+		done
 	elif [[ "$(uname -m)" = "i686" ]] ; then
 		export local envkogaionmakeconf="ln -sf /opt/build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
 		export local envkogaionprofile="eselect profile set 1"
@@ -178,11 +176,9 @@ envkogaionbuildsystem() {
 		echo "Adding Kogaion Linux i686 Buildsystem && Setting up Portage && Setting up make.conf"
 		echo ""
 		sleep 1
-		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionbuildgit"
-		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionportageconfig"
-		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionmakeconf"
-		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionprofile"
-		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionenvupdate"
+		for cmd in "$envkogaionbuildgit" "$envkogaionportageconfig" "$envkogaionmakeconf" "$envkogaionprofile" "$envkogaionenvupdate" ; do
+			linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$cmd"
+		done
 	fi
 
 }
