@@ -146,19 +146,31 @@ envkogaionchroot() {
 	fi
 }
 
+envkogaionoverlays() {
+	# inject our overlays into squashfs + overlayfs chroot
+	if [[ "$(uname -m)" = "x86_64" ]] ; then
+		echo "Injecting Kogaion Linux Main Overlay into x86_64 environment"
+		sleep 1
+		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionoverlay"
+		echo "Injecting Kogaion Linux Desktop Overlay into x86_64 environment"
+		sleep 1
+		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaiondesktopoverlay"
+	elif [[ "$(uname -m)" = "i686" ]] ; then
+		echo "Injecting Kogaion Linux Main Overlay into i686 environment"
+		sleep 1
+		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionoverlay"
+		echo "Injecting Kogaion Linux Desktop Overlay into i686 environment"
+		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaiondesktopoverlay"
+	fi
+}
+
+
 envkogaionbuildsystem() {
-	# since squashed chroot is barebones, we need to set it up
-	# add our overlays && set up our buildsystem
+	# inject our buildsystem into squashfs + overlayfs chroot
 	if [[ "$(uname -m)" = "x86_64" ]] ; then
 		export local envkogaionmakeconf="ln -sf /opt/build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
 		export local envkogaionprofile="eselect profile set 1"
-		echo "Adding Kogaion Linux Main Overlay"
-		sleep 1
-		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionoverlay"
-		echo "Adding Kogaion Linux Desktop Overlay"
-		sleep 1
-		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaiondesktopoverlay"
-		echo "Adding Kogaion Linux X86_64 Buildsystem && Setting up Portage && Setting up make.conf"
+		echo "Injecting Kogaion Linux X86_64 Buildsystem && Setting up Portage && Setting up make.conf"
 		echo ""
 		sleep 1
 		for cmd in "$envkogaionbuildgit" "$envkogaionportageconfig" "$envkogaionmakeconf" "$envkogaionprofile" "$envkogaionenvupdate" ; do
@@ -167,13 +179,7 @@ envkogaionbuildsystem() {
 	elif [[ "$(uname -m)" = "i686" ]] ; then
 		export local envkogaionmakeconf="ln -sf /opt/build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
 		export local envkogaionprofile="eselect profile set 1"
-		echo "Adding Kogaion Linux Main Overlay"
-		sleep 1
-		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionoverlay"
-		echo "Adding Kogaion Linux Desktop Overlay"
-		sleep 1
-		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaiondesktopoverlay"
-		echo "Adding Kogaion Linux i686 Buildsystem && Setting up Portage && Setting up make.conf"
+		echo "Injecting Kogaion Linux i686 Buildsystem && Setting up Portage && Setting up make.conf"
 		echo ""
 		sleep 1
 		for cmd in "$envkogaionbuildgit" "$envkogaionportageconfig" "$envkogaionmakeconf" "$envkogaionprofile" "$envkogaionenvupdate" ; do
@@ -208,6 +214,7 @@ main () {
 	if envcheckroot ; then
 		envkogaionsquashfsintegrity
 		envkogaionprepare
+		envkogaionoverlays
 		envkogaionbuildsystem
 		envkogaionbuild
 		envkogaionchroot
