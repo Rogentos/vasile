@@ -96,14 +96,14 @@ envkogaionstart () {
 
 envkogaionstop () {
 	# umount squashfs + overlayfs chroot
-	umount -l "$overlaydir"/proc
-	umount -l "$overlaydir"/sys
-	umount -l "$overlaydir"/dev/pts
-	umount -l "$overlaydir"/dev/shm
-	umount -l "$overlaydir"/dev
-	umount -l "$overlaydir"/tmp
-	umount -l "$overlaydir"
-	umount -l "$rodir"
+	umount -l "$overlaydir"/proc > /dev/null 2>&1
+	umount -l "$overlaydir"/sys > /dev/null 2>&1
+	umount -l "$overlaydir"/dev/pts > /dev/null 2>&1
+	umount -l "$overlaydir"/dev/shm > /dev/null 2>&1
+	umount -l "$overlaydir"/dev > /dev/null 2>&1
+	umount -l "$overlaydir"/tmp > /dev/null 2>&1
+	umount -l "$overlaydir" > /dev/null 2>&1
+	umount -l "$rodir" > /dev/null 2>&1
 }
 
 envkogaionbuild () {
