@@ -20,8 +20,9 @@ export local envkogaiontarget="$@"
 export local envkogaionbuildtarget="emerge -av "$envkogaiontarget""
 
 # env buildsystem variables
-export local envkogaionportageconfig="ln -sf /opt/build/conf/intel/portage /etc/portage"
 export local envkogaionbuildgit="cd /opt && git clone https://github.com/Rogentos/build.git"
+export local envkogaionportageconfig="ln -sf /opt/build/conf/intel/portage /etc/portage"
+export local envkogaionenvupdate="/usr/sbin/env-update && . /etc/profile"
 export local envkogaionoverlay="layman -f -a kogaion -o https://raw.github.com/Rogentos/kogaion/master/overlay.xml"
 export local envkogaiondesktopoverlay="layman -f -a kogaion-desktop -o https://raw.github.com/Rogentos/kogaion-desktop/master/overlay.xml"
 
@@ -164,6 +165,7 @@ envkogaionbuildsystem() {
 		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionportageconfig"
 		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionmakeconf"
 		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionprofile"
+		chroot "$overlaydir" su - "$engkogaionuser" -c "$envkogaionenvupdate"
 	elif [[ "$(uname -m)" = "i686" ]] ; then
 		export local envkogaionmakeconf="ln -sf /opt/build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
 		export local envkogaionprofile="eselect profile set 1"
@@ -180,6 +182,7 @@ envkogaionbuildsystem() {
 		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionportageconfig"
 		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionmakeconf"
 		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionprofile"
+		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionenvupdate"
 	fi
 
 }
