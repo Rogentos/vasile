@@ -90,7 +90,7 @@ envkogaionstart () {
 	mount -t proc proc "$overlaydir"/proc
 	mount -t sysfs sysfs "$overlaydir"/sys
 	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$overlaydir"/dev
-	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none $1/dev/pts "$overlaydir"/dev/pts
+	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$overlaydir"/dev/pts
 	mount -t tmpfs -o nosuid,nodev none "$overlaydir"/dev/shm
 	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
 }
