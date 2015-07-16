@@ -27,6 +27,30 @@ export local envkogaionoverlay="layman -f -a kogaion -o https://raw.github.com/R
 export local envkogaiondesktopoverlay="layman -f -a kogaion-desktop -o https://raw.github.com/Rogentos/kogaion-desktop/master/overlay.xml"
 
 
+envkogaionstart () {
+	# mount ro squashfs chroot + add rw overlayfs layer to enable clean package building
+	mount -t squashfs "$sqfsroot" "$rodir"
+	mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
+	mount -t proc proc "$overlaydir"/proc
+	mount -t sysfs sysfs "$overlaydir"/sys
+	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$overlaydir"/dev
+	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$overlaydir"/dev/pts
+	mount -t tmpfs -o nosuid,nodev none "$overlaydir"/dev/shm
+	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
+}
+
+envkogaionstop () {
+	# umount squashfs + overlayfs chroot
+	umount -l "$overlaydir"/proc > /dev/null 2>&1
+	umount -l "$overlaydir"/sys > /dev/null 2>&1
+	umount -l "$overlaydir"/dev/pts > /dev/null 2>&1
+	umount -l "$overlaydir"/dev/shm > /dev/null 2>&1
+	umount -l "$overlaydir"/dev > /dev/null 2>&1
+	umount -l "$overlaydir"/tmp > /dev/null 2>&1
+	umount -l "$overlaydir" > /dev/null 2>&1
+	umount -l "$rodir" > /dev/null 2>&1
+}
+
 envcheckroot () {
 	if [[ "$(whoami)" != root ]] ; then
 		echo ""
@@ -83,28 +107,67 @@ envkogaionsquashfsintegrity () {
 	done
 }
 
-envkogaionstart () {
-	# mount ro squashfs chroot + add rw overlayfs layer to enable clean package building
-	mount -t squashfs "$sqfsroot" "$rodir"
-	mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
-	mount -t proc proc "$overlaydir"/proc
-	mount -t sysfs sysfs "$overlaydir"/sys
-	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$overlaydir"/dev
-	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$overlaydir"/dev/pts
-	mount -t tmpfs -o nosuid,nodev none "$overlaydir"/dev/shm
-	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
+envkogaionprepare () {
+	# check our environment for sanity
+	# if safe, trigger start && break the loop to build packages
+	# else trigger stop && cleanup && check again
+	while : true ; do
+		if [[ ! -d "$rodir" && ! -d "$rwdir" && ! -d "$overlaydir" ]] ; then
+			for i in "$rodir" "$rwdir" "$overlaydir" ; do
+				mkdir "$i"
+			done
+			envkogaionstart
+			break
+		elif [[ -d "$rodir" && -d "$rwdir" && -d "$overlaydir" ]] ; then
+			envkogaionstop
+			for i in "$rodir" "$rwdir" "$overlaydir" ; do
+				rm -rf "$i"
+			done
+			continue
+		fi
+	done
 }
 
-envkogaionstop () {
-	# umount squashfs + overlayfs chroot
-	umount -l "$overlaydir"/proc > /dev/null 2>&1
-	umount -l "$overlaydir"/sys > /dev/null 2>&1
-	umount -l "$overlaydir"/dev/pts > /dev/null 2>&1
-	umount -l "$overlaydir"/dev/shm > /dev/null 2>&1
-	umount -l "$overlaydir"/dev > /dev/null 2>&1
-	umount -l "$overlaydir"/tmp > /dev/null 2>&1
-	umount -l "$overlaydir" > /dev/null 2>&1
-	umount -l "$rodir" > /dev/null 2>&1
+envkogaionoverlays() {
+	# inject our overlays into squashfs + overlayfs chroot
+	if [[ "$(uname -m)" = "x86_64" ]] ; then
+		echo "Injecting Kogaion Linux Main Overlay into x86_64 environment"
+		sleep 1
+		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionoverlay"
+		echo "Injecting Kogaion Linux Desktop Overlay into x86_64 environment"
+		sleep 1
+		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaiondesktopoverlay"
+	elif [[ "$(uname -m)" = "i686" ]] ; then
+		echo "Injecting Kogaion Linux Main Overlay into i686 environment"
+		sleep 1
+		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionoverlay"
+		echo "Injecting Kogaion Linux Desktop Overlay into i686 environment"
+		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaiondesktopoverlay"
+	fi
+}
+
+envkogaionbuildsystem() {
+	# inject our buildsystem into squashfs + overlayfs chroot
+	if [[ "$(uname -m)" = "x86_64" ]] ; then
+		export local envkogaionmakeconf="ln -sf /opt/build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
+		export local envkogaionprofile="eselect profile set 1"
+		echo "Injecting Kogaion Linux X86_64 Buildsystem && Setting up Portage && Setting up make.conf"
+		echo ""
+		sleep 1
+		for cmd in "$envkogaionbuildgit" "$envkogaionportageconfig" "$envkogaionmakeconf" "$envkogaionprofile" "$envkogaionenvupdate" ; do
+			chroot "$overlaydir" su - "$envkogaionuser" -c "$cmd"
+		done
+	elif [[ "$(uname -m)" = "i686" ]] ; then
+		export local envkogaionmakeconf="ln -sf /opt/build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
+		export local envkogaionprofile="eselect profile set 1"
+		echo "Injecting Kogaion Linux i686 Buildsystem && Setting up Portage && Setting up make.conf"
+		echo ""
+		sleep 1
+		for cmd in "$envkogaionbuildgit" "$envkogaionportageconfig" "$envkogaionmakeconf" "$envkogaionprofile" "$envkogaionenvupdate" ; do
+			linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$cmd"
+		done
+	fi
+
 }
 
 envkogaionbuild () {
@@ -135,7 +198,7 @@ envkogaionchroot() {
 	echo -e "#   DO NOT EXIT CHROOT UNTIL ALL PACKAGES ARE PUSHED TO REPOS   #"
 	echo -e "#  OR, IN CASE OF BUILD FAILURES, UNTIL ALL FIXES ARE COMMITED  #"
 	echo -e "#################################################################"
-	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"	
+	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
 	echo -e "#################################################################"
 	echo -e ""
 	echo -e ""
@@ -144,70 +207,6 @@ envkogaionchroot() {
 	elif [[ "$(uname -m)" = "i686"  ]] ; then
 		linux32 chroot "$overlaydir" su - "$envkogaionuser"
 	fi
-}
-
-envkogaionoverlays() {
-	# inject our overlays into squashfs + overlayfs chroot
-	if [[ "$(uname -m)" = "x86_64" ]] ; then
-		echo "Injecting Kogaion Linux Main Overlay into x86_64 environment"
-		sleep 1
-		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionoverlay"
-		echo "Injecting Kogaion Linux Desktop Overlay into x86_64 environment"
-		sleep 1
-		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaiondesktopoverlay"
-	elif [[ "$(uname -m)" = "i686" ]] ; then
-		echo "Injecting Kogaion Linux Main Overlay into i686 environment"
-		sleep 1
-		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionoverlay"
-		echo "Injecting Kogaion Linux Desktop Overlay into i686 environment"
-		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaiondesktopoverlay"
-	fi
-}
-
-
-envkogaionbuildsystem() {
-	# inject our buildsystem into squashfs + overlayfs chroot
-	if [[ "$(uname -m)" = "x86_64" ]] ; then
-		export local envkogaionmakeconf="ln -sf /opt/build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
-		export local envkogaionprofile="eselect profile set 1"
-		echo "Injecting Kogaion Linux X86_64 Buildsystem && Setting up Portage && Setting up make.conf"
-		echo ""
-		sleep 1
-		for cmd in "$envkogaionbuildgit" "$envkogaionportageconfig" "$envkogaionmakeconf" "$envkogaionprofile" "$envkogaionenvupdate" ; do
-			chroot "$overlaydir" su - "$envkogaionuser" -c "$cmd"
-		done
-	elif [[ "$(uname -m)" = "i686" ]] ; then
-		export local envkogaionmakeconf="ln -sf /opt/build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
-		export local envkogaionprofile="eselect profile set 1"
-		echo "Injecting Kogaion Linux i686 Buildsystem && Setting up Portage && Setting up make.conf"
-		echo ""
-		sleep 1
-		for cmd in "$envkogaionbuildgit" "$envkogaionportageconfig" "$envkogaionmakeconf" "$envkogaionprofile" "$envkogaionenvupdate" ; do
-			linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$cmd"
-		done
-	fi
-
-}
-
-envkogaionprepare () {
-	# check our environment for sanity
-	# if safe, trigger start && break the loop to build packages
-	# else trigger stop && cleanup && check again
-	while : true ; do
-		if [[ ! -d "$rodir" && ! -d "$rwdir" && ! -d "$overlaydir" ]] ; then
-			for i in "$rodir" "$rwdir" "$overlaydir" ; do
-				mkdir "$i"
-			done
-			envkogaionstart
-			break
-		elif [[ -d "$rodir" && -d "$rwdir" && -d "$overlaydir" ]] ; then
-			envkogaionstop
-			for i in "$rodir" "$rwdir" "$overlaydir" ; do
-				rm -rf "$i"
-			done
-			continue
-		fi
-	done
 }
 
 main () {
