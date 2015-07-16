@@ -20,12 +20,14 @@ export local envkogaiontarget="$@"
 export local envkogaionbuildtarget="emerge -av "$envkogaiontarget""
 
 # env buildsystem variables
+export local envkogaionoverlay="layman -f -a kogaion -o https://raw.github.com/Rogentos/kogaion/master/overlay.xml"
+export local envkogaiondesktopoverlay="layman -f -a kogaion-desktop -o https://raw.github.com/Rogentos/kogaion-desktop/master/overlay.xml"
 export local envkogaionbuildgit="cd /opt && git clone https://github.com/Rogentos/build.git"
 export local envkogaionportageconfig="ln -sf /opt/build/conf/intel/portage /etc/portage"
 export local envkogaionenvupdate="/usr/sbin/env-update && . /etc/profile"
-export local envkogaionoverlay="layman -f -a kogaion -o https://raw.github.com/Rogentos/kogaion/master/overlay.xml"
-export local envkogaiondesktopoverlay="layman -f -a kogaion-desktop -o https://raw.github.com/Rogentos/kogaion-desktop/master/overlay.xml"
 
+# env eit pull
+export local envkogaioneitpull="eit pull"
 
 envkogaionstart () {
 	# mount ro squashfs chroot + add rw overlayfs layer to enable clean package building
@@ -170,16 +172,31 @@ envkogaionbuildsystem() {
 
 }
 
+envkogaioneit() {
+	# pull already build packages + db , before we build another packages
+	if [[ "$(uname -m)" = "x86_64" ]] ; then
+		echo ""
+		echo "Synchronizing local x86_64 repository"
+		sleep 1
+		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaioneitpull"
+	elif [[ "$(uname -m)" = "i686" ]] ; then
+		echo ""
+		echo "Synchronizing local i686 repository"
+		sleep 1
+		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaioneitpull"
+	fi
+}
+
 envkogaionbuild () {
 	# build packages in squashfs + overlayfs chroot
 	if [[ "$(uname -m)" = "x86_64" ]] ; then
 		echo ""
-		echo "Environment is UP && RUNNING ... building targets"
+		echo "x86_46 Environment is UP && RUNNING ... building targets"
 		sleep 1
 		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionbuildtarget"
 	elif [[ "$(uname -m)" = "i686" ]] ; then
 		echo ""
-		echo "Environment is UP && RUNNING ... building targets"
+		echo "i686 Environment is UP && RUNNING ... building targets"
 		sleep 1
 		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionbuildtarget"
 	fi
@@ -215,6 +232,7 @@ main () {
 		envkogaionprepare
 		envkogaionoverlays
 		envkogaionbuildsystem
+		envkogaioneit
 		envkogaionbuild
 		envkogaionchroot
 		envkogaionstop
