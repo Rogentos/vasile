@@ -27,7 +27,7 @@ export local envkogaionportageconfig="ln -sf /opt/build/conf/intel/portage /etc/
 export local envkogaionenvupdate="/usr/sbin/env-update && . /etc/profile"
 
 # env eit pull
-export local envkogaioneitpull="eit pull"
+export local envkogaioneitpull="LC_ALL=en_US.UTF-8 eit pull"
 
 envkogaionstart () {
 	# mount ro squashfs chroot + add rw overlayfs layer to enable clean package building
