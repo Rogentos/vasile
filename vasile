@@ -33,6 +33,16 @@ envkogaionstart () {
 	# mount ro squashfs chroot + add rw overlayfs layer to enable clean package building
 	mount -t squashfs "$sqfsroot" "$rodir"
 	mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
+	while : true ; do
+		if [[ ! -d packages ]] ; then
+			mkdir packages
+			mount -o bind packages "$overlaydir"/usr/portage/packages
+			break
+		elif [[ -d packages ]] ; then
+			mount -o bind packages "$overlaydir"/usr/portage/packages
+			break
+		fi
+	done
 	mount -t proc proc "$overlaydir"/proc
 	mount -t sysfs sysfs "$overlaydir"/sys
 	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$overlaydir"/dev
