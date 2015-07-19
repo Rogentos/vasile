@@ -19,6 +19,17 @@ export local envkogaionuser="root"
 export local envkogaiontarget="$@"
 export local envkogaionbuildtarget="emerge -kav "$envkogaiontarget""
 
+# portage buildpkg feature is enabled by default now, so every built target will also have binary packages
+# vasile will still clean build environment and reset everything to default, but will let binary packages in place
+# each target depends on previous one (building a target will most likely pull packages already built in previous target, causing useless rebuilds)
+# to prevent this behaviour install already built targets using binary packages
+export local envkerneltarget="$(< kernel.target)"
+export local envmultimediatarget="$(< multimedia.target)"
+export local envartworktarget="$(< artwork.target)"
+export local envxlibstarget="$(< xlibs.target)"
+export local envxorgtarget="$(< xorg.target)"
+export local envkogaioninstalltarget="emerge -kav "$envkerneltarget" "$envmultimediatarget" "$envartworktarget" "$envxlibstarget" "$envxorgtarget""
+
 # env buildsystem variables
 export local envkogaionoverlay="layman -f -a kogaion -o https://raw.github.com/Rogentos/kogaion/master/overlay.xml"
 export local envkogaiondesktopoverlay="layman -f -a kogaion-desktop -o https://raw.github.com/Rogentos/kogaion-desktop/master/overlay.xml"
@@ -200,11 +211,13 @@ envkogaioneit() {
 envkogaionbuild () {
 	# build packages in squashfs + overlayfs chroot
 	if [[ "$(uname -m)" = "x86_64" ]] ; then
+		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaioninstalltarget"
 		echo ""
 		echo "x86_46 Environment is UP && RUNNING ... building targets"
 		sleep 1
 		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionbuildtarget"
 	elif [[ "$(uname -m)" = "i686" ]] ; then
+		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaioninstalltarget"
 		echo ""
 		echo "i686 Environment is UP && RUNNING ... building targets"
 		sleep 1
