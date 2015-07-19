@@ -26,13 +26,15 @@ export local envkogaionbuildgit="cd /opt && git clone https://github.com/Rogento
 export local envkogaionportageconfig="ln -sf /opt/build/conf/intel/portage /etc/portage"
 export local envkogaionenvupdate="/usr/sbin/env-update && . /etc/profile"
 
-# env eit pull
-export local envkogaioneitpull="LC_ALL=en_US.UTF-8 eit pull"
-
 envkogaionstart () {
 	# mount ro squashfs chroot + add rw overlayfs layer to enable clean package building
 	mount -t squashfs "$sqfsroot" "$rodir"
 	mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
+	# portage buildpkg feature is now enabled by default, so all built packages or targets will also have binary packages created
+	# each target depends on previous one, building a target will most likely pull packages from previous one
+	# to avoid useless rebuilds, bind mount portage binary packages folder, and use binaries if needed
+	# every binary was built in same clean build environment managed by vasile, so they are safe to reuse
+	# vasile will still clean the build environment, but will leave binaries in place
 	while : true ; do
 		if [[ ! -d packages ]] ; then
 			mkdir packages
@@ -43,6 +45,8 @@ envkogaionstart () {
 			break
 		fi
 	done
+	# bind mount targets inside clean build environment managed by vasile, we really need them to be in there
+	mount -o bind targets "$overlaydir"/mnt
 	mount -t proc proc "$overlaydir"/proc
 	mount -t sysfs sysfs "$overlaydir"/sys
 	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$overlaydir"/dev
@@ -59,6 +63,8 @@ envkogaionstop () {
 	umount -l "$overlaydir"/dev/shm > /dev/null 2>&1
 	umount -l "$overlaydir"/dev > /dev/null 2>&1
 	umount -l "$overlaydir"/tmp > /dev/null 2>&1
+	umount -l "$overlaydir"/usr/portage/packages > /dev/null 2>&1
+	umount -l "$overlaydir"/mnt > /dev/null 2>&1
 	umount -l "$overlaydir" > /dev/null 2>&1
 	umount -l "$rodir" > /dev/null 2>&1
 }
@@ -182,21 +188,6 @@ envkogaionbuildsystem() {
 
 }
 
-envkogaioneit() {
-	# pull already build packages + db , before we build another packages
-	if [[ "$(uname -m)" = "x86_64" ]] ; then
-		echo ""
-		echo "Synchronizing local x86_64 repository"
-		sleep 1
-		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaioneitpull"
-	elif [[ "$(uname -m)" = "i686" ]] ; then
-		echo ""
-		echo "Synchronizing local i686 repository"
-		sleep 1
-		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaioneitpull"
-	fi
-}
-
 envkogaionbuild () {
 	# build packages in squashfs + overlayfs chroot
 	if [[ "$(uname -m)" = "x86_64" ]] ; then
@@ -242,7 +233,6 @@ main () {
 		envkogaionprepare
 		envkogaionoverlays
 		envkogaionbuildsystem
-		envkogaioneit
 		envkogaionbuild
 		envkogaionchroot
 		envkogaionstop
