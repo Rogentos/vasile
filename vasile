@@ -28,7 +28,6 @@ export local envmultimediatarget="$(< multimedia.target)"
 export local envartworktarget="$(< artwork.target)"
 export local envxlibstarget="$(< xlibs.target)"
 export local envxorgtarget="$(< xorg.target)"
-export local envkogaioninstalltarget="emerge -kav "$envkerneltarget" "$envmultimediatarget" "$envartworktarget" "$envxlibstarget" "$envxorgtarget""
 
 # env buildsystem variables
 export local envkogaionoverlay="layman -f -a kogaion -o https://raw.github.com/Rogentos/kogaion/master/overlay.xml"
@@ -211,12 +210,17 @@ envkogaioneit() {
 envkogaionbuild () {
 	# build packages in squashfs + overlayfs chroot
 	if [[ "$(uname -m)" = "x86_64" ]] ; then
-		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaioninstalltarget"
+		for envkogaioninstalltarget in "$envkogaionkerneltarget" "$envkogaionmultimediatarget" "$envkogaionxlibstarget" "$envkogaionxorgtarget" "$envkogaionartworktarget" ; do
+			chroot "$overlaydir" su - "$envkogaionuser" -c "emerge -kav $envkogaioninstalltarget"
+		done
 		echo ""
 		echo "x86_46 Environment is UP && RUNNING ... building targets"
 		sleep 1
 		chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionbuildtarget"
 	elif [[ "$(uname -m)" = "i686" ]] ; then
+		for envkogaioninstalltarget in "$envkogaionkerneltarget" "$envkogaionmultimediatarget" "$envkogaionxlibstarget" "$envkogaionxorgtarget" "$envkogaionartworktarget" ; do
+			linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "emerge -kav $envkogaioninstalltarget"
+		done
 		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaioninstalltarget"
 		echo ""
 		echo "i686 Environment is UP && RUNNING ... building targets"
