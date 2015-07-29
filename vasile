@@ -45,6 +45,17 @@ envkogaionstart () {
 			break
 		fi
 	done
+	# keep distfiles around
+	while : true ; do
+		if [[ ! -d distfiles ]] ; then
+			mkdir distfiles
+			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
+			break
+		elif [[ -d distfiles ]]
+			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
+			break
+		fi
+	done
 	# bind mount targets inside clean build environment managed by vasile, we really need them to be in there
 	mount -o bind targets "$overlaydir"/mnt
 	mount -t proc proc "$overlaydir"/proc
