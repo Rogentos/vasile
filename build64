@@ -23,11 +23,7 @@ envkogaionstart () {
 	# mount ro squashfs chroot + add rw overlayfs layer to enable clean package building
 	mount -t squashfs "$sqfsroot" "$rodir"
 	mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
-	# portage buildpkg feature is now enabled by default, so all built packages or targets will also have binary packages created
-	# each target depends on previous one, building a target will most likely pull packages from previous one
-	# to avoid useless rebuilds, bind mount portage binary packages folder, and use binaries if needed
-	# every binary was built in same clean build environment managed by vasile, so they are safe to reuse
-	# vasile will still clean the build environment, but will leave binaries in place
+	# keep built binary packages around, we will convert them to deb packages using vasile
 	while : true ; do
 		if [[ ! -d packages ]] ; then
 			mkdir packages
