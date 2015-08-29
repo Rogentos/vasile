@@ -1,0 +1,195 @@
+#!/usr/bin/env bash
+
+# env mount variables
+export local rodir="rodir"
+export local rwdir="rwdir"
+export local overlaydir="overlaydir"
+
+# env user variable
+export local envkogaionuser="root"
+
+# env target variable (can be a single package, multiple packages, or a target file passed as parameter)
+export local envkogaiontarget="$@"
+export local envkogaionbuildtarget="emerge -kav "$envkogaiontarget""
+
+# env buildsystem variables
+export local envkogaionoverlay="layman -f -a kogaion -o https://raw.github.com/Rogentos/kogaion/master/overlay.xml"
+export local envkogaiondesktopoverlay="layman -f -a kogaion-desktop -o https://raw.github.com/Rogentos/kogaion-desktop/master/overlay.xml"
+export local envkogaionbuildgit="cd /opt && git clone https://github.com/Rogentos/build.git"
+export local envkogaionportageconfig="ln -sf /opt/build/conf/intel/portage /etc/portage"
+export local envkogaionenvupdate="/usr/sbin/env-update && . /etc/profile"
+
+envkogaionstart () {
+	# mount ro squashfs chroot + add rw overlayfs layer to enable clean package building
+	mount -t squashfs "$sqfsroot" "$rodir"
+	mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
+	# portage buildpkg feature is now enabled by default, so all built packages or targets will also have binary packages created
+	# each target depends on previous one, building a target will most likely pull packages from previous one
+	# to avoid useless rebuilds, bind mount portage binary packages folder, and use binaries if needed
+	# every binary was built in same clean build environment managed by vasile, so they are safe to reuse
+	# vasile will still clean the build environment, but will leave binaries in place
+	while : true ; do
+		if [[ ! -d packages ]] ; then
+			mkdir packages
+			mount -o bind packages "$overlaydir"/usr/portage/packages
+			break
+		elif [[ -d packages ]] ; then
+			mount -o bind packages "$overlaydir"/usr/portage/packages
+			break
+		fi
+	done
+	# keep distfiles around
+	while : true ; do
+		if [[ ! -d distfiles ]] ; then
+			mkdir distfiles
+			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
+			break
+		elif [[ -d distfiles ]] ; then
+			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
+			break
+		fi
+	done
+	# bind mount targets inside clean build environment managed by vasile, we really need them to be in there
+	mount -o bind targets "$overlaydir"/mnt
+	mount -t proc proc "$overlaydir"/proc
+	mount -t sysfs sysfs "$overlaydir"/sys
+	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$overlaydir"/dev
+	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$overlaydir"/dev/pts
+	mount -t tmpfs -o nosuid,nodev none "$overlaydir"/dev/shm
+	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
+}
+
+envkogaionstop () {
+	# umount squashfs + overlayfs chroot
+	umount -l "$overlaydir"/proc > /dev/null 2>&1
+	umount -l "$overlaydir"/sys > /dev/null 2>&1
+	umount -l "$overlaydir"/dev/pts > /dev/null 2>&1
+	umount -l "$overlaydir"/dev/shm > /dev/null 2>&1
+	umount -l "$overlaydir"/dev > /dev/null 2>&1
+	umount -l "$overlaydir"/tmp > /dev/null 2>&1
+	umount -l "$overlaydir"/usr/portage/packages > /dev/null 2>&1
+	umount -l "$overlaydir"/mnt > /dev/null 2>&1
+	umount -l "$overlaydir" > /dev/null 2>&1
+	umount -l "$rodir" > /dev/null 2>&1
+}
+
+envcheckroot () {
+	if [[ "$(whoami)" != root ]] ; then
+		echo ""
+		echo "You're not root?...No cookies for you, go away !!!"
+		echo ""
+		exit 1
+	fi
+}
+	
+envkogaionsquashfsintegrity () {
+	# our bare metal buildserver is x86_64 but we want to build 32bit packages as well
+	# run this script with linux32 to fool it we run i686 and to build 32bit packages
+	while : true ; do
+		export local sqfsroot="kogaiondevelx64.squashfs"
+		export local sqfsrootmd5file=""$sqfsroot".md5"
+		export local sqfsrootmd5="$(cat "$sqfsrootmd5file" | awk {'print $1'})"
+		if [[ -f "$sqfsroot" && -f "$sqfsrootmd5file" ]] ; then
+			echo "Good, x86_64 squashed chroot && checksum file FOUND ... verifying integrity"
+			echo ""
+			if [[ "$(md5sum "$sqfsroot" | awk {'print $1'})" = "$sqfsrootmd5" ]] ; then
+				echo "Good, x86_64 squashed chroot checksum PASSED ... starting environment"
+				echo ""
+				sleep 1
+				break
+			else
+				echo "Ooops, x86_64 squashed chroot checksum FAILED ... aborting"
+				exit 1
+			fi
+		else
+			echo "Ooops, x86_64 squashed chroot or checksum file NOT FOUND ... aborting"
+			exit 1
+		fi
+	done
+}
+
+envkogaionprepare () {
+	# check our environment for sanity
+	# if safe, trigger start && break the loop to build packages
+	# else trigger stop && cleanup && check again
+	while : true ; do
+		if [[ ! -d "$rodir" && ! -d "$rwdir" && ! -d "$overlaydir" ]] ; then
+			for i in "$rodir" "$rwdir" "$overlaydir" ; do
+				mkdir "$i"
+			done
+			envkogaionstart
+			break
+		elif [[ -d "$rodir" && -d "$rwdir" && -d "$overlaydir" ]] ; then
+			envkogaionstop
+			for i in "$rodir" "$rwdir" "$overlaydir" ; do
+				rm -rf "$i"
+			done
+			continue
+		fi
+	done
+}
+
+envkogaionoverlays() {
+	# inject our overlays into squashfs + overlayfs chroot
+	echo "Injecting Kogaion Linux Main Overlay into x86_64 environment"
+	sleep 1
+	chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionoverlay"
+	echo "Injecting Kogaion Linux Desktop Overlay into x86_64 environment"
+	sleep 1
+	chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaiondesktopoverlay"
+}
+
+envkogaionbuildsystem() {
+	# inject our buildsystem into squashfs + overlayfs chroot
+	export local envkogaionmakeconf="ln -sf /opt/build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
+	export local envkogaionprofile="eselect profile set 1"
+	echo "Injecting Kogaion Linux X86_64 Buildsystem && Setting up Portage && Setting up make.conf"
+	echo ""
+	sleep 1
+	for cmd in "$envkogaionbuildgit" "$envkogaionportageconfig" "$envkogaionmakeconf" "$envkogaionprofile" "$envkogaionenvupdate" ; do
+		chroot "$overlaydir" su - "$envkogaionuser" -c "$cmd"
+	done
+}
+
+envkogaionbuild () {
+	# build packages in squashfs + overlayfs chroot
+	echo ""
+	echo "x86_46 Environment is UP && RUNNING ... building targets"
+	sleep 1
+	chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionbuildtarget"
+}
+
+envkogaionchroot() {
+# enter squashfs + overlayfs chroot to push packages, or debug build errors
+	echo -e ""
+	echo -e "#################################################################"
+	echo -e "#       ENTERING CHROOT ENV FOR YOU TO PUSH BUILT PACKAGES      #"
+	echo -e "#               OR TO FIX EVENTUAL BUILD ERRORS                 #"
+	echo -e "#################################################################"
+	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
+	echo -e "#################################################################"
+	echo -e "#       NEXT RUN OF THIS SCRIPT WILL DESTROY ALL YOUR WORK      #"
+	echo -e "#   DO NOT EXIT CHROOT UNTIL ALL PACKAGES ARE PUSHED TO REPOS   #"
+	echo -e "#  OR, IN CASE OF BUILD FAILURES, UNTIL ALL FIXES ARE COMMITED  #"
+	echo -e "#################################################################"
+	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
+	echo -e "#################################################################"
+	echo -e ""
+	echo -e ""
+	chroot "$overlaydir" su - "$envkogaionuser"
+}
+
+main () {
+	if envcheckroot ; then
+		envkogaionsquashfsintegrity
+		envkogaionprepare
+		envkogaionoverlays
+		envkogaionbuildsystem
+		envkogaionbuild
+		envkogaionchroot
+		envkogaionstop
+	fi
+}
+
+main 
+exit 0
