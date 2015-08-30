@@ -214,7 +214,7 @@ chrootbuildsystemx86() {
 
 chrootbuildx86 () {
 	echo ""
-	echo "x64 Environment is UP && RUNNING ... building targets"
+	echo "x86 Environment is UP && RUNNING ... building targets"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildtarget"
 }
