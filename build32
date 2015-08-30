@@ -115,12 +115,10 @@ envkogaionoverlays() {
 
 envkogaionbuildsystem() {
 	# inject our buildsystem into squashfs + overlayfs chroot
-	export local envkogaionmakeconf="ln -sf /opt/build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
-	export local envkogaionprofile="eselect profile set 1"
 	echo "Injecting Kogaion Linux i686 Buildsystem && Setting up Portage && Setting up make.conf"
 	echo ""
 	sleep 1
-	for cmd in "$envkogaionbuildgit" "$envkogaionportageconfig" "$envkogaionmakeconf" "$envkogaionprofile" "$envkogaionenvupdate" ; do
+	for cmd in "$envkogaionbuildgit" "$envkogaionportageconfig" "$envkogaionmakeconfx86" "$envkogaionprofile" "$envkogaionenvupdate" ; do
 		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$cmd"
 	done
 }
