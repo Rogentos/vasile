@@ -1,0 +1,37 @@
+#!/bin/bash -x
+
+chrootpreparex64 () {
+	# check our environment for sanity
+	# if safe, trigger start && break the loop to build packages
+	# else trigger stop && cleanup && check again
+	while : true ; do
+		if [[ ! -d "$rodir" && ! -d "$rwdir" && ! -d "$overlaydir" ]] ; then
+			for i in "$rodir" "$rwdir" "$overlaydir" ; do
+				mkdir "$i"
+			done
+			chrootstartx64
+			break
+		elif [[ -d "$rodir" && -d "$rwdir" && -d "$overlaydir" ]] ; then
+			chrootstop
+			for i in "$rodir" "$rwdir" "$overlaydir" ; do
+				rm -rf "$i"
+			done
+			continue
+		fi
+	done
+}
+
+main () {
+	if checkroot ; then
+		chrootchecksumx64
+		chrootpreparex64
+		chrootoverlaysx64
+		chrootbuildsystemx64
+		chrootbuildx64
+		chrootx64
+		chrootstop
+	fi
+}
+
+main 
+exit 0

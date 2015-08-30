@@ -1,0 +1,28 @@
+#!/bin/bash -x
+# Say Hello to Vasile, a script to build Kogaion Linux packages in a clean squashfs + overlayfs chroot
+# Using predefined targets : kernel.target , xlibs.target , x11.target , sound.target , artwork.target
+# Main author : Ghiunhan Mamut (aka V3n3RiX) @ RogentOS Development Group
+# Dependencies : kernel built with squashfs + overlayfs, app-arch/dpkg (optional for building deb packages in portage)
+#
+
+source libvasile
+
+case $1 in
+	--build64)		source build64
+					;;
+	--build32)		source build32
+					;;
+	--help)			echo -e ""
+					echo -e "Usage: vasile [options]"
+					echo -e ""
+					echo -e "Options:"
+					echo -e "--build64 : build package in a clean x64 environment"
+					echo -e "--build32 : build package in a clean x86 environment"
+					echo -e "--help : display this help and exit"
+					echo -e ""
+					;;
+	*)				echo -e "error: no operation specified, use --help for help"
+					;;
+esac
+
+exit 0

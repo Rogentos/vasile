@@ -1,0 +1,37 @@
+#!/bin/bash -x
+
+chrootpreparex86 () {
+	# check our environment for sanity
+	# if safe, trigger start && break the loop to build packages
+	# else trigger stop && cleanup && check again
+	while : true ; do
+		if [[ ! -d "$rodir" && ! -d "$rwdir" && ! -d "$overlaydir" ]] ; then
+			for i in "$rodir" "$rwdir" "$overlaydir" ; do
+				mkdir "$i"
+			done
+			chrootstartx86
+			break
+		elif [[ -d "$rodir" && -d "$rwdir" && -d "$overlaydir" ]] ; then
+			chrootstop
+			for i in "$rodir" "$rwdir" "$overlaydir" ; do
+				rm -rf "$i"
+			done
+			continue
+		fi
+	done
+}
+
+main () {
+	if checkroot ; then
+		chrootchecksumx86
+		chrootpreparex86
+		chrootoverlaysx86
+		chrootbuildsystemx86
+		chrootbuildx86
+		chrootx86
+		chrootstop
+	fi
+}
+
+main 
+exit 0

@@ -1,0 +1,239 @@
+# arch agnostic code
+export local rodir="rodir"
+export local rwdir="rwdir"
+export local overlaydir="overlaydir"
+export local chrootuser="root"
+export local chroottarget="${@:2}"
+export local chrootbuildtarget="emerge -kav "$chroottarget""
+export local chrootoverlay="layman -f -a kogaion -o https://raw.github.com/Rogentos/kogaion/master/overlay.xml"
+export local chrootdesktopoverlay="layman -f -a kogaion-desktop -o https://raw.github.com/Rogentos/kogaion-desktop/master/overlay.xml"
+export local chrootbuildgit="cd /opt && git clone https://github.com/Rogentos/build.git"
+export local chrootportageconfig="ln -sf /opt/build/conf/intel/portage /etc/portage"
+export local chrootenvupdate="/usr/sbin/env-update && . /etc/profile"
+export local chrootprofile="eselect profile set 1"
+
+checkroot () {
+	if [[ "$(whoami)" != root ]] ; then
+		echo ""
+		echo "You're not root?...No cookies for you, go away !!!"
+		echo ""
+		exit 1
+	fi
+}
+
+chrootstop () {
+	umount -l "$overlaydir"/proc > /dev/null 2>&1
+	umount -l "$overlaydir"/sys > /dev/null 2>&1
+	umount -l "$overlaydir"/dev/pts > /dev/null 2>&1
+	umount -l "$overlaydir"/dev/shm > /dev/null 2>&1
+	umount -l "$overlaydir"/dev > /dev/null 2>&1
+	umount -l "$overlaydir"/tmp > /dev/null 2>&1
+	umount -l "$overlaydir"/usr/portage/packages > /dev/null 2>&1
+	umount -l "$overlaydir"/mnt > /dev/null 2>&1
+	umount -l "$overlaydir" > /dev/null 2>&1
+	umount -l "$rodir" > /dev/null 2>&1
+}
+
+# x64 specific code
+export local chrootx64="kogaiondevelx64.squashfs"
+export local chrootx64md5=""$chrootx64".md5"
+export local chrootmakeconfx64="ln -sf /opt/build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
+
+chrootchecksumx64 () {
+	while : true ; do
+		if [[ -f "$chrootx64" && -f "$chrootx64md5" ]] ; then
+			echo "Good, x64 squashed chroot && checksum file FOUND ... verifying integrity"
+			echo ""
+			if [[ "$(md5sum -c "$chrootx64md5")" ]] ; then
+				echo "Good, x64 squashed chroot checksum PASSED ... starting environment"
+				echo ""
+				sleep 1
+				break
+			else
+				echo "Ooops, x64 squashed chroot checksum FAILED ... aborting"
+				exit 1
+			fi
+		else
+			echo "Ooops, x64 squashed chroot or checksum file NOT FOUND ... aborting"
+			exit 1
+		fi
+	done
+}
+
+chrootstartx64 () {
+	mount -t squashfs "$chrootx64" "$rodir"
+	mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
+	while : true ; do
+		if [[ ! -d packages ]] ; then
+			mkdir packages
+			mount -o bind packages "$overlaydir"/usr/portage/packages
+			break
+		elif [[ -d packages ]] ; then
+			mount -o bind packages "$overlaydir"/usr/portage/packages
+			break
+		fi
+	done
+	while : true ; do
+		if [[ ! -d distfiles ]] ; then
+			mkdir distfiles
+			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
+			break
+		elif [[ -d distfiles ]] ; then
+			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
+			break
+		fi
+	done
+	mount -o bind targets "$overlaydir"/mnt
+	mount -t proc proc "$overlaydir"/proc
+	mount -t sysfs sysfs "$overlaydir"/sys
+	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$overlaydir"/dev
+	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$overlaydir"/dev/pts
+	mount -t tmpfs -o nosuid,nodev none "$overlaydir"/dev/shm
+	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
+}
+
+chrootoverlaysx64() {
+	echo "Injecting Kogaion Linux Main Overlay into x64 environment"
+	sleep 1
+	chroot "$overlaydir" su - "$chrootuser" -c "$chrootoverlay"
+	echo "Injecting Kogaion Linux Desktop Overlay into x64 environment"
+	sleep 1
+	chroot "$overlaydir" su - "$chrootuser" -c "$chrootdesktopoverlay"
+}
+
+chrootbuildsystemx64() {
+	echo "Injecting Kogaion Linux x64 Buildsystem && Setting up Portage && Setting up make.conf"
+	echo ""
+	sleep 1
+	for cmd in "$chrootbuildgit" "$chrootportageconfig" "$chrootmakeconfx64" "$chrootprofile" "$chrootenvupdate" ; do
+		chroot "$overlaydir" su - "$chrootuser" -c "$cmd"
+	done
+}
+
+chrootbuildx64 () {
+	echo ""
+	echo "x64 Environment is UP && RUNNING ... building targets"
+	sleep 1
+	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildtarget"
+}
+
+chrootx64() {
+	echo -e ""
+	echo -e "#################################################################"
+	echo -e "#       ENTERING CHROOT ENV FOR YOU TO PUSH BUILT PACKAGES      #"
+	echo -e "#               OR TO FIX EVENTUAL BUILD ERRORS                 #"
+	echo -e "#################################################################"
+	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
+	echo -e "#################################################################"
+	echo -e "#       NEXT RUN OF THIS SCRIPT WILL DESTROY ALL YOUR WORK      #"
+	echo -e "#   DO NOT EXIT CHROOT UNTIL ALL PACKAGES ARE PUSHED TO REPOS   #"
+	echo -e "#  OR, IN CASE OF BUILD FAILURES, UNTIL ALL FIXES ARE COMMITED  #"
+	echo -e "#################################################################"
+	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
+	echo -e "#################################################################"
+	echo -e ""
+	echo -e ""
+	chroot "$overlaydir" su - "$chrootuser"
+}
+
+# x86 specific code
+export local chrootx86="kogaiondevelx86.squashfs"
+export local chrootx86md5=""$chrootx86".md5"
+export local chrootmakeconfx86="ln -sf /opt/build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
+
+chrootchecksumx86 () {
+	while : true ; do
+		if [[ -f "$chrootx86" && -f "$chrootx86md5" ]] ; then
+			echo "Good, x86 squashed chroot && checksum file FOUND ... verifying integrity"
+			echo ""
+			if [[ "$(md5sum -c "$chrootx86md5")" ]] ; then
+				echo "Good, x86 squashed chroot checksum PASSED ... starting environment"
+				echo ""
+				sleep 1
+				break
+			else
+				echo "Ooops, x86 squashed chroot checksum FAILED ... aborting"
+				exit 1
+			fi
+		else
+			echo "Ooops, x86 squashed chroot or checksum file NOT FOUND ... aborting"
+			exit 1
+		fi
+	done
+}
+
+chrootstartx86 () {
+	mount -t squashfs "$chrootx86" "$rodir"
+	mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
+	while : true ; do
+		if [[ ! -d packages ]] ; then
+			mkdir packages
+			mount -o bind packages "$overlaydir"/usr/portage/packages
+			break
+		elif [[ -d packages ]] ; then
+			mount -o bind packages "$overlaydir"/usr/portage/packages
+			break
+		fi
+	done
+	while : true ; do
+		if [[ ! -d distfiles ]] ; then
+			mkdir distfiles
+			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
+			break
+		elif [[ -d distfiles ]] ; then
+			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
+			break
+		fi
+	done
+	mount -o bind targets "$overlaydir"/mnt
+	mount -t proc proc "$overlaydir"/proc
+	mount -t sysfs sysfs "$overlaydir"/sys
+	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$overlaydir"/dev
+	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$overlaydir"/dev/pts
+	mount -t tmpfs -o nosuid,nodev none "$overlaydir"/dev/shm
+	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
+}
+
+chrootoverlaysx86() {
+	echo "Injecting Kogaion Linux Main Overlay into x86 environment"
+	sleep 1
+	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootoverlay"
+	echo "Injecting Kogaion Linux Desktop Overlay into x86 environment"
+	sleep 1
+	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootdesktopoverlay"
+}
+
+chrootbuildsystemx86() {
+	echo "Injecting Kogaion Linux x86 Buildsystem && Setting up Portage && Setting up make.conf"
+	echo ""
+	sleep 1
+	for cmd in "$chrootbuildgit" "$chrootportageconfig" "$chrootmakeconfx86" "$chrootprofile" "$chrootenvupdate" ; do
+		linux32 chroot "$overlaydir" su - "$chrootuser" -c "$cmd"
+	done
+}
+
+chrootbuildx86 () {
+	echo ""
+	echo "x86 Environment is UP && RUNNING ... building targets"
+	sleep 1
+	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildtarget"
+}
+
+chrootx86() {
+	echo -e ""
+	echo -e "#################################################################"
+	echo -e "#       ENTERING CHROOT ENV FOR YOU TO PUSH BUILT PACKAGES      #"
+	echo -e "#               OR TO FIX EVENTUAL BUILD ERRORS                 #"
+	echo -e "#################################################################"
+	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
+	echo -e "#################################################################"
+	echo -e "#       NEXT RUN OF THIS SCRIPT WILL DESTROY ALL YOUR WORK      #"
+	echo -e "#   DO NOT EXIT CHROOT UNTIL ALL PACKAGES ARE PUSHED TO REPOS   #"
+	echo -e "#  OR, IN CASE OF BUILD FAILURES, UNTIL ALL FIXES ARE COMMITED  #"
+	echo -e "#################################################################"
+	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
+	echo -e "#################################################################"
+	echo -e ""
+	echo -e ""
+	linux32 chroot "$overlaydir" su - "$chrootuser"
+}
