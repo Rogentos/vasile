@@ -27,3 +27,26 @@ export local sqfsrootx64md5=""$sqfsrootx64".md5"
 # env make.conf variables
 export local envkogaionmakeconfx86="ln -sf /opt/build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
 export local envkogaionmakeconfx64="ln -sf /opt/build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
+
+envcheckroot () {
+	if [[ "$(whoami)" != root ]] ; then
+		echo ""
+		echo "You're not root?...No cookies for you, go away !!!"
+		echo ""
+		exit 1
+	fi
+}
+
+envkogaionstop () {
+	# umount squashfs + overlayfs chroot
+	umount -l "$overlaydir"/proc > /dev/null 2>&1
+	umount -l "$overlaydir"/sys > /dev/null 2>&1
+	umount -l "$overlaydir"/dev/pts > /dev/null 2>&1
+	umount -l "$overlaydir"/dev/shm > /dev/null 2>&1
+	umount -l "$overlaydir"/dev > /dev/null 2>&1
+	umount -l "$overlaydir"/tmp > /dev/null 2>&1
+	umount -l "$overlaydir"/usr/portage/packages > /dev/null 2>&1
+	umount -l "$overlaydir"/mnt > /dev/null 2>&1
+	umount -l "$overlaydir" > /dev/null 2>&1
+	umount -l "$rodir" > /dev/null 2>&1
+}
