@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/usr/bin/env bash
 
 chrootpreparex86 () {
 	# check our environment for sanity

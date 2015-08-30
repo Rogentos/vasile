@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/usr/bin/env bash
 # Say Hello to Vasile, a script to build Kogaion Linux packages in a clean squashfs + overlayfs chroot
 # Using predefined targets : kernel.target , xlibs.target , x11.target , sound.target , artwork.target
 # Main author : Ghiunhan Mamut (aka V3n3RiX) @ RogentOS Development Group
