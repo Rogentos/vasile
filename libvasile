@@ -7,7 +7,7 @@ export local overlaydir="overlaydir"
 export local envkogaionuser="root"
 
 # env target variable (can be a single package, multiple packages, or a target file passed as parameter)
-export local envkogaiontarget="$@"
+export local envkogaiontarget="${@:2}"
 export local envkogaionbuildtarget="emerge -kav "$envkogaiontarget""
 
 # env buildsystem variables
