@@ -12,8 +12,6 @@ case $1 in
 					;;
 	--build32)		source build32
 					;;
-	--clean)		source cleanup
-					;;
 	--help)			echo -e ""
 					echo -e "Usage: vasile [options]"
 					echo -e ""
