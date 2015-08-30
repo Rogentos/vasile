@@ -1,4 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/bash -x
+
+source libvasile
 
 envkogaionstart () {
 	# mount ro squashfs chroot + add rw overlayfs layer to enable clean package building
