@@ -1,64 +1,6 @@
 #!/bin/bash -x
 
-envkogaionstart () {
-	# mount ro squashfs chroot + add rw overlayfs layer to enable clean package building
-	mount -t squashfs "$sqfsrootx86" "$rodir"
-	mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
-	# keep built binary packages around, we will convert them to deb packages using vasile
-	while : true ; do
-		if [[ ! -d packages ]] ; then
-			mkdir packages
-			mount -o bind packages "$overlaydir"/usr/portage/packages
-			break
-		elif [[ -d packages ]] ; then
-			mount -o bind packages "$overlaydir"/usr/portage/packages
-			break
-		fi
-	done
-	# keep distfiles around
-	while : true ; do
-		if [[ ! -d distfiles ]] ; then
-			mkdir distfiles
-			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
-			break
-		elif [[ -d distfiles ]] ; then
-			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
-			break
-		fi
-	done
-	# bind mount targets inside clean build environment managed by vasile, we really need them to be in there
-	mount -o bind targets "$overlaydir"/mnt
-	mount -t proc proc "$overlaydir"/proc
-	mount -t sysfs sysfs "$overlaydir"/sys
-	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$overlaydir"/dev
-	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$overlaydir"/dev/pts
-	mount -t tmpfs -o nosuid,nodev none "$overlaydir"/dev/shm
-	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
-}
-
-envkogaionsquashfsintegrity () {
-	# our bare metal buildserver is x86_64 but we want to build 32bit packages as well
-	# run this script with linux32 to fool it we run i686 and to build 32bit packages
-	while : true ; do
-		if [[ -f "$sqfsrootx86" && -f "$sqfsrootx86md5" ]] ; then
-			echo "Good, i686 squashed chroot && checksum file FOUND ... verifying integrity"
-			echo ""
-			if [[ "$(md5sum -c "$sqfsrootx86md5")" ]] ; then
-				echo "Good, i686 squashed chroot checksum PASSED ... starting environment"
-				echo ""
-				sleep 1
-				break
-			else
-				echo "Ooops, i686 squashed chroot checksum FAILED ... aborting"
-			fi
-		else
-			echo "Ooops, i686 squashed chroot of checksum file NOT FOUND ... aborting"
-			exit 1
-		fi
-	done
-}
-
-envkogaionprepare () {
+chrootpreparex86 () {
 	# check our environment for sanity
 	# if safe, trigger start && break the loop to build packages
 	# else trigger stop && cleanup && check again
@@ -67,10 +9,10 @@ envkogaionprepare () {
 			for i in "$rodir" "$rwdir" "$overlaydir" ; do
 				mkdir "$i"
 			done
-			envkogaionstart
+			chrootstartx86
 			break
 		elif [[ -d "$rodir" && -d "$rwdir" && -d "$overlaydir" ]] ; then
-			envkogaionstop
+			chrootstop
 			for i in "$rodir" "$rwdir" "$overlaydir" ; do
 				rm -rf "$i"
 			done
@@ -79,62 +21,15 @@ envkogaionprepare () {
 	done
 }
 
-envkogaionoverlays() {
-	# inject our overlays into squashfs + overlayfs chroot
-	echo "Injecting Kogaion Linux Main Overlay into i686 environment"
-	sleep 1
-	linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionoverlay"
-	echo "Injecting Kogaion Linux Desktop Overlay into i686 environment"
-	linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaiondesktopoverlay"
-}
-
-envkogaionbuildsystem() {
-	# inject our buildsystem into squashfs + overlayfs chroot
-	echo "Injecting Kogaion Linux i686 Buildsystem && Setting up Portage && Setting up make.conf"
-	echo ""
-	sleep 1
-	for cmd in "$envkogaionbuildgit" "$envkogaionportageconfig" "$envkogaionmakeconfx86" "$envkogaionprofile" "$envkogaionenvupdate" ; do
-		linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$cmd"
-	done
-}
-
-envkogaionbuild () {
-	# build packages in squashfs + overlayfs chroot
-	echo ""
-	echo "i686 Environment is UP && RUNNING ... building targets"
-	sleep 1
-	linux32 chroot "$overlaydir" su - "$envkogaionuser" -c "$envkogaionbuildtarget"
-}
-
-envkogaionchroot() {
-	# enter squashfs + overlayfs chroot to push packages, or debug build errors
-	echo -e ""
-	echo -e "#################################################################"
-	echo -e "#       ENTERING CHROOT ENV FOR YOU TO PUSH BUILT PACKAGES      #"
-	echo -e "#               OR TO FIX EVENTUAL BUILD ERRORS                 #"
-	echo -e "#################################################################"
-	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
-	echo -e "#################################################################"
-	echo -e "#       NEXT RUN OF THIS SCRIPT WILL DESTROY ALL YOUR WORK      #"
-	echo -e "#   DO NOT EXIT CHROOT UNTIL ALL PACKAGES ARE PUSHED TO REPOS   #"
-	echo -e "#  OR, IN CASE OF BUILD FAILURES, UNTIL ALL FIXES ARE COMMITED  #"
-	echo -e "#################################################################"
-	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
-	echo -e "#################################################################"
-	echo -e ""
-	echo -e ""
-	linux32 chroot "$overlaydir" su - "$envkogaionuser"
-}
-
 main () {
-	if envcheckroot ; then
-		envkogaionsquashfsintegrity
-		envkogaionprepare
-		envkogaionoverlays
-		envkogaionbuildsystem
-		envkogaionbuild
-		envkogaionchroot
-		envkogaionstop
+	if checkroot ; then
+		chrootchecksumx86
+		chrootpreparex86
+		chrootoverlaysx86
+		chrootbuildsystemx86
+		chrootbuildx86
+		chrootx86
+		chrootstop
 	fi
 }
 
