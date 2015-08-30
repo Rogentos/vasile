@@ -1,0 +1,18 @@
+# env mount variables
+export local rodir="rodir"
+export local rwdir="rwdir"
+export local overlaydir="overlaydir"
+
+# env user variable
+export local envkogaionuser="root"
+
+# env target variable (can be a single package, multiple packages, or a target file passed as parameter)
+export local envkogaiontarget="$@"
+export local envkogaionbuildtarget="emerge -kav "$envkogaiontarget""
+
+# env buildsystem variables
+export local envkogaionoverlay="layman -f -a kogaion -o https://raw.github.com/Rogentos/kogaion/master/overlay.xml"
+export local envkogaiondesktopoverlay="layman -f -a kogaion-desktop -o https://raw.github.com/Rogentos/kogaion-desktop/master/overlay.xml"
+export local envkogaionbuildgit="cd /opt && git clone https://github.com/Rogentos/build.git"
+export local envkogaionportageconfig="ln -sf /opt/build/conf/intel/portage /etc/portage"
+export local envkogaionenvupdate="/usr/sbin/env-update && . /etc/profile"
