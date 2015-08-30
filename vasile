@@ -51,7 +51,7 @@ envkogaionstart () {
 			mkdir distfiles
 			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
 			break
-		elif [[ -d distfiles ]]
+		elif [[ -d distfiles ]] ; then
 			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
 			break
 		fi
