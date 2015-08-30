@@ -4,7 +4,7 @@ source libvasile
 
 envkogaionstart () {
 	# mount ro squashfs chroot + add rw overlayfs layer to enable clean package building
-	mount -t squashfs "$sqfsroot" "$rodir"
+	mount -t squashfs "$sqfsrootx86" "$rodir"
 	mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
 	# keep built binary packages around, we will convert them to deb packages using vasile
 	while : true ; do
@@ -65,13 +65,10 @@ envkogaionsquashfsintegrity () {
 	# our bare metal buildserver is x86_64 but we want to build 32bit packages as well
 	# run this script with linux32 to fool it we run i686 and to build 32bit packages
 	while : true ; do
-		export local sqfsroot="kogaiondevelx86.squashfs"
-		export local sqfsrootmd5file=""$sqfsroot".md5"
-		export local sqfsrootmd5="$(cat "$sqfsrootmd5file" | awk {'print $1'})"
-		if [[ -f "$sqfsroot" && -f "$sqfsrootmd5file" ]] ; then
+		if [[ -f "$sqfsrootx86" && -f "$sqfsrootx86md5" ]] ; then
 			echo "Good, i686 squashed chroot && checksum file FOUND ... verifying integrity"
 			echo ""
-			if [[ "$(md5sum "$sqfsroot" | awk {'print $1'})" = "$sqfsrootmd5" ]] ; then
+			if [[ "$(md5sum -c "$sqfsrootx86md5")" ]] ; then
 				echo "Good, i686 squashed chroot checksum PASSED ... starting environment"
 				echo ""
 				sleep 1

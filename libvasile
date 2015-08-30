@@ -16,3 +16,11 @@ export local envkogaiondesktopoverlay="layman -f -a kogaion-desktop -o https://r
 export local envkogaionbuildgit="cd /opt && git clone https://github.com/Rogentos/build.git"
 export local envkogaionportageconfig="ln -sf /opt/build/conf/intel/portage /etc/portage"
 export local envkogaionenvupdate="/usr/sbin/env-update && . /etc/profile"
+
+# env squashfs chroot variables
+export local sqfsrootx86="kogaiondevelx86.squashfs"
+export local sqfsrootx86md5=""$sqfsrootx86".md5"
+
+export local sqfsrootx64="kogaiondevelx64.squashfs"
+export local sqfsrootx64md5=""$sqfsrootx64".md5"
+
