@@ -7,6 +7,9 @@ export local overlaydir="overlaydir"
 export local envkogaionuser="root"
 
 # env target variable (can be a single package, multiple packages, or a target file passed as parameter)
+# vasile is now splitted, so calling it with one of its build arguments (--build32 or --build64)
+# would import that argument into envkogaiontarget variable and building most likely would fail
+# so change envkogaiontarget variable for vasile to skip build arguments and focus and next ones (target files, or packages)
 export local envkogaiontarget="${@:2}"
 export local envkogaionbuildtarget="emerge -kav "$envkogaiontarget""
 
