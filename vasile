@@ -5,12 +5,12 @@
 # Dependencies : kernel built with squashfs + overlayfs, app-arch/dpkg (optional for building deb packages in portage)
 #
 
-source libvasile
+source /usr/lib/vasile/libvasile
 
 case $1 in
-	--build64)		source build64
+	--build64)		source /usr/share/vasile/build64
 					;;
-	--build32)		source build32
+	--build32)		source /usr/share/vasile/build32
 					;;
 	--help)			echo -e ""
 					echo -e "Usage: vasile [options]"
