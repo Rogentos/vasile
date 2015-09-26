@@ -63,9 +63,9 @@ chrootchecksumx64 () {
 
 chrootstartx64 () {
 	mount -t squashfs "$chrootx64" "$rodir"
-	if [[ "$(uname -r | cut -d - -f1)" = "3.14.0" ]] ; then
+	if [[ "$(uname -r | cut -d . -f1,2)" = "3.14" ]] ; then
 		mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
-	elif [[ "(uname -r | cut -d - -f1)" = "4.1.0" ]] ; then
+	elif [[ "(uname -r | cut -d . -f1,2)" = "4.1" ]] ; then
 		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
 	fi
 	while : true ; do
@@ -169,9 +169,9 @@ chrootchecksumx86 () {
 
 chrootstartx86 () {
 	mount -t squashfs "$chrootx86" "$rodir"
-	if [[ "$(uname -r | cut -d - -f1)" = "3.14.0" ]] ; then
+	if [[ "$(uname -r | cut -d . -f1,2)" = "3.14" ]] ; then
 		mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
-	elif [[ "(uname -r | cut -d - -f1)" = "4.1.0" ]] ; then
+	elif [[ "(uname -r | cut -d . -f1,2)" = "4.1" ]] ; then
 		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
 	fi
 	while : true ; do
