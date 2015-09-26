@@ -1,6 +1,7 @@
 # arch agnostic code
 export local rodir="rodir"
 export local rwdir="rwdir"
+export local workdir="workdir" # only needed for overlayfs on kernel greather than 3.18
 export local overlaydir="overlaydir"
 export local chrootuser="root"
 export local chroottarget="${@:2}"
@@ -8,7 +9,7 @@ export local chrootbuildtarget="emerge -kav "$chroottarget""
 export local chrootoverlay="layman -f -a kogaion -o https://gitlab.com/kogaion/kogaion-main/raw/master/overlay.xml"
 export local chrootdesktopoverlay="layman -f -a kogaion-desktop -o https://gitlab.com/kogaion/kogaion-desktop/raw/master/overlay.xml"
 export local chrootbuildgit="cd /opt && git clone https://gitlab.com/kogaion/kogaion-build.git"
-export local chrootportageconfig="ln -sf /opt/build/conf/intel/portage /etc/portage"
+export local chrootportageconfig="ln -sf /opt/kogaion-build/conf/intel/portage /etc/portage"
 export local chrootenvupdate="/usr/sbin/env-update && . /etc/profile"
 export local chrootprofile="eselect profile set 1"
 
@@ -37,7 +38,7 @@ chrootstop () {
 # x64 specific code
 export local chrootx64="kogaiondevelx64.squashfs"
 export local chrootx64md5=""$chrootx64".md5"
-export local chrootmakeconfx64="ln -sf /opt/build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
+export local chrootmakeconfx64="ln -sf /opt/kogaion-build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
 
 chrootchecksumx64 () {
 	while : true ; do
@@ -62,7 +63,11 @@ chrootchecksumx64 () {
 
 chrootstartx64 () {
 	mount -t squashfs "$chrootx64" "$rodir"
-	mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
+	if [[ "$(uname -r | cut -d - -f1)" = "3.14.0" ]] ; then
+		mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
+	elif [[ "(uname -r | cut -d - -f1)" = "4.1.0" ]] ; then
+		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
+	fi
 	while : true ; do
 		if [[ ! -d packages ]] ; then
 			mkdir packages
@@ -139,7 +144,7 @@ chrootx64() {
 # x86 specific code
 export local chrootx86="kogaiondevelx86.squashfs"
 export local chrootx86md5=""$chrootx86".md5"
-export local chrootmakeconfx86="ln -sf /opt/build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
+export local chrootmakeconfx86="ln -sf /opt/kogaion-build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
 
 chrootchecksumx86 () {
 	while : true ; do
@@ -164,7 +169,11 @@ chrootchecksumx86 () {
 
 chrootstartx86 () {
 	mount -t squashfs "$chrootx86" "$rodir"
-	mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
+	if [[ "$(uname -r | cut -d - -f1)" = "3.14.0" ]] ; then
+		mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
+	elif [[ "(uname -r | cut -d - -f1)" = "4.1.0" ]] ; then
+		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
+	fi
 	while : true ; do
 		if [[ ! -d packages ]] ; then
 			mkdir packages

@@ -5,15 +5,15 @@ chrootpreparex86 () {
 	# if safe, trigger start && break the loop to build packages
 	# else trigger stop && cleanup && check again
 	while : true ; do
-		if [[ ! -d "$rodir" && ! -d "$rwdir" && ! -d "$overlaydir" ]] ; then
-			for i in "$rodir" "$rwdir" "$overlaydir" ; do
+		if [[ ! -d "$rodir" && ! -d "$rwdir" && ! -d "$workdir" && ! -d "$overlaydir" ]] ; then
+			for i in "$rodir" "$rwdir" "$workdir" "$overlaydir" ; do
 				mkdir "$i"
 			done
 			chrootstartx86
 			break
-		elif [[ -d "$rodir" && -d "$rwdir" && -d "$overlaydir" ]] ; then
+		elif [[ -d "$rodir" && -d "$rwdir" && -d "$workdir" && -d "$overlaydir" ]] ; then
 			chrootstop
-			for i in "$rodir" "$rwdir" "$overlaydir" ; do
+			for i in "$rodir" "$rwdir" "$workdir" "$overlaydir" ; do
 				rm -rf "$i"
 			done
 			continue
