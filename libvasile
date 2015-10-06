@@ -36,7 +36,7 @@ chrootstop () {
 }
 
 # x64 specific code
-export local chrootx64="kogaiondevelx64.squashfs"
+export local chrootx64="kogaion_3_core_x64.squashfs"
 export local chrootx64md5=""$chrootx64".md5"
 export local chrootmakeconfx64="ln -sf /opt/kogaion-build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
 
@@ -142,7 +142,7 @@ chrootx64() {
 }
 
 # x86 specific code
-export local chrootx86="kogaiondevelx86.squashfs"
+export local chrootx86="kogaion_3_core_x86.squashfs"
 export local chrootx86md5=""$chrootx86".md5"
 export local chrootmakeconfx86="ln -sf /opt/kogaion-build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
 
