@@ -61,6 +61,9 @@ chrootchecksumx64 () {
 	done
 }
 
+coresetupx64 () {
+}
+
 chrootstartx64 () {
 	mount -t squashfs "$chrootx64" "$rodir"
 	if [[ "$(uname -r | cut -d . -f1,2)" = "3.14" ]] ; then
@@ -97,7 +100,7 @@ chrootstartx64 () {
 	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
 }
 
-chrootoverlaysx64() {
+chrootoverlaysx64 () {
 	echo "Injecting Kogaion Linux Main Overlay into x64 environment"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootoverlay"
@@ -106,7 +109,7 @@ chrootoverlaysx64() {
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootdesktopoverlay"
 }
 
-chrootbuildsystemx64() {
+chrootbuildsystemx64 () {
 	echo "Injecting Kogaion Linux x64 Buildsystem && Setting up Portage && Setting up make.conf"
 	echo ""
 	sleep 1
@@ -122,7 +125,7 @@ chrootbuildx64 () {
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildtarget"
 }
 
-chrootx64() {
+chrootx64 () {
 	echo -e ""
 	echo -e "#################################################################"
 	echo -e "#       ENTERING CHROOT ENV FOR YOU TO PUSH BUILT PACKAGES      #"
@@ -167,6 +170,9 @@ chrootchecksumx86 () {
 	done
 }
 
+coresetupx86 () {
+}
+
 chrootstartx86 () {
 	mount -t squashfs "$chrootx86" "$rodir"
 	if [[ "$(uname -r | cut -d . -f1,2)" = "3.14" ]] ; then
@@ -203,7 +209,7 @@ chrootstartx86 () {
 	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
 }
 
-chrootoverlaysx86() {
+chrootoverlaysx86 () {
 	echo "Injecting Kogaion Linux Main Overlay into x86 environment"
 	sleep 1
 	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootoverlay"
@@ -212,7 +218,7 @@ chrootoverlaysx86() {
 	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootdesktopoverlay"
 }
 
-chrootbuildsystemx86() {
+chrootbuildsystemx86 () {
 	echo "Injecting Kogaion Linux x86 Buildsystem && Setting up Portage && Setting up make.conf"
 	echo ""
 	sleep 1
@@ -228,7 +234,7 @@ chrootbuildx86 () {
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildtarget"
 }
 
-chrootx86() {
+chrootx86 () {
 	echo -e ""
 	echo -e "#################################################################"
 	echo -e "#       ENTERING CHROOT ENV FOR YOU TO PUSH BUILT PACKAGES      #"
