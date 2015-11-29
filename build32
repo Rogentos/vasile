@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Vasile needs root privileges and a proper kernel to run
+
+checkroot
+kernelconfig
+
 chrootpreparex86 () {
 	# check our environment for sanity
 	# if safe, trigger start && break the loop to build packages
@@ -22,16 +27,13 @@ chrootpreparex86 () {
 }
 
 main () {
-	kernelconfig
-	if checkroot ; then
-		chrootchecksumx86
-		chrootpreparex86
-		chrootoverlaysx86
-		chrootbuildsystemx86
-		chrootbuildx86
-		chrootx86
-		chrootstop
-	fi
+	chrootchecksumx86
+	chrootpreparex86
+	chrootoverlaysx86
+	chrootbuildsystemx86
+	chrootbuildx86
+	chrootx86
+	chrootstop
 }
 
 main 

@@ -78,9 +78,6 @@ chrootchecksumx64 () {
 	done
 }
 
-#coresetupx64 () {
-#}
-
 chrootstartx64 () {
 	mount -t squashfs "$chrootx64" "$rodir"
 	if [[ "$(uname -r | cut -d . -f1,2)" = "3.14" ]] ; then
@@ -186,9 +183,6 @@ chrootchecksumx86 () {
 		fi
 	done
 }
-
-#coresetupx86 () {
-#}
 
 chrootstartx86 () {
 	mount -t squashfs "$chrootx86" "$rodir"

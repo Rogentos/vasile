@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+# Vasile needs root privileges and a proper kernel to run
+
+kernelconfig
+checkroot
+
+export local isoarch="x86"
+export local isoname=""$releasename"-"$releaseversion"-"$isoarch""
+
+dailyisox86 () {
+	export local isostatus="DAILY"
+	mkdir -p ""$isoname"-"$isostatus"/livecd"
+}
+
+alphaisox86 () {
+	export local isostatus="ALPHA"
+	mkdir -p ""$isoname"-"$isostatus"/livecd"
+}
+
+betaisox86 () {
+	export local isostatus="BETA"
+	mkdir -p ""$isoname"-"$isostatus"/livecd"
+}
+
+rcisox86 () {
+	export local isostatus="RC"
+	mkdir -p ""$isoname"-"$isostatus"/livecd"
+}
+
+stableisox86 () {
+	export local isostatus="STABLE"
+	mkdir -p ""$isoname"-"$isostatus"/livecd"
+}
+
+case $2 in
+	--daily)			dailyisox86
+						;;
+	--alpha)			alphaisox86
+						;;
+	--beta)				betaisox86
+						;;
+	--rc)				rcisox86
+						;;
+	--stable)			stableisox86
+						;;
+esac
