@@ -17,7 +17,7 @@ dailyisox64 () {
 	mkdir -p "$tmpiso"
 	mkdir -p ""$isoname"-"$isostatus"/livecd"
 	mount -t squashfs "$chrootx64" "$tmpiso"
-	rsync -aHAXr --progress "$tmpiso" ""$isoname"-"$isostatus"/livecd"
+	rsync -aHAXr --progress "$tmpiso/" ""$isoname"-"$isostatus"/livecd/"
 	umount "$tmpiso"
 }
 
@@ -26,7 +26,7 @@ alphaisox64 () {
 	mkdir -p "$tmpiso"
 	mkdir -p ""$isoname"-"$isostatus"/livecd"
 	mount -t squashfs "$chrootx64" "$tmpiso"
-	rsync -aHAXr --progress "$tmpiso" ""$isoname"-"$isostatus"/livecd"
+	rsync -aHAXr --progress "$tmpiso/" ""$isoname"-"$isostatus"/livecd/"
 	umount "$tmpiso"
 }
 
@@ -35,7 +35,7 @@ betaisox64 () {
 	mkdir -p "$tmpiso"
 	mkdir -p ""$isoname"-"$isostatus"/livecd"
 	mount -t squashfs "$chrootx64" "$tmpiso"
-	rsync -aHAXr --progress "$tmpiso" ""$isoname"-"$isostatus"/livecd"
+	rsync -aHAXr --progress "$tmpiso/" ""$isoname"-"$isostatus"/livecd/"
 	umount "$tmpiso"
 }
 
@@ -44,7 +44,7 @@ rcisox64 () {
 	mkdir -p "$tmpiso"
 	mkdir -p ""$isoname"-"$isostatus"/livecd"
 	mount -t squashfs "$chrootx64" "$tmpiso"
-	rsync -aHAXr --progress "$tmpiso" ""$isoname"-"$isostatus"/livecd"
+	rsync -aHAXr --progress "$tmpiso/" ""$isoname"-"$isostatus"/livecd/"
 	umount "$tmpiso"
 }
 
@@ -53,7 +53,7 @@ stableisox64 () {
 	mkdir -p "$tmpiso"
 	mkdir -p ""$isoname"-"$isostatus"/livecd"
 	mount -t squashfs "$chrootx64" "$tmpiso"
-	rsync -aHAXr --progress "$tmpiso" ""$isoname"-"$isostatus"/livecd"
+	rsync -aHAXr --progress "$tmpiso/" ""$isoname"-"$isostatus"/livecd/"
 	umount "$tmpiso"
 }
 
