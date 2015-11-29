@@ -5,67 +5,21 @@
 kernelconfig
 checkroot
 
-# Check core integrity before doing anything
-chrootchecksumx86
-
 export local isoarch="x86"
 export local isoname=""$releasename"-"$releaseversion"-"$isoarch""
 export local tmpiso="/tmp/"$isoname""
 
-dailyisox86 () {
-	export local isostatus="DAILY"
+makeisox86 () {
 	mkdir -p "$tmpiso"
-	mkdir -p ""$isoname"-"$isostatus"/livecd"
+	mkdir -p ""$isoname"/livecd"
 	mount -t squashfs "$chrootx86" "$tmpiso"
-	rsync -aHAXr --progress "$tmpiso/" ""$isoname"-"$isostatus"/livecd/"
+	rsync -aHAXr --progress "$tmpiso/" ""$isoname"/livecd/"
 	umount "$tmpiso"
 }
 
-alphaisox86 () {
-	export local isostatus="ALPHA"
-	mkdir -p "$tmpiso"
-	mkdir -p ""$isoname"-"$isostatus"/livecd"
-	mount -t squashfs "$chrootx86" "$tmpiso"
-	rsync -aHAXr --progress "$tmpiso/" ""$isoname"-"$isostatus"/livecd/"
-	umount "$tmpiso"
+main () {
+	chrootchecksumx86
+	makeisox86
 }
 
-betaisox86 () {
-	export local isostatus="BETA"
-	mkdir -p "$tmpiso"
-	mkdir -p ""$isoname"-"$isostatus"/livecd"
-	mount -t squashfs "$chrootx86" "$tmpiso"
-	rsync -aHAXr --progress "$tmpiso/" ""$isoname"-"$isostatus"/livecd/"
-	umount "$tmpiso"
-}
-
-rcisox86 () {
-	export local isostatus="RC"
-	mkdir -p "$tmpiso"
-	mkdir -p ""$isoname"-"$isostatus"/livecd"
-	mount -t squashfs "$chrootx86" "$tmpiso"
-	rsync -aHAXr --progress "$tmpiso/" ""$isoname"-"$isostatus"/livecd/"
-	umount "$tmpiso"
-}
-
-stableisox86 () {
-	export local isostatus="STABLE"
-	mkdir -p "$tmpiso"
-	mkdir -p ""$isoname"-"$isostatus"/livecd"
-	mount -t squashfs "$chrootx86" "$tmpiso"
-	rsync -aHAXr --progress "$tmpiso/" ""$isoname"-"$isostatus"/livecd/"
-	umount "$tmpiso"
-}
-
-case $2 in
-	--daily)			dailyisox86
-						;;
-	--alpha)			alphaisox86
-						;;
-	--beta)				betaisox86
-						;;
-	--rc)				rcisox86
-						;;
-	--stable)			stableisox86
-						;;
-esac
+main
