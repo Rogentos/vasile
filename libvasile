@@ -13,6 +13,21 @@ export local chrootportageconfig="ln -sf /opt/kogaion-build/conf/intel/portage /
 export local chrootenvupdate="/usr/sbin/env-update && . /etc/profile"
 export local chrootprofile="eselect profile set 1"
 
+kernelconfig () {
+	if [[ $(zgrep 'CONFIG_OVERLAY_FS=' /proc/config.gz) && $(zgrep "CONFIG_SQUASHFS=" /proc/config.gz) &&  $(zgrep "CONFIG_BLK_DEV_LOOP=" /proc/config.gz) ]] ; then
+		echo ""
+		echo "Kernel configuration seems OK, moving on"
+		echo ""
+		sleep 1
+	else
+		echo ""
+		echo "Vasile needs OVERLAYFS && SQUASHFS && LOOP DEVICES to work"
+		echo "Please rebuild the kernel with those activated to use it"
+		echo ""
+		exit 1
+	fi
+}
+
 checkroot () {
 	if [[ "$(whoami)" != root ]] ; then
 		echo ""
@@ -61,8 +76,8 @@ chrootchecksumx64 () {
 	done
 }
 
-coresetupx64 () {
-}
+#coresetupx64 () {
+#}
 
 chrootstartx64 () {
 	mount -t squashfs "$chrootx64" "$rodir"
@@ -170,8 +185,8 @@ chrootchecksumx86 () {
 	done
 }
 
-coresetupx86 () {
-}
+#coresetupx86 () {
+#}
 
 chrootstartx86 () {
 	mount -t squashfs "$chrootx86" "$rodir"
