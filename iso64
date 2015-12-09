@@ -18,6 +18,8 @@ makeisox64 () {
 	mkdir -p ""$isoname"/livecd"
 	mkdir -p ""$isoname"/boot"
 	mkdir -p ""$isoname"/boot/grub"
+	mkdir -p ""$isoname"/efi"
+	mkdir -p ""$isoname"/efi/boot"
 	# Mount && Sync squashed core (Kogaion stage4) into live environment
 	mount -t squashfs "$chrootx64" "$coremnt"
 	rsync -aHAXr --progress "$coremnt/" ""$isoname"/livecd/"
