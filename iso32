@@ -8,7 +8,7 @@ checkroot
 export local mainarch="x86"
 export local isoname=""$releasename"-"$releaseversion"-"$mainarch""
 export local livedir=""$isoname"/livecd"
-export local isoboot=""$livedir"/boot/grub"
+export local isoboot=""$isoname"/boot/grub"
 export local kernelname="kernel-genkernel-"$mainarch"-"$kernelver""
 export local ramfsname="initramfs-genkernel-"$mainarch"-"$kernelver""
 

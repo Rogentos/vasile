@@ -8,8 +8,8 @@ checkroot
 export local mainarch="x86_64"
 export local isoname=""$releasename"-"$releaseversion"-"$mainarch""
 export local livedir=""$isoname"/livecd"
-export local isoboot=""$livedir"/boot/grub"
-export local isoefiboot=""$livedir"/efi/boot"
+export local isoboot=""$isoname"/boot/grub"
+export local isoefiboot=""$isoname"/efi/boot"
 export local kernelname="kernel-genkernel-"$mainarch"-"$kernelver""
 export local ramfsname="initramfs-genkernel-"$mainarch"-"$kernelver""
 
