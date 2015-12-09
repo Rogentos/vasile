@@ -6,7 +6,7 @@ kernelconfig
 checkroot
 
 export local mainarch="x86"
-export local isoname=""$releasename"-"$releaseversion"-"$isoarch""
+export local isoname=""$releasename"-"$releaseversion"-"$mainarch""
 export local coremnt="/tmp/"$isoname""
 export local kernelver="3.14.0-"$releasename""
 export local kernelname="kernel-genkernel-"$mainarch"-"$kernelver""
