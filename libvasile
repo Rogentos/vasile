@@ -18,6 +18,11 @@ export local chrootportageconfig="ln -sf /opt/kogaion-build/conf/intel/portage /
 export local chrootenvupdate="/usr/sbin/env-update && . /etc/profile"
 export local chrootprofile="eselect profile set 1"
 
+# arch independent iso variables
+
+export local coremnt="/tmp/"$isoname""
+export local kernelver="3.14.0-"$releasename""
+
 # generic arch independent functions (used for both build && iso creation)
 
 kernelconfig () {

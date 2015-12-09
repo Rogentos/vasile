@@ -7,8 +7,6 @@ checkroot
 
 export local mainarch="x86_64"
 export local isoname=""$releasename"-"$releaseversion"-"$mainarch""
-export local coremnt="/tmp/"$isoname""
-export local kernelver="3.14.0-"$releasename""
 export local kernelname="kernel-genkernel-"$mainarch"-"$kernelver""
 export local ramfsname="initramfs-genkernel-"$mainarch"-"$kernelver""
 
