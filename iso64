@@ -5,16 +5,27 @@
 kernelconfig
 checkroot
 
-export local isoarch="amd64"
+export local mainarch="x86_64"
 export local isoname=""$releasename"-"$releaseversion"-"$isoarch""
-export local tmpiso="/tmp/"$isoname""
+export local coremnt="/tmp/"$isoname""
+export local kernelver="3.14.0-"$releasename""
+export local kernelname="kernel-genkernel-"$mainarch"-"$kernelver""
+export local ramfsname="initramfs-genkernel-"$mainarch"-"$kernelver""
 
 makeisox64 () {
+	# ISO layout
 	mkdir -p "$tmpiso"
 	mkdir -p ""$isoname"/livecd"
-	mount -t squashfs "$chrootx64" "$tmpiso"
-	rsync -aHAXr --progress "$tmpiso/" ""$isoname"/livecd/"
-	umount "$tmpiso"
+	mkdir -p ""$isoname"/boot"
+	# Mount && Sync squashed core (Kogaion stage4) into live environment
+	mount -t squashfs "$chrootx64" "$coremnt"
+	rsync -aHAXr --progress "$coremnt/" ""$isoname"/livecd/"
+	# Put our kernel and initramfs in place
+	cp -avx ""$isoname"/livecd/boot/"$kernelname"" "$isoname/"
+	cp -avx ""$isoname"/livecd/boot/"$ramfsname"" "$isoname/"
+	# Squash live environment
+	mksquashfs ""$isoname"/livecd" ""$isoname"/livecd.squashfs" -b 1048576 -comp xz -Xdict-size 100%
+	umount "$coremnt"
 }
 
 main () {
