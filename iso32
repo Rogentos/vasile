@@ -17,14 +17,20 @@ makeisox86 () {
 	mkdir -p "$coremnt"
 	mkdir -p ""$isoname"/livecd"
 	mkdir -p ""$isoname"/boot"
+	mkdir -p ""$isoname"/boot/grub"
 	# Mount && Sync squashed core (Kogaion stage4) into live environment
 	mount -t squashfs "$chrootx86" "$coremnt"
 	rsync -aHAXr --progress "$coremnt/" ""$isoname"/livecd/"
 	# Put our kernel and initramfs in place
 	cp -avx ""$isoname"/livecd/boot/"$kernelname"" ""$isoname"/boot/"$releasename""
-	cp -avx ""$isoname"/livecd/boot/"$ramfsname"" ""$isoname"/boot/"$releasename.igz""
+	cp -avx ""$isoname"/livecd/boot/"$ramfsname"" ""$isoname"/boot/"$releasename".igz"
+	# Checksum the kernel && initramfs
+	sha256sum ""$isoname"/boot/"$releasename"" | tee ""$isoname"/boot/"$releasename".sha256"
+	sha256sum ""$isoname"/boot/"$releasename.igz"" | tee ""$isoname"/boot/"$releasename".igz.sha256"
 	# Squash live environment
 	mksquashfs ""$isoname"/livecd" ""$isoname"/livecd.squashfs" -b 1048576 -comp xz -Xdict-size 100%
+	# Checksum the live environment
+	sha256sum ""$isoname"/livecd.squashfs" | tee ""$isoname"/livecd.squashfs.sha256"
 	umount "$coremnt"
 }
 
