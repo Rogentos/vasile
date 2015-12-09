@@ -14,7 +14,7 @@ export local ramfsname="initramfs-genkernel-"$mainarch"-"$kernelver""
 
 makeisox86 () {
 	# ISO layout
-	mkdir -p "$tmpiso"
+	mkdir -p "$coremnt"
 	mkdir -p ""$isoname"/livecd"
 	mkdir -p ""$isoname"/boot"
 	# Mount && Sync squashed core (Kogaion stage4) into live environment
