@@ -21,8 +21,8 @@ makeisox64 () {
 	mount -t squashfs "$chrootx64" "$coremnt"
 	rsync -aHAXr --progress "$coremnt/" ""$isoname"/livecd/"
 	# Put our kernel and initramfs in place
-	cp -avx ""$isoname"/livecd/boot/"$kernelname"" "$isoname/"
-	cp -avx ""$isoname"/livecd/boot/"$ramfsname"" "$isoname/"
+	cp -avx ""$isoname"/livecd/boot/"$kernelname"" ""$isoname"/"$releasename""
+	cp -avx ""$isoname"/livecd/boot/"$ramfsname"" ""$isoname"/"$releasename.igz""
 	# Squash live environment
 	mksquashfs ""$isoname"/livecd" ""$isoname"/livecd.squashfs" -b 1048576 -comp xz -Xdict-size 100%
 	umount "$coremnt"
