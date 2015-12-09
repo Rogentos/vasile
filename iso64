@@ -33,6 +33,11 @@ makeisox64 () {
 	mksquashfs ""$isoname"/livecd" ""$isoname"/livecd.squashfs" -b 1048576 -comp xz -Xdict-size 100%
 	# Checksum the live environment
 	sha256sum ""$isoname"/livecd.squashfs" | tee ""$isoname"/livecd.squashfs.sha256"
+	# Remove live environment directory (we have it squashed now, no longer needed)
+	rm -rf ""$isoname"/livecd"
+	# Enable liveboot
+	touch ""$isoname"/livecd"
+	# Umount squashed core (Kogaion stage4)
 	umount "$coremnt"
 }
 
