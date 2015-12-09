@@ -7,15 +7,15 @@ checkroot
 
 export local mainarch="x86"
 export local isoname=""$releasename"-"$releaseversion"-"$mainarch""
+export local livedir=""$isoname"/livecd"
+export local isoboot=""$livedir"/boot/grub"
 export local kernelname="kernel-genkernel-"$mainarch"-"$kernelver""
 export local ramfsname="initramfs-genkernel-"$mainarch"-"$kernelver""
 
 makeisox86 () {
 	# ISO layout
 	mkdir -p "$coremnt"
-	mkdir -p ""$isoname"/livecd"
-	mkdir -p ""$isoname"/boot"
-	mkdir -p ""$isoname"/boot/grub"
+	mkdir -p "$isoboot"
 	# Mount && Sync squashed core (Kogaion stage4) into live environment
 	mount -t squashfs "$chrootx86" "$coremnt"
 	rsync -aHAXr --progress "$coremnt/" ""$isoname"/livecd/"
