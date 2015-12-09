@@ -1,4 +1,9 @@
-# arch agnostic code
+# generic variables
+export local releasename="kogaion"
+export local releaseversion="3"
+
+# arch independent build variables
+
 export local rodir="rodir"
 export local rwdir="rwdir"
 export local workdir="workdir" # only needed for overlayfs on kernel greather than 3.18
@@ -12,8 +17,8 @@ export local chrootbuildgit="cd /opt && git clone https://gitlab.com/kogaion/kog
 export local chrootportageconfig="ln -sf /opt/kogaion-build/conf/intel/portage /etc/portage"
 export local chrootenvupdate="/usr/sbin/env-update && . /etc/profile"
 export local chrootprofile="eselect profile set 1"
-export local releasename="kogaion"
-export local releaseversion="3"
+
+# generic arch independent functions (used for both build && iso creation)
 
 kernelconfig () {
 	if [[ $(zgrep 'CONFIG_OVERLAY_FS=' /proc/config.gz) && $(zgrep "CONFIG_SQUASHFS=" /proc/config.gz) &&  $(zgrep "CONFIG_BLK_DEV_LOOP=" /proc/config.gz) ]] ; then
@@ -39,23 +44,7 @@ checkroot () {
 	fi
 }
 
-chrootstop () {
-	umount -l "$overlaydir"/proc > /dev/null 2>&1
-	umount -l "$overlaydir"/sys > /dev/null 2>&1
-	umount -l "$overlaydir"/dev/pts > /dev/null 2>&1
-	umount -l "$overlaydir"/dev/shm > /dev/null 2>&1
-	umount -l "$overlaydir"/dev > /dev/null 2>&1
-	umount -l "$overlaydir"/tmp > /dev/null 2>&1
-	umount -l "$overlaydir"/usr/portage/packages > /dev/null 2>&1
-	umount -l "$overlaydir"/mnt > /dev/null 2>&1
-	umount -l "$overlaydir" > /dev/null 2>&1
-	umount -l "$rodir" > /dev/null 2>&1
-}
-
-# x64 specific code
-export local chrootx64=""$releasename"_"$releaseversion"_core_x64.squashfs"
-export local chrootx64md5=""$chrootx64".md5"
-export local chrootmakeconfx64="ln -sf /opt/kogaion-build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
+# generic x64 functions (used for both build && iso creation)
 
 chrootchecksumx64 () {
 	while : true ; do
@@ -77,6 +66,50 @@ chrootchecksumx64 () {
 		fi
 	done
 }
+
+chrootchecksumx86 () {
+	while : true ; do
+		if [[ -f "$chrootx86" && -f "$chrootx86md5" ]] ; then
+			echo "Good, x86 squashed chroot && checksum file FOUND ... verifying integrity"
+			echo ""
+			if [[ "$(md5sum -c "$chrootx86md5")" ]] ; then
+				echo "Good, x86 squashed chroot checksum PASSED ... starting environment"
+				echo ""
+				sleep 1
+				break
+			else
+				echo "Ooops, x86 squashed chroot checksum FAILED ... aborting"
+				exit 1
+			fi
+		else
+			echo "Ooops, x86 squashed chroot or checksum file NOT FOUND ... aborting"
+			exit 1
+		fi
+	done
+}
+
+# arch independent build functions
+
+chrootstop () {
+	umount -l "$overlaydir"/proc > /dev/null 2>&1
+	umount -l "$overlaydir"/sys > /dev/null 2>&1
+	umount -l "$overlaydir"/dev/pts > /dev/null 2>&1
+	umount -l "$overlaydir"/dev/shm > /dev/null 2>&1
+	umount -l "$overlaydir"/dev > /dev/null 2>&1
+	umount -l "$overlaydir"/tmp > /dev/null 2>&1
+	umount -l "$overlaydir"/usr/portage/packages > /dev/null 2>&1
+	umount -l "$overlaydir"/mnt > /dev/null 2>&1
+	umount -l "$overlaydir" > /dev/null 2>&1
+	umount -l "$rodir" > /dev/null 2>&1
+}
+
+# x64 specific build variables
+
+export local chrootx64=""$releasename"_"$releaseversion"_core_x64.squashfs"
+export local chrootx64md5=""$chrootx64".md5"
+export local chrootmakeconfx64="ln -sf /opt/kogaion-build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
+
+# x64 specific build functions
 
 chrootstartx64 () {
 	mount -t squashfs "$chrootx64" "$rodir"
@@ -158,31 +191,13 @@ chrootx64 () {
 	chroot "$overlaydir" su - "$chrootuser"
 }
 
-# x86 specific code
+# x86 specific build variables
+
 export local chrootx86=""$releasename"_"$releaseversion"_core_x86.squashfs"
 export local chrootx86md5=""$chrootx86".md5"
 export local chrootmakeconfx86="ln -sf /opt/kogaion-build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
 
-chrootchecksumx86 () {
-	while : true ; do
-		if [[ -f "$chrootx86" && -f "$chrootx86md5" ]] ; then
-			echo "Good, x86 squashed chroot && checksum file FOUND ... verifying integrity"
-			echo ""
-			if [[ "$(md5sum -c "$chrootx86md5")" ]] ; then
-				echo "Good, x86 squashed chroot checksum PASSED ... starting environment"
-				echo ""
-				sleep 1
-				break
-			else
-				echo "Ooops, x86 squashed chroot checksum FAILED ... aborting"
-				exit 1
-			fi
-		else
-			echo "Ooops, x86 squashed chroot or checksum file NOT FOUND ... aborting"
-			exit 1
-		fi
-	done
-}
+# x86 specific build functions
 
 chrootstartx86 () {
 	mount -t squashfs "$chrootx86" "$rodir"
