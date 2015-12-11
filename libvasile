@@ -124,10 +124,10 @@ chrootstartx64 () {
 chrootoverlaysx64 () {
 	echo "Injecting Kogaion Linux Main Overlay into x64 environment"
 	sleep 1
-	chroot "$overlaydir" su - "$chrootuser" -c "$chrootoverlay"
+	chroot "$overlaydir" su - "$chrootuser" -c "$chrootmainoverlay"
 	echo "Injecting Kogaion Linux Desktop Overlay into x64 environment"
 	sleep 1
-	chroot "$overlaydir" su - "$chrootuser" -c "$chrootdesktopoverlay"
+	chroot "$overlaydir" su - "$chrootuser" -c "$chrootaddonoverlay"
 }
 
 chrootbuildsystemx64 () {
@@ -206,10 +206,10 @@ chrootstartx86 () {
 chrootoverlaysx86 () {
 	echo "Injecting Kogaion Linux Main Overlay into x86 environment"
 	sleep 1
-	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootoverlay"
+	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootmainoverlay"
 	echo "Injecting Kogaion Linux Desktop Overlay into x86 environment"
 	sleep 1
-	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootdesktopoverlay"
+	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootaddonoverlay"
 }
 
 chrootbuildsystemx86 () {
