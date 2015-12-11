@@ -6,7 +6,7 @@ kernelconfig
 checkroot
 
 export local mainarch="x86"
-export local isoname=""$releasename"-"$releaseversion"-"$mainarch""
+export local isoname=""$releasename"-"$releasetarget"-"$releaseversion"-"$mainarch""
 export local coremnt="/tmp/"$isoname""
 export local livedir=""$isoname"/livecd"
 export local isoboot=""$isoname"/boot/grub"
