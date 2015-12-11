@@ -29,19 +29,19 @@ checkroot () {
 chrootchecksumx64 () {
 	while : true ; do
 		if [[ -f "$chrootx64" && -f "$chrootx64md5" ]] ; then
-			echo "Good, x64 squashed chroot && checksum file FOUND ... verifying integrity"
+			echo "good, x64 squashed chroot && checksum file found ... verifying integrity"
 			echo ""
 			if [[ "$(md5sum -c "$chrootx64md5")" ]] ; then
-				echo "Good, x64 squashed chroot checksum PASSED ... starting environment"
+				echo "good, x64 squashed chroot checksum passed ... starting environment"
 				echo ""
 				sleep 1
 				break
 			else
-				echo "Ooops, x64 squashed chroot checksum FAILED ... aborting"
+				echo "ooops, x64 squashed chroot checksum failed ... aborting"
 				exit 1
 			fi
 		else
-			echo "Ooops, x64 squashed chroot or checksum file NOT FOUND ... aborting"
+			echo "ooops, x64 squashed chroot or checksum file not found ... aborting"
 			exit 1
 		fi
 	done
@@ -50,19 +50,19 @@ chrootchecksumx64 () {
 chrootchecksumx86 () {
 	while : true ; do
 		if [[ -f "$chrootx86" && -f "$chrootx86md5" ]] ; then
-			echo "Good, x86 squashed chroot && checksum file FOUND ... verifying integrity"
+			echo "good, x86 squashed chroot && checksum file found ... verifying integrity"
 			echo ""
 			if [[ "$(md5sum -c "$chrootx86md5")" ]] ; then
-				echo "Good, x86 squashed chroot checksum PASSED ... starting environment"
+				echo "good, x86 squashed chroot checksum found ... starting environment"
 				echo ""
 				sleep 1
 				break
 			else
-				echo "Ooops, x86 squashed chroot checksum FAILED ... aborting"
+				echo "ooops, x86 squashed chroot checksum failed ... aborting"
 				exit 1
 			fi
 		else
-			echo "Ooops, x86 squashed chroot or checksum file NOT FOUND ... aborting"
+			echo "ooops, x86 squashed chroot or checksum file not found ... aborting"
 			exit 1
 		fi
 	done
@@ -122,16 +122,16 @@ chrootstartx64 () {
 }
 
 chrootoverlaysx64 () {
-	echo "Injecting Kogaion Linux Main Overlay into x64 environment"
+	echo "injecting "$releasename" main overlay into x64 environment"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootmainoverlay"
-	echo "Injecting Kogaion Linux Desktop Overlay into x64 environment"
+	echo "injecting "$releasename" "$releasetarget" overlay into x64 environment"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootaddonoverlay"
 }
 
 chrootbuildsystemx64 () {
-	echo "Injecting Kogaion Linux x64 Buildsystem && Setting up Portage && Setting up make.conf"
+	echo "injecting "$releasename" x64 buildsystem && setting up portage"
 	echo ""
 	sleep 1
 	for cmd in "$chrootbuildgit" "$chrootportageconfig" "$chrootmakeconfx64" "$chrootprofile" "$chrootenvupdate" ; do
@@ -141,7 +141,7 @@ chrootbuildsystemx64 () {
 
 chrootbuildx64 () {
 	echo ""
-	echo "x64 Environment is UP && RUNNING ... building targets"
+	echo "x64 Environment is up && running ... building targets"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildtarget"
 }
@@ -204,16 +204,16 @@ chrootstartx86 () {
 }
 
 chrootoverlaysx86 () {
-	echo "Injecting Kogaion Linux Main Overlay into x86 environment"
+	echo "injecting "$releasename" main overlay into x86 environment"
 	sleep 1
 	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootmainoverlay"
-	echo "Injecting Kogaion Linux Desktop Overlay into x86 environment"
+	echo "injecting "$releasename" "$releasetarget" overlay into x86 environment"
 	sleep 1
 	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootaddonoverlay"
 }
 
 chrootbuildsystemx86 () {
-	echo "Injecting Kogaion Linux x86 Buildsystem && Setting up Portage && Setting up make.conf"
+	echo "injecting "$releasename" x86 buildsystem && setting up portage"
 	echo ""
 	sleep 1
 	for cmd in "$chrootbuildgit" "$chrootportageconfig" "$chrootmakeconfx86" "$chrootprofile" "$chrootenvupdate" ; do
@@ -223,7 +223,7 @@ chrootbuildsystemx86 () {
 
 chrootbuildx86 () {
 	echo ""
-	echo "x86 Environment is UP && RUNNING ... building targets"
+	echo "x86 environment is up && running ... building targets"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildtarget"
 }

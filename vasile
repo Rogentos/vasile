@@ -7,6 +7,7 @@
 
 # generic variables
 export local releasename="kogaion"
+export local releasetarget="desktop"
 export local releaseversion="3"
 
 # arch independent build variables
@@ -19,7 +20,7 @@ export local chrootuser="root"
 export local chroottarget="${@:2}"
 export local chrootbuildtarget="emerge -kav "$chroottarget""
 export local chrootmainoverlay="layman -f -a "$releasename" -o https://gitlab.com/"$releasename"/"$releasename"-main/raw/master/overlay.xml"
-export local chrootaddonoverlay="layman -f -a "$releasename"-desktop -o https://gitlab.com/"$releasename"/"$releasename"-desktop/raw/master/overlay.xml"
+export local chrootaddonoverlay="layman -f -a "$releasename"-"$releasetarget" -o https://gitlab.com/"$releasename"/"$releasename"-"$releasetarget"/raw/master/overlay.xml"
 export local chrootbuildgit="cd /opt && git clone https://gitlab.com/"$releasename"/"$releasename"-build.git"
 export local chrootportageconfig="ln -sf /opt/"$releasename"-build/conf/intel/portage /etc/portage"
 export local chrootenvupdate="/usr/sbin/env-update && . /etc/profile"
