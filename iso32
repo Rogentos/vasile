@@ -27,7 +27,8 @@ makeisox86 () {
 }
 
 bootcorex86 () {
-	echo "injecting live bootloader configuration"
+	git clone https://gitlab.com/rogentos/boot-core.git "$bootcorepath"
+	cp -avx "$bootcorefiles" "$isonamex86"
 }
 
 cleanupisox86 () {

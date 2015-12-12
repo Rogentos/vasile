@@ -28,7 +28,8 @@ makeisox64 () {
 }
 
 bootcorex64 () {
-	echo "injecting live bootloader configuration"
+	git clone https://gitlab.com/rogentos/boot-core.git "$bootcorepath"
+	cp -avx "$bootcorefiles" "$isonamex64"
 }
 
 cleanupisox64 () {
