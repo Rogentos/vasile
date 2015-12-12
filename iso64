@@ -23,10 +23,17 @@ makeisox64 () {
 	mksquashfs "$livedirx64" ""$livedirx64".squashfs" -b 1048576 -comp xz -Xdict-size 100%
 	# Checksum the live environment
 	sha256sum ""$livedirx64".squashfs" | tee ""$livedirx64".squashfs.sha256"
-	# Remove live environment directory (we have it squashed now, no longer needed)
-	rm -rf "$livedirx64"
 	# Enable liveboot
 	touch "$livedirx64"
+}
+
+bootcorex64 () {
+	echo "injecting live bootloader configuration"
+}
+
+cleanupisox64 () {
+	# Remove live environment directory (we have it squashed now, no longer needed)
+	rm -rf "$livedirx64"
 	# Umount squashed core (Kogaion stage4)
 	umount "$coremntx64"
 }
@@ -34,6 +41,8 @@ makeisox64 () {
 main () {
 	chrootchecksumx64
 	makeisox64
+	bootcorex64
+	cleanupisox64
 }
 
 main
