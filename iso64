@@ -5,39 +5,30 @@
 kernelconfig
 checkroot
 
-export local mainarch="x86_64"
-export local isoname=""$releasename"-"$releasetarget"-"$releaseversion"-"$mainarch""
-export local coremnt="/tmp/"$isoname""
-export local livedir=""$isoname"/livecd"
-export local isoboot=""$isoname"/boot/grub"
-export local isoefiboot=""$isoname"/efi/boot"
-export local kernelname="kernel-genkernel-"$mainarch"-"$kernelver""
-export local ramfsname="initramfs-genkernel-"$mainarch"-"$kernelver""
-
 makeisox64 () {
 	# ISO layout
-	mkdir -p "$coremnt"
-	mkdir -p "$isoboot"
-	mkdir -p "$isoefiboot"
+	mkdir -p "$coremntx64"
+	mkdir -p "$isobootx64"
+	mkdir -p "$isoefibootx64"
 	# Mount && Sync squashed core (Kogaion stage4) into live environment
-	mount -t squashfs "$chrootx64" "$coremnt"
-	rsync -aHAXr --progress "$coremnt/" "$livedir/"
+	mount -t squashfs "$chrootx64" "$coremntx64"
+	rsync -aHAXr --progress "$coremntx64/" "$livedirx64/"
 	# Put our kernel and initramfs in place
-	cp -avx ""$livedir"/boot/"$kernelname"" ""$isoname"/boot/"$releasename""
-	cp -avx ""$livedir"/boot/"$ramfsname"" ""$isoname"/boot/"$releasename".igz"
+	cp -avx ""$livedirx64"/boot/"$kernelnamex64"" ""$isonamex64"/boot/"$releasename""
+	cp -avx ""$livedirx64"/boot/"$ramfsnamex64"" ""$isonamex64"/boot/"$releasename".igz"
 	# Checksum the kernel && initramfs
-	sha256sum ""$isoname"/boot/"$releasename"" | tee ""$isoname"/boot/"$releasename".sha256"
-	sha256sum ""$isoname"/boot/"$releasename.igz"" | tee ""$isoname"/boot/"$releasename".igz.sha256"
+	sha256sum ""$isonamex64"/boot/"$releasename"" | tee ""$isonamex64"/boot/"$releasename".sha256"
+	sha256sum ""$isonamex64"/boot/"$releasename.igz"" | tee ""$isonamex64"/boot/"$releasename".igz.sha256"
 	# Squash live environment
-	mksquashfs "$livedir" ""$livedir".squashfs" -b 1048576 -comp xz -Xdict-size 100%
+	mksquashfs "$livedirx64" ""$livedirx64".squashfs" -b 1048576 -comp xz -Xdict-size 100%
 	# Checksum the live environment
-	sha256sum ""$livedir".squashfs" | tee ""$livedir".squashfs.sha256"
+	sha256sum ""$livedirx64".squashfs" | tee ""$livedirx64".squashfs.sha256"
 	# Remove live environment directory (we have it squashed now, no longer needed)
-	rm -rf "$livedir"
+	rm -rf "$livedirx64"
 	# Enable liveboot
-	touch "$livedir"
+	touch "$livedirx64"
 	# Umount squashed core (Kogaion stage4)
-	umount "$coremnt"
+	umount "$coremntx64"
 }
 
 main () {

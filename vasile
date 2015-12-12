@@ -42,6 +42,26 @@ export local chrootx86=""$releasename"_"$releaseversion"_core_x86.squashfs"
 export local chrootx86md5=""$chrootx86".md5"
 export local chrootmakeconfx86="ln -sf /opt/"$releasename"-build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
 
+# x64 specific iso variables
+
+export local mainarchx64="x86_64"
+export local isonamex64=""$releasename"-"$releasetarget"-"$releaseversion"-"$mainarchx64""
+export local kernelnamex64="kernel-genkernel-"$mainarchx64"-"$kernelver""
+export local ramfsnamex64="initramfs-genkernel-"$mainarchx64"-"$kernelver""
+export local coremntx64="/tmp/"$isonamex64""
+export local livedirx64=""$isonamex64"/livecd"
+export local isobootx64=""$isonamex64"/boot/grub"
+export local isoefibootx64=""$isonamex64"/efi/boot"
+
+# x86 specific iso variables
+
+export local mainarchx86="x86"
+export local isonamex86=""$releasename"-"$releasetarget"-"$releaseversion"-"$mainarchx86""
+export local kernelnamex86="kernel-genkernel-"$mainarchx86"-"$kernelver""
+export local ramfsnamex86="initramfs-genkernel-"$mainarchx86"-"$kernelver""
+export local coremntx86="/tmp/"$isonamex86""
+export local livedirx86=""$isonamex86"/livecd"
+export local isobootx86=""$isonamex86"/boot/grub"
 
 source /usr/lib/vasile/libvasile
 
