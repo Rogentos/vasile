@@ -6,23 +6,16 @@ kernelconfig
 checkroot
 
 makeisox86 () {
-	# ISO layout
 	mkdir -p "$coremntx86"
 	mkdir -p "$isobootx86"
-	# Mount && Sync squashed core (Kogaion stage4) into live environment
 	mount -t squashfs "$chrootx86" "$coremntx86"
 	rsync -aHAXr --progress "$coremntx86/" "$livedirx86/"
-	# Put our kernel and initramfs in place
 	cp -avx ""$livedirx86"/boot/"$kernelnamex86"" ""$isonamex86"/boot/"$releasename""
 	cp -avx ""$livedirx86"/boot/"$ramfsnamex86"" ""$isonamex86"/boot/"$releasename".igz"
-	# Checksum the kernel && initramfs
 	sha256sum ""$isonamex86"/boot/"$releasename"" | tee ""$isonamex86"/boot/"$releasename".sha256"
 	sha256sum ""$isonamex86"/boot/"$releasename.igz"" | tee ""$isonamex86"/boot/"$releasename".igz.sha256"
-	# Squash live environment
 	mksquashfs "$livedirx86" ""$livedirx86".squashfs" -b 1048576 -comp xz -Xdict-size 100%
-	# Checksum the live environment
 	sha256sum ""$livedirx86".squashfs" | tee ""$livedirx86".squashfs.sha256"
-	# Enable liveboot
 	touch "$livedirx86"
 }
 
@@ -32,9 +25,8 @@ bootcorex86 () {
 }
 
 cleanupisox86 () {
-	# Remove live environment directory (we have it squashed now, no longer needed)
 	rm -rf "$livedirx86"
-	# Umount squashed core (Kogaion stage4)
+	rm -rf "$bootcorepath"
 	umount "$coremntx86"
 }
 
