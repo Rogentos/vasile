@@ -30,7 +30,7 @@ export local chrootprofile="eselect profile set 1"
 
 export local kernelver="3.14.0-"$releasename""
 export local bootcorepath="/tmp/bootcore"
-export local bootcorefiles="/tmp/bootcore/cdroot/*"
+export local bootcorefiles="/tmp/bootcore/cdroot/boot"
 
 # x64 specific build variables
 
