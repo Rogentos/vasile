@@ -246,3 +246,83 @@ chrootx86 () {
 	echo -e ""
 	linux32 chroot "$overlaydir" su - "$chrootuser"
 }
+
+# x64 specific iso functions
+
+isostartx64 () {
+	mount -o bind packages "$livedirx64"/usr/portage/packages
+	mount -o bind targets "$livedirx64"/mnt
+	mount -t proc proc "$livedirx64"/proc
+	mount -t sysfs sysfs "$livedirx64"/sys
+	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$livedirx64"/dev
+	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$livedirx64"/dev/pts
+	mount -t tmpfs -o nosuid,nodev none "$livedirx64"/dev/shm
+	mount -t tmpfs -o nosuid,nodev,noexec none  "$livedirx64"/tmp
+}
+
+isooverlaysx64 () {
+	echo "injecting "$releasename" main overlay into x64 environment"
+	sleep 1
+	chroot "$livedirx64" su - "$isouser" -c "$isomainoverlay"
+	echo "injecting "$releasename" "$releasetarget" overlay into x64 environment"
+	sleep 1
+	chroot "$livedirx64" su - "$isouser" -c "$isoaddonoverlay"
+}
+
+isobuildsystemx64 () {
+	echo "injecting "$releasename" x64 buildsystem && setting up portage"
+	echo ""
+	sleep 1
+	for cmd in "$isobuildgit" "$isoportageconfig" "$isomakeconfx64" "$isoprofile" "$isoenvupdate" ; do
+		chroot "$livedirx64" su - "$isouser" -c "$cmd"
+	done
+}
+
+isochrootx64 () {
+	echo -e ""
+	echo -e "DROPPING YOU TO A ROOT SHELL INTO ISO ENVIRONMENT"
+	echo -e "INSTALL APPS & TARGETS & DES YOU WANT INSIDE ISO"
+	echo -e "EXIT WHEN YOU'RE DONE AND I'LL CREATE THE IMAGE"
+	echo -e ""
+	chroot "$livedirx64" su - "$isouser"
+}
+
+# x86 specific iso functions
+
+isostartx86 () {
+	mount -o bind packages "$livedirx86"/usr/portage/packages
+	mount -o bind targets "$livedirx86"/mnt
+	mount -t proc proc "$livedirx86"/proc
+	mount -t sysfs sysfs "$livedirx86"/sys
+	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$livedirx86"/dev
+	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$livedirx86"/dev/pts
+	mount -t tmpfs -o nosuid,nodev none "$livedirx86"/dev/shm
+	mount -t tmpfs -o nosuid,nodev,noexec none  "$livedirx86"/tmp
+}
+
+isooverlaysx86 () {
+	echo "injecting "$releasename" main overlay into x86 environment"
+	sleep 1
+	linux32 chroot "$livedirx86" su - "$isouser" -c "$isomainoverlay"
+	echo "injecting "$releasename" "$releasetarget" overlay into x86 environment"
+	sleep 1
+	linux32 chroot "$livedirx86" su - "$isouser" -c "$isoaddonoverlay"
+}
+
+isobuildsystemx86 () {
+	echo "injecting "$releasename" x86 buildsystem && setting up portage"
+	echo ""
+	sleep 1
+	for cmd in "$isobuildgit" "$isoportageconfig" "$isomakeconfx86" "$isoprofile" "$isoenvupdate" ; do
+		linux32 chroot "$livedirx86" su - "$isouser" -c "$cmd"
+	done
+}
+
+isochrootx86 () {
+	echo -e ""
+	echo -e "DROPPING YOU TO A ROOT SHELL INTO ISO ENVIRONMENT"
+	echo -e "INSTALL APPS & TARGETS & DES YOU WANT INSIDE ISO"
+	echo -e "EXIT WHEN YOU'RE DONE AND I'LL CREATE THE IMAGE"
+	echo -e ""
+	linux32 chroot "$livedirx86" su - "$isouser"
+}
