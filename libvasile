@@ -260,6 +260,17 @@ isostartx64 () {
 	mount -t tmpfs -o nosuid,nodev,noexec none  "$livedirx64"/tmp
 }
 
+isostopx64 () {
+	umount -l "$livedirx64"/proc > /dev/null 2>&1
+	umount -l "$livedirx64"/sys > /dev/null 2>&1
+	umount -l "$livedirx64"/dev/pts > /dev/null 2>&1
+	umount -l "$livedirx64"/dev/shm > /dev/null 2>&1
+	umount -l "$livedirx64"/dev > /dev/null 2>&1
+	umount -l "$livedirx64"/tmp > /dev/null 2>&1
+	umount -l "$livedirx64"/usr/portage/packages > /dev/null 2>&1
+	umount -l "$livedirx64"/mnt > /dev/null 2>&1
+}
+
 isooverlaysx64 () {
 	echo "injecting "$releasename" main overlay into x64 environment"
 	sleep 1
@@ -298,6 +309,17 @@ isostartx86 () {
 	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$livedirx86"/dev/pts
 	mount -t tmpfs -o nosuid,nodev none "$livedirx86"/dev/shm
 	mount -t tmpfs -o nosuid,nodev,noexec none  "$livedirx86"/tmp
+}
+
+isostopx86 () {
+	umount -l "$livedirx86"/proc > /dev/null 2>&1
+	umount -l "$livedirx86"/sys > /dev/null 2>&1
+	umount -l "$livedirx86"/dev/pts > /dev/null 2>&1
+	umount -l "$livedirx86"/dev/shm > /dev/null 2>&1
+	umount -l "$livedirx86"/dev > /dev/null 2>&1
+	umount -l "$livedirx86"/tmp > /dev/null 2>&1
+	umount -l "$livedirx86"/usr/portage/packages > /dev/null 2>&1
+	umount -l "$livedirx86"/mnt > /dev/null 2>&1
 }
 
 isooverlaysx86 () {
