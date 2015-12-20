@@ -6,20 +6,31 @@ kernelconfig
 checkroot
 
 makeisox86 () {
+	# create live iso layout
 	mkdir -p "$coremntx86"
 	mkdir -p "$isobootx86"
+	# mount && copy our core stage 4 image
 	mount -t squashfs "$chrootx86" "$coremntx86"
 	rsync -aHAXr --progress "$coremntx86/" "$livedirx86/"
 	cp -avx ""$livedirx86"/boot/"$kernelnamex86"" ""$isonamex86"/boot/vmlinuz"
 	cp -avx ""$livedirx86"/boot/"$ramfsnamex86"" ""$isonamex86"/boot/initrd"
 	sha256sum ""$isonamex86"/boot/vmlinuz" | tee ""$isonamex86"/boot/vmlinuz.sha256"
 	sha256sum ""$isonamex86"/boot/initrd" | tee ""$isonamex86"/boot/initrd.sha256"
+	# configure portage && give up control for package / desktop environment installation
+	isostartx86
+	isooverlaysx86
+	isobuildsystemx86
+	isochrootx86
+	isostopx86
+	# squash live environment
 	mksquashfs "$livedirx86" ""$livedirx86".squashfs" -b 1048576 -comp xz -Xdict-size 100%
 	sha256sum ""$livedirx86".squashfs" | tee ""$livedirx86".squashfs.sha256"
+	# enable live boot
 	touch "$livedirx86"
 }
 
 bootcorex86 () {
+	# configure live bootloader
 	git clone https://gitlab.com/rogentos/boot-core.git "$bootcorepath"
 	cp -avx "$bootcorefiles" "$isonamex86"
 }

@@ -6,21 +6,33 @@ kernelconfig
 checkroot
 
 makeisox64 () {
+	# create live iso layout
 	mkdir -p "$coremntx64"
 	mkdir -p "$isobootx64"
 	mkdir -p "$isoefibootx64"
+	# mount && copy our core stage 4 image
 	mount -t squashfs "$chrootx64" "$coremntx64"
 	rsync -aHAXr --progress "$coremntx64/" "$livedirx64/"
+	# copy our kernel
 	cp -avx ""$livedirx64"/boot/"$kernelnamex64"" ""$isonamex64"/boot/vmlinuz"
 	cp -avx ""$livedirx64"/boot/"$ramfsnamex64"" ""$isonamex64"/boot/initrd"
 	sha256sum ""$isonamex64"/boot/vmlinuz" | tee ""$isonamex64"/boot/vmlinuz.sha256"
 	sha256sum ""$isonamex64"/boot/initrd" | tee ""$isonamex64"/boot/initrd.sha256"
+	# configure portage && give up control for package / desktop environment installation
+	isostartx64
+	isooverlaysx64
+	isobuildsystemx64
+	isochrootx64
+	isostopx64
+	# squash live environment
 	mksquashfs "$livedirx64" ""$livedirx64".squashfs" -b 1048576 -comp xz -Xdict-size 100%
 	sha256sum ""$livedirx64".squashfs" | tee ""$livedirx64".squashfs.sha256"
+	# enable live boot
 	touch "$livedirx64"
 }
 
 bootcorex64 () {
+	# configure live bootloader
 	git clone https://gitlab.com/rogentos/boot-core.git "$bootcorepath"
 	cp -avx "$bootcorefiles" "$isonamex64"
 }
