@@ -28,7 +28,7 @@ makeisox64 () {
 	mksquashfs "$livedirx64" ""$livedirx64".squashfs" -b 1048576 -comp xz -Xdict-size 100%
 	sha256sum ""$livedirx64".squashfs" | tee ""$livedirx64".squashfs.sha256"
 	# enable live boot
-	touch "$livedirx64"
+	touch ""$isonamex64"/livecd"
 }
 
 bootcorex64 () {

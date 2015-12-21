@@ -26,7 +26,7 @@ makeisox86 () {
 	mksquashfs "$livedirx86" ""$livedirx86".squashfs" -b 1048576 -comp xz -Xdict-size 100%
 	sha256sum ""$livedirx86".squashfs" | tee ""$livedirx86".squashfs.sha256"
 	# enable live boot
-	touch "$livedirx86"
+	touch ""$isonamex86"/livecd"
 }
 
 bootcorex86 () {
