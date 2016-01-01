@@ -289,6 +289,12 @@ isobuildsystemx64 () {
 	done
 }
 
+isoramfsx64 () {
+	echo "generating live initramfs"
+	echo ""
+	chroot "$livedirx64" su - "$isouser" -c "$isoramfs"
+}
+
 isochrootx64 () {
 	echo -e ""
 	echo -e "DROPPING YOU TO A ROOT SHELL INTO ISO ENVIRONMENT"
@@ -338,6 +344,12 @@ isobuildsystemx86 () {
 	for cmd in "$isobuildgit" "$isoportageconfig" "$isomakeconfx86" "$isoprofile" "$isoenvupdate" ; do
 		linux32 chroot "$livedirx86" su - "$isouser" -c "$cmd"
 	done
+}
+
+isoramfsx86 () {
+	echo "generating live initramfs"
+	echo ""
+	linux32 chroot "$livedirx86" su - "$isouser" -c "$isoramfs"
 }
 
 isochrootx86 () {

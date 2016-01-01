@@ -40,6 +40,8 @@ export local isobuildgit="cd /opt && git clone https://gitlab.com/"$releasename"
 export local isoportageconfig="ln -sf /opt/"$releasename"-build/conf/intel/portage /etc/portage"
 export local isoenvupdate="/usr/sbin/env-update && . /etc/profile"
 export local isoprofile="eselect profile set 1"
+export local isoramfs="dracut --no-hostonly --add "dmsquash-live pollcdrom" --kver "$kernelver""
+export local ramfsname="initramfs-"$kernelver".img"
 
 # x64 specific build variables
 
@@ -59,9 +61,9 @@ export local mainarchx64="x86_64"
 export local isomakeconfx64="ln -sf /opt/"$releasename"-build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
 export local isonamex64=""$releasename"-"$releasetarget"-"$releaseversion"-"$mainarchx64""
 export local kernelnamex64="kernel-genkernel-"$mainarchx64"-"$kernelver""
-export local ramfsnamex64="initramfs-genkernel-"$mainarchx64"-"$kernelver""
 export local coremntx64="/tmp/"$isonamex64""
-export local livedirx64=""$isonamex64"/livecd"
+export local liverootfsx64=""$isonamex64"/CDroot/LiveOS"
+export local syncdirx64=""$isonamex64"/rootfs"
 export local isobootx64=""$isonamex64"/boot/grub"
 export local isoefibootx64=""$isonamex64"/efi/boot"
 
@@ -71,9 +73,9 @@ export local mainarchx86="x86"
 export local isomakeconfx86="ln -sf /opt/"$releasename"-build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
 export local isonamex86=""$releasename"-"$releasetarget"-"$releaseversion"-"$mainarchx86""
 export local kernelnamex86="kernel-genkernel-"$mainarchx86"-"$kernelver""
-export local ramfsnamex86="initramfs-genkernel-"$mainarchx86"-"$kernelver""
 export local coremntx86="/tmp/"$isonamex86""
-export local livedirx86=""$isonamex86"/livecd"
+export local liverootfsx86=""$isonamex86"/CDroot/LiveOS"
+export local syncdirx86=""$isonamex86"/rootfs"
 export local isobootx86=""$isonamex86"/boot/grub"
 
 source /usr/lib/vasile/libvasile
