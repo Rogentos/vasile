@@ -14,11 +14,8 @@ makeisox64 () {
 	# mount && copy our core stage 4 image
 	mount -t squashfs "$chrootx64" "$isostagingx64"
 	rsync -aHAXr --progress "$isostagingdirx64/" "$isosyncdirx64/"
-	# copy our kernel
 	cp -avx ""$isosyncdirx64"/boot/"$isokernelnamex64"" ""$isorootdirx64"/boot/vmlinuz"
-	cp -avx ""$isosyncdirx64"/boot/"$isoramfsname"" ""$isorootdirx64"/boot/initrd"
 	sha256sum ""$isorootdirx64"/boot/vmlinuz" | tee ""$isorootdirx64"/boot/vmlinuz.sha256"
-	sha256sum ""$isorootdirx64"/boot/initrd" | tee ""$isorootdirx64"/boot/initrd.sha256"
 	# configure portage && give up control for package / desktop environment installation
 	isostartx64
 	isooverlaysx64
