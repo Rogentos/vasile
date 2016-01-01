@@ -10,12 +10,13 @@ makeisox64 () {
 	mkdir -p "$coremntx64"
 	mkdir -p "$isobootx64"
 	mkdir -p "$isoefibootx64"
+	mkdir -p "$liverootfsx64"
 	# mount && copy our core stage 4 image
 	mount -t squashfs "$chrootx64" "$coremntx64"
-	rsync -aHAXr --progress "$coremntx64/" "$livedirx64/"
+	rsync -aHAXr --progress "$coremntx64/" "$syncdirx64/"
 	# copy our kernel
-	cp -avx ""$livedirx64"/boot/"$kernelnamex64"" ""$isonamex64"/boot/vmlinuz"
-	cp -avx ""$livedirx64"/boot/"$ramfsnamex64"" ""$isonamex64"/boot/initrd"
+	cp -avx ""$syncdirx64"/boot/"$kernelnamex64"" ""$isonamex64"/boot/vmlinuz"
+	cp -avx ""$syncdirx64"/boot/"$ramfsnamex64"" ""$isonamex64"/boot/initrd"
 	sha256sum ""$isonamex64"/boot/vmlinuz" | tee ""$isonamex64"/boot/vmlinuz.sha256"
 	sha256sum ""$isonamex64"/boot/initrd" | tee ""$isonamex64"/boot/initrd.sha256"
 	# configure portage && give up control for package / desktop environment installation
@@ -25,10 +26,8 @@ makeisox64 () {
 	isochrootx64
 	isostopx64
 	# squash live environment
-	mksquashfs "$livedirx64" ""$livedirx64".squashfs" -b 1048576 -comp xz -Xdict-size 100%
-	sha256sum ""$livedirx64".squashfs" | tee ""$livedirx64".squashfs.sha256"
-	# enable live boot
-	touch ""$isonamex64"/livecd"
+	mksquashfs "$syncdirx64" ""$syncdirx64".img" -b 1048576 -comp xz -Xdict-size 100%
+	sha256sum ""$syncdirx64".img" | tee ""$syncdirx64".img.sha256"
 }
 
 bootcorex64 () {
@@ -38,7 +37,7 @@ bootcorex64 () {
 }
 
 cleanupisox64 () {
-	rm -rf "$livedirx64"
+	rm -rf "$syncdirx64"
 	rm -rf "$bootcorepath"
 	umount "$coremntx64"
 }

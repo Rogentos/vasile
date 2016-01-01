@@ -9,11 +9,12 @@ makeisox86 () {
 	# create live iso layout
 	mkdir -p "$coremntx86"
 	mkdir -p "$isobootx86"
+	mkdir -p "$liverootfsx86"
 	# mount && copy our core stage 4 image
 	mount -t squashfs "$chrootx86" "$coremntx86"
-	rsync -aHAXr --progress "$coremntx86/" "$livedirx86/"
-	cp -avx ""$livedirx86"/boot/"$kernelnamex86"" ""$isonamex86"/boot/vmlinuz"
-	cp -avx ""$livedirx86"/boot/"$ramfsnamex86"" ""$isonamex86"/boot/initrd"
+	rsync -aHAXr --progress "$coremntx86/" "$syncdirx86/"
+	cp -avx ""$syncdirx86"/boot/"$kernelnamex86"" ""$isonamex86"/boot/vmlinuz"
+	cp -avx ""$syncdirx86"/boot/"$ramfsnamex86"" ""$isonamex86"/boot/initrd"
 	sha256sum ""$isonamex86"/boot/vmlinuz" | tee ""$isonamex86"/boot/vmlinuz.sha256"
 	sha256sum ""$isonamex86"/boot/initrd" | tee ""$isonamex86"/boot/initrd.sha256"
 	# configure portage && give up control for package / desktop environment installation
@@ -23,10 +24,8 @@ makeisox86 () {
 	isochrootx86
 	isostopx86
 	# squash live environment
-	mksquashfs "$livedirx86" ""$livedirx86".squashfs" -b 1048576 -comp xz -Xdict-size 100%
-	sha256sum ""$livedirx86".squashfs" | tee ""$livedirx86".squashfs.sha256"
-	# enable live boot
-	touch ""$isonamex86"/livecd"
+	mksquashfs "$syncdirx86" ""$syncdirx86".img" -b 1048576 -comp xz -Xdict-size 100%
+	sha256sum ""$syncdirx86".img" | tee ""$syncdirx86".img.sha256"
 }
 
 bootcorex86 () {
@@ -36,7 +35,7 @@ bootcorex86 () {
 }
 
 cleanupisox86 () {
-	rm -rf "$livedirx86"
+	rm -rf "$syncdirx86"
 	rm -rf "$bootcorepath"
 	umount "$coremntx86"
 }
