@@ -7,18 +7,18 @@ checkroot
 
 makeisox64 () {
 	# create live iso layout
-	mkdir -p "$coremntx64"
-	mkdir -p "$isobootx64"
-	mkdir -p "$isoefibootx64"
-	mkdir -p "$liverootfsx64"
+	mkdir -p "$isostagingdirx64"
+	mkdir -p "$isobootdirx64"
+	mkdir -p "$isoefibootdirx64"
+	mkdir -p "$isosupersquashdirx64"
 	# mount && copy our core stage 4 image
-	mount -t squashfs "$chrootx64" "$coremntx64"
-	rsync -aHAXr --progress "$coremntx64/" "$syncdirx64/"
+	mount -t squashfs "$chrootx64" "$isostagingx64"
+	rsync -aHAXr --progress "$isostagingdirx64/" "$isosyncdirx64/"
 	# copy our kernel
-	cp -avx ""$syncdirx64"/boot/"$kernelnamex64"" ""$isonamex64"/boot/vmlinuz"
-	cp -avx ""$syncdirx64"/boot/"$ramfsnamex64"" ""$isonamex64"/boot/initrd"
-	sha256sum ""$isonamex64"/boot/vmlinuz" | tee ""$isonamex64"/boot/vmlinuz.sha256"
-	sha256sum ""$isonamex64"/boot/initrd" | tee ""$isonamex64"/boot/initrd.sha256"
+	cp -avx ""$isosyncdirx64"/boot/"$isokernelnamex64"" ""$isorootdirx64"/boot/vmlinuz"
+	cp -avx ""$isosyncdirx64"/boot/"$isoramfsname"" ""$isorootdirx64"/boot/initrd"
+	sha256sum ""$isorootdirx64"/boot/vmlinuz" | tee ""$isorootdirx64"/boot/vmlinuz.sha256"
+	sha256sum ""$isorootdirx64"/boot/initrd" | tee ""$isorootdirx64"/boot/initrd.sha256"
 	# configure portage && give up control for package / desktop environment installation
 	isostartx64
 	isooverlaysx64
@@ -26,20 +26,20 @@ makeisox64 () {
 	isochrootx64
 	isostopx64
 	# squash live environment
-	mksquashfs "$syncdirx64" ""$syncdirx64".img" -b 1048576 -comp xz -Xdict-size 100%
-	sha256sum ""$syncdirx64".img" | tee ""$syncdirx64".img.sha256"
+	mksquashfs "$isosyncdirx64" ""$isosyncdirx64".img" -b 1048576 -comp xz -Xdict-size 100%
+	sha256sum ""$isosyncdirx64".img" | tee ""$isosyncdirx64".img.sha256"
 }
 
 bootcorex64 () {
 	# configure live bootloader
 	git clone https://gitlab.com/rogentos/boot-core.git "$bootcorepath"
-	cp -avx "$bootcorefiles" "$isonamex64"
+	cp -avx "$bootcorefiles" "$isorootdirx64"
 }
 
 cleanupisox64 () {
-	rm -rf "$syncdirx64"
+	rm -rf "$isosyncdirx64"
 	rm -rf "$bootcorepath"
-	umount "$coremntx64"
+	umount "$isostagingdirx64"
 }
 
 main () {

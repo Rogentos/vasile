@@ -41,7 +41,7 @@ export local isoportageconfig="ln -sf /opt/"$releasename"-build/conf/intel/porta
 export local isoenvupdate="/usr/sbin/env-update && . /etc/profile"
 export local isoprofile="eselect profile set 1"
 export local isoramfs="dracut --no-hostonly --add "dmsquash-live pollcdrom" --kver "$kernelver""
-export local ramfsname="initramfs-"$kernelver".img"
+export local isoramfsname="initramfs-"$kernelver".img"
 
 # x64 specific build variables
 
@@ -57,26 +57,26 @@ export local chrootmakeconfx86="ln -sf /opt/"$releasename"-build/conf/intel/port
 
 # x64 specific iso variables
 
-export local mainarchx64="x86_64"
+export local isomainarchx64="x86_64"
 export local isomakeconfx64="ln -sf /opt/"$releasename"-build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
-export local isonamex64=""$releasename"-"$releasetarget"-"$releaseversion"-"$mainarchx64""
-export local kernelnamex64="kernel-genkernel-"$mainarchx64"-"$kernelver""
-export local coremntx64="/tmp/"$isonamex64""
-export local liverootfsx64=""$isonamex64"/CDroot/LiveOS"
-export local syncdirx64=""$isonamex64"/rootfs"
-export local isobootx64=""$isonamex64"/boot/grub"
-export local isoefibootx64=""$isonamex64"/efi/boot"
+export local isorootdirx64=""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarchx64""
+export local isokernelnamex64="kernel-genkernel-"$isomainarchx64"-"$kernelver""
+export local isostagingdirx64="/tmp/"$isorootdirx64""
+export local isosupersquashdirx64=""$isorootdirx64"/CDroot/LiveOS"
+export local isosyncdirx64=""$isorootdirx64"/rootfs"
+export local isobootdirx64=""$isorootdirx64"/boot/grub"
+export local isoefibootdirx64=""$isorootdirx64"/efi/boot"
 
 # x86 specific iso variables
 
-export local mainarchx86="x86"
+export local isomainarchx86="x86"
 export local isomakeconfx86="ln -sf /opt/"$releasename"-build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
-export local isonamex86=""$releasename"-"$releasetarget"-"$releaseversion"-"$mainarchx86""
-export local kernelnamex86="kernel-genkernel-"$mainarchx86"-"$kernelver""
-export local coremntx86="/tmp/"$isonamex86""
-export local liverootfsx86=""$isonamex86"/CDroot/LiveOS"
-export local syncdirx86=""$isonamex86"/rootfs"
-export local isobootx86=""$isonamex86"/boot/grub"
+export local isorootdirx86=""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarchx86""
+export local isokernelnamex86="kernel-genkernel-"$isomainarchx86"-"$kernelver""
+export local isostagingdirx86="/tmp/"$isorootdirx86""
+export local isosupersquashdirx86=""$isorootdirx86"/CDroot/LiveOS"
+export local isosyncdirx86=""$isorootdirx86"/rootfs"
+export local isobootdirx86=""$isorootdirx86"/boot/grub"
 
 source /usr/lib/vasile/libvasile
 

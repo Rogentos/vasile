@@ -7,16 +7,14 @@ checkroot
 
 makeisox86 () {
 	# create live iso layout
-	mkdir -p "$coremntx86"
-	mkdir -p "$isobootx86"
-	mkdir -p "$liverootfsx86"
+	mkdir -p "$isostagingdirx86"
+	mkdir -p "$isobootdirx86"
+	mkdir -p "$isosupersquashdirx86"
 	# mount && copy our core stage 4 image
-	mount -t squashfs "$chrootx86" "$coremntx86"
-	rsync -aHAXr --progress "$coremntx86/" "$syncdirx86/"
-	cp -avx ""$syncdirx86"/boot/"$kernelnamex86"" ""$isonamex86"/boot/vmlinuz"
-	cp -avx ""$syncdirx86"/boot/"$ramfsnamex86"" ""$isonamex86"/boot/initrd"
-	sha256sum ""$isonamex86"/boot/vmlinuz" | tee ""$isonamex86"/boot/vmlinuz.sha256"
-	sha256sum ""$isonamex86"/boot/initrd" | tee ""$isonamex86"/boot/initrd.sha256"
+	mount -t squashfs "$chrootx86" "$isostagingdirx86"
+	rsync -aHAXr --progress "$isostagingx86/" "$isosyncdirx86/"
+	cp -avx ""$isosyncdirx86"/boot/"$isokernelnamex86"" ""$isorootdirx86"/boot/vmlinuz"
+	sha256sum ""$isorootdirx86"/boot/vmlinuz" | tee ""$isorootdirx86"/boot/vmlinuz.sha256"
 	# configure portage && give up control for package / desktop environment installation
 	isostartx86
 	isooverlaysx86
@@ -24,20 +22,20 @@ makeisox86 () {
 	isochrootx86
 	isostopx86
 	# squash live environment
-	mksquashfs "$syncdirx86" ""$syncdirx86".img" -b 1048576 -comp xz -Xdict-size 100%
-	sha256sum ""$syncdirx86".img" | tee ""$syncdirx86".img.sha256"
+	mksquashfs "$isosyncdirx86" ""$isosyncdirx86".img" -b 1048576 -comp xz -Xdict-size 100%
+	sha256sum ""$isosyncdirx86".img" | tee ""$isosyncdirx86".img.sha256"
 }
 
 bootcorex86 () {
 	# configure live bootloader
 	git clone https://gitlab.com/rogentos/boot-core.git "$bootcorepath"
-	cp -avx "$bootcorefiles" "$isonamex86"
+	cp -avx "$bootcorefiles" "$isorootdirx86"
 }
 
 cleanupisox86 () {
-	rm -rf "$syncdirx86"
+	rm -rf "$isosyncdirx86"
 	rm -rf "$bootcorepath"
-	umount "$coremntx86"
+	umount "$isostagingdirx86"
 }
 
 main () {
