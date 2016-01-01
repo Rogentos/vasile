@@ -12,7 +12,7 @@ makeisox64 () {
 	mkdir -p "$isoefibootdirx64"
 	mkdir -p "$isosupersquashdirx64"
 	# mount && copy our core stage 4 image
-	mount -t squashfs "$chrootx64" "$isostagingx64"
+	mount -t squashfs "$chrootx64" "$isostagingdirx64"
 	rsync -aHAXr --progress "$isostagingdirx64/" "$isosyncdirx64/"
 	cp -avx ""$isosyncdirx64"/boot/"$isokernelnamex64"" ""$isorootdirx64"/boot/vmlinuz"
 	sha256sum ""$isorootdirx64"/boot/vmlinuz" | tee ""$isorootdirx64"/boot/vmlinuz.sha256"
