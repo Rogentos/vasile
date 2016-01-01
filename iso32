@@ -16,7 +16,6 @@ makeisox86 () {
 	mount -t squashfs "$chrootx86" "$isostagingdirx86"
 	rsync -aHAXr --progress "$isostagingx86/" "$isosyncdirx86/"
 	cp -avx ""$isosyncdirx86"/boot/"$isokernelnamex86"" ""$isorootdirx86"/boot/vmlinuz"
-	sha256sum ""$isorootdirx86"/boot/vmlinuz" | tee ""$isorootdirx86"/boot/vmlinuz.sha256"
 	# configure portage && give up control for package / desktop environment installation
 	isostartx86
 	isooverlaysx86
@@ -25,7 +24,6 @@ makeisox86 () {
 	isostopx86
 	# squash live environment
 	mksquashfs "$isosyncdirx86" ""$isosyncdirx86".img" -b 1048576 -comp xz -Xdict-size 100%
-	sha256sum ""$isosyncdirx86".img" | tee ""$isosyncdirx86".img.sha256"
 	# move our squashed live environment on place
 	mv ""$isosyncdirx86".img"  "$isosupersquashdirx86"
 	# squash it again to be detected by dmsquash-live
