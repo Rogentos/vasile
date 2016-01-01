@@ -63,6 +63,7 @@ export local isorootdirx64=""$releasename"-"$releasetarget"-"$releaseversion"-"$
 export local isokernelnamex64="kernel-genkernel-"$isomainarchx64"-"$kernelver""
 export local isostagingdirx64="/tmp/"$isorootdirx64""
 export local isosupersquashdirx64=""$isorootdirx64"/CDroot/LiveOS"
+export local isoliveosdirx64=""$isorootdirx64"/LiveOS"
 export local isosyncdirx64=""$isorootdirx64"/rootfs"
 export local isobootdirx64=""$isorootdirx64"/boot/grub"
 export local isoefibootdirx64=""$isorootdirx64"/efi/boot"
@@ -75,6 +76,7 @@ export local isorootdirx86=""$releasename"-"$releasetarget"-"$releaseversion"-"$
 export local isokernelnamex86="kernel-genkernel-"$isomainarchx86"-"$kernelver""
 export local isostagingdirx86="/tmp/"$isorootdirx86""
 export local isosupersquashdirx86=""$isorootdirx86"/CDroot/LiveOS"
+export local isoliveosdirx86=""$isorootdirx86"/LiveOS"
 export local isosyncdirx86=""$isorootdirx86"/rootfs"
 export local isobootdirx86=""$isorootdirx86"/boot/grub"
 

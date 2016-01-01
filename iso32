@@ -9,6 +9,7 @@ makeisox86 () {
 	# create live iso layout
 	mkdir -p "$isostagingdirx86"
 	mkdir -p "$isobootdirx86"
+	mkdir -p "$isoliveosdirx86"
 	mkdir -p "$isosupersquashdirx86"
 	# mount && copy our core stage 4 image
 	mount -t squashfs "$chrootx86" "$isostagingdirx86"
@@ -24,6 +25,12 @@ makeisox86 () {
 	# squash live environment
 	mksquashfs "$isosyncdirx86" ""$isosyncdirx86".img" -b 1048576 -comp xz -Xdict-size 100%
 	sha256sum ""$isosyncdirx86".img" | tee ""$isosyncdirx86".img.sha256"
+	# move our squashed live environment on place
+	mv ""$isosyncdirx86".img"  "$isosupersquashdirx86"
+	# squash it again to be detected by dmsquash-live
+	mksquashfs "$isosupersquashdirx86" "squashfs.img"
+	# and again, move our double squashed live environment on place
+	mv "squashfs.img" "$isoliveosdirx86"
 }
 
 bootcorex86 () {
