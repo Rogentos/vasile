@@ -11,6 +11,7 @@ makeisox86 () {
 	mkdir -p "$isobootdirx86"
 	mkdir -p "$isoliveosdirx86"
 	mkdir -p "$isosupersquashdirx86"
+	mkdir -p "$isolivesqfsdirx86"
 	# mount && copy our core stage 4 image
 	mount -t squashfs "$chrootx86" "$isostagingdirx86"
 	rsync -aHAXr --progress "$isostagingx86/" "$isosyncdirx86/"
@@ -28,9 +29,9 @@ makeisox86 () {
 	# move our squashed live environment on place
 	mv ""$isosyncdirx86".img"  "$isosupersquashdirx86"
 	# squash it again to be detected by dmsquash-live
-	mksquashfs "$isosupersquashdirx86" "squashfs.img"
+	mksquashfs "$isosupersquashdirx86" ""$isorootdirx86"/squashfs.img"
 	# and again, move our double squashed live environment on place
-	mv "squashfs.img" "$isoliveosdirx86"
+	mv ""$isorootdirx86"/squashfs.img" "$isoliveosdirx86"
 }
 
 bootcorex86 () {
@@ -42,6 +43,7 @@ bootcorex86 () {
 cleanupisox86 () {
 	rm -rf "$isosyncdirx86"
 	rm -rf "$bootcorepath"
+	rm -rf "$isosupersquashdirx86"
 	umount "$isostagingdirx86"
 }
 

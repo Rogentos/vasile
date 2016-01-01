@@ -12,6 +12,7 @@ makeisox64 () {
 	mkdir -p "$isoefibootdirx64"
 	mkdir -p "$isoliveosdirx64"
 	mkdir -p "$isosupersquashdirx64"
+	mkdir -p "$isolivesqfsdirx64"
 	# mount && copy our core stage 4 image
 	mount -t squashfs "$chrootx64" "$isostagingdirx64"
 	rsync -aHAXr --progress "$isostagingdirx64/" "$isosyncdirx64/"
@@ -29,9 +30,9 @@ makeisox64 () {
 	# move our squashed live environment on place
 	mv ""$isosyncdirx64".img"  "$isosupersquashdirx64"
 	# squash it again to be detected by dmsquash-live
-	mksquashfs "$isosupersquashdirx64" "squashfs.img"
+	mksquashfs "$isosupersquashdirx64" ""$isorootdirx64"/squashfs.img"
 	# and again, move our double squashed live environment on place
-	mv "squashfs.img" "$isoliveosdirx64"
+	mv ""$isorootdirx64/"squashfs.img" "$isoliveosdirx64"
 }
 
 bootcorex64 () {
@@ -42,6 +43,7 @@ bootcorex64 () {
 
 cleanupisox64 () {
 	rm -rf "$isosyncdirx64"
+	rm -rf "$isosupersquashdirx64"
 	rm -rf "$bootcorepath"
 	umount "$isostagingdirx64"
 }
