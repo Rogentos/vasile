@@ -32,7 +32,7 @@ chrootchecksumx64 () {
 			echo "good, x64 squashed chroot && checksum file found ... verifying integrity"
 			echo ""
 			if [[ "$(md5sum -c "$chrootx64md5")" ]] ; then
-				echo "good, x64 squashed chroot checksum passed ... starting environment"
+				echo "good, x64 squashed chroot checksum passed ... starting engines"
 				echo ""
 				sleep 1
 				break
@@ -53,7 +53,7 @@ chrootchecksumx86 () {
 			echo "good, x86 squashed chroot && checksum file found ... verifying integrity"
 			echo ""
 			if [[ "$(md5sum -c "$chrootx86md5")" ]] ; then
-				echo "good, x86 squashed chroot checksum found ... starting environment"
+				echo "good, x86 squashed chroot checksum found ... starting engines"
 				echo ""
 				sleep 1
 				break
