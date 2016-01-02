@@ -6,7 +6,11 @@ kernelconfig
 checkroot
 
 makeisox64 () {
+	# create an empty 15GB ext4 fs were our rootfs will stay
+	dd if=/dev/zero of=""$isosyncdirx64".img" bs=50M count=300
+	mkfs.ext4 ""$isosyncdirx64".img"
 	# create live iso layout
+	mkdir -p "$isosyncdirx64"
 	mkdir -p "$isostagingdirx64"
 	mkdir -p "$isobootdirx64"
 	mkdir -p "$isoefibootdirx64"
@@ -15,7 +19,9 @@ makeisox64 () {
 	mkdir -p "$isolivesqfsdirx64"
 	# mount && copy our core stage 4 image
 	mount -t squashfs "$chrootx64" "$isostagingdirx64"
+	mount -t ext4 ""$isosyncdirx64".img" "$isosyncdirx64"
 	rsync -aHAXr --progress "$isostagingdirx64/" "$isosyncdirx64/"
+	# copy our kernel into cdroot
 	cp -avx ""$isosyncdirx64"/boot/"$isokernelnamex64"" ""$isorootdirx64"/boot/vmlinuz"
 	# configure portage && give up control for package / desktop environment installation
 	isostartx64
@@ -23,13 +29,13 @@ makeisox64 () {
 	isobuildsystemx64
 	isochrootx64
 	isostopx64
-	# squash live environment
-	mksquashfs "$isosyncdirx64" ""$isosyncdirx64".img" -b 1048576 -comp xz -Xdict-size 100%
-	# move our squashed live environment on place
+	# unmount rootfs before compression
+	umount -l "$isosyncdirx64" > /dev/null 2>&1
+	# move rootfs in place
 	mv ""$isosyncdirx64".img"  "$isolivesqfsdirx64"
-	# squash it again to be detected by dmsquash-live
-	mksquashfs "$isosupersquashdirx64" ""$isorootdirx64"/squashfs.img"
-	# and again, move our double squashed live environment on place
+	# squash rootfs with best compression
+	mksquashfs "$isosupersquashdirx64" ""$isorootdirx64"/squashfs.img" -b 1048576 -comp xz -Xdict-size 100%
+	# move squashed rootfs in place
 	mv ""$isorootdirx64/"squashfs.img" "$isoliveosdirx64"
 }
 
@@ -40,10 +46,11 @@ bootcorex64 () {
 }
 
 cleanupisox64 () {
+	umount "$isostagingdirx64"
 	rm -rf "$isosyncdirx64"
+	rm -rf "$isostagingdirx64"
 	rm -rf "$isosupersquashdirx64"
 	rm -rf "$bootcorepath"
-	umount "$isostagingdirx64"
 }
 
 main () {
