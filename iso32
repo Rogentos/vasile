@@ -5,7 +5,7 @@
 kernelconfig
 checkroot
 
-makeisox86 () {
+prepareisox86 () {
 	# we really need this folder as quick as possible
 	mkdir -p "$isosyncdirx86"
 	# create an empty 15GB ext4 fs were our rootfs will stay
@@ -45,7 +45,7 @@ makeisox86 () {
 	mv ""$isorootdirx86"/squashfs.img" "$isoliveosdirx86"
 }
 
-bootcorex86 () {
+bootcoreisox86 () {
 	# configure live bootloader
 	git clone https://gitlab.com/rogentos/boot-core.git "$bootcorepath"
 	cp -avx "$bootcorefiles" "$isorootdirx86"
@@ -59,11 +59,16 @@ cleanupisox86 () {
 	rm -rf "$isosupersquashdirx86"
 }
 
+makeisox86 () {
+	grub2-mkrescue -o ""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarchx86".iso" "$isorootdirx86"
+}
+
 main () {
 	chrootchecksumx86
-	makeisox86
-	bootcorex86
+	prepareisox86
+	bootcoreisox86
 	cleanupisox86
+	makeisox86
 }
 
 main
