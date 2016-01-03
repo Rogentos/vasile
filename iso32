@@ -19,7 +19,7 @@ makeisox86 () {
 	mkdir -p "$isolivesqfsdirx86"
 	# mount && copy our core stage 4 image
 	mount -t squashfs "$chrootx86" "$isostagingdirx86"
-	mount -t ext4 ""$isosyncdirx64".img" "$isosyncdirx86"
+	mount -t ext4 ""$isosyncdirx86".img" "$isosyncdirx86"
 	rsync -aHAXr --progress "$isostagingx86/" "$isosyncdirx86/"
 	# copy our kernel into cdroot
 	cp -avx ""$isosyncdirx86"/boot/"$isokernelnamex86"" ""$isorootdirx86"/boot/vmlinuz"
