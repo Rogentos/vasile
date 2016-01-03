@@ -18,12 +18,18 @@ makeisox64 () {
 	mkdir -p "$isoliveosdirx64"
 	mkdir -p "$isosupersquashdirx64"
 	mkdir -p "$isolivesqfsdirx64"
-	# mount && copy our core stage 4 image
+	# mount && copy core stage 4 image
 	mount -t squashfs "$chrootx64" "$isostagingdirx64"
 	mount -t ext4 ""$isosyncdirx64".img" "$isosyncdirx64"
 	rsync -aHAXr --progress "$isostagingdirx64/" "$isosyncdirx64/"
-	# copy our kernel into cdroot
+	# copy kernel into cdroot
 	cp -avx ""$isosyncdirx64"/boot/"$isokernelnamex64"" ""$isorootdirx64"/boot/vmlinuz"
+	# generate live initramfs
+	isostartx64
+	isoramfsx64
+	isostopx64
+	# copy live initramfs into cdroot
+	mv ""$isosyncdirx64"/boot/"$isoramfsname"" ""$isorootdirx64"/boot/initrd"
 	# configure portage && give up control for package / desktop environment installation
 	isostartx64
 	isooverlaysx64
