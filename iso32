@@ -6,11 +6,12 @@ kernelconfig
 checkroot
 
 makeisox86 () {
+	# we really need this folder as quick as possible
+	mkdir -p "$isosyncdirx86"
 	# create an empty 15GB ext4 fs were our rootfs will stay
 	dd if=/dev/zero of=""$isosyncdirx86".img" bs=50M count=300
 	mkfs.ext4 ""$isosyncdirx86".img"
 	# create live iso layout
-	mkdir -p "$isosyncdirx86"
 	mkdir -p "$isostagingdirx86"
 	mkdir -p "$isobootdirx86"
 	mkdir -p "$isoliveosdirx86"
