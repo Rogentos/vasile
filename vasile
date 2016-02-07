@@ -7,13 +7,17 @@
 
 # generic variables
 
+echo -e ""
+echo -e "Type in the core you want me to use (Kogaion or Argent)"
 read -e "basename"
 if [[ "$basename" = "Kogaion" ]] ; then
+	echo -e ""
 	echo -e "Adjusting variables for Kogaion Desktop 3"
 	export releasename="kogaion"
 	export releasetarget="desktop"
 	export releaseversion="3"
 elif [[ "$basename" = "Argent" ]] ; then
+	echo -e ""
 	echo -e "Adjusting variables for Argent Server 2"
 	export releasename="argent"
 	export releasetarget="server"
