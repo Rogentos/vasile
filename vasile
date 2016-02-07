@@ -9,6 +9,7 @@
 
 echo -e ""
 echo -e "Type in the core you want me to use (Kogaion or Argent)"
+echo -e ""
 read -e "basename"
 if [[ "$basename" = "Kogaion" ]] ; then
 	echo -e ""
