@@ -6,9 +6,22 @@
 #
 
 # generic variables
-export local releasename="kogaion"
-export local releasetarget="desktop"
-export local releaseversion="3"
+
+read -e "basename"
+if [[ "$basename" = "Kogaion" ]] ; then
+	echo -e "Adjusting variables for Kogaion Desktop 3"
+	export releasename="kogaion"
+	export releasetarget="desktop"
+	export releaseversion="3"
+elif [[ "$basename" = "Argent" ]] ; then
+	echo -e "Adjusting variables for Argent Server 2"
+	export releasename="argent"
+	export releasetarget="server"
+	export releaseversion="2"
+else
+	echo -e "Ooops, wrong basename "$basename"...it must be Kogaion or Argent...bye bye"
+	exit 1
+fi
 
 # arch independent build variables
 
