@@ -65,18 +65,18 @@ export local isoramfsname="initramfs-"$kernelver".img"
 
 export local chrootx64=""$releasename"_"$releaseversion"_core_x64.squashfs"
 export local chrootx64md5=""$chrootx64".md5"
-export local chrootmakeconfx64="ln -sf /opt/"$releasename"-build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
+export local chrootmakeconfx64="ln -sf /opt/"$releasename"-build/conf/intel/portage/make.conf.amd64-server /etc/portage/make.conf"
 
 # x86 specific build variables
 
 export local chrootx86=""$releasename"_"$releaseversion"_core_x86.squashfs"
 export local chrootx86md5=""$chrootx86".md5"
-export local chrootmakeconfx86="ln -sf /opt/"$releasename"-build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
+export local chrootmakeconfx86="ln -sf /opt/"$releasename"-build/conf/intel/portage/make.conf.x86-server /etc/portage/make.conf"
 
 # x64 specific iso variables
 
 export local isomainarchx64="x86_64"
-export local isomakeconfx64="ln -sf /opt/"$releasename"-build/conf/intel/portage/make.conf.amd64 /etc/portage/make.conf"
+export local isomakeconfx64="ln -sf /opt/"$releasename"-build/conf/intel/portage/make.conf.amd64-client /etc/portage/make.conf"
 export local isorootdirx64=""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarchx64""
 export local isokernelnamex64="kernel-genkernel-"$isomainarchx64"-"$kernelver""
 export local isostagingdirx64="/tmp/"$isorootdirx64""
@@ -90,7 +90,7 @@ export local isoefibootdirx64=""$isorootdirx64"/efi/boot"
 # x86 specific iso variables
 
 export local isomainarchx86="x86"
-export local isomakeconfx86="ln -sf /opt/"$releasename"-build/conf/intel/portage/make.conf.x86 /etc/portage/make.conf"
+export local isomakeconfx86="ln -sf /opt/"$releasename"-build/conf/intel/portage/make.conf.x86-client /etc/portage/make.conf"
 export local isorootdirx86=""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarchx86""
 export local isokernelnamex86="kernel-genkernel-"$isomainarchx86"-"$kernelver""
 export local isostagingdirx86="/tmp/"$isorootdirx86""
