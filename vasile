@@ -14,15 +14,17 @@ read -e "basename"
 if [[ "$basename" = "Kogaion" ]] ; then
 	echo -e ""
 	echo -e "Adjusting variables for Kogaion Desktop 3"
-	export releasename="kogaion"
-	export releasetarget="desktop"
-	export releaseversion="3"
+	export local releasename="kogaion"
+	export local releasetarget="desktop"
+	export local releaseversion="3"
+	export local kernelver="3.14.50-"$releasename""
 elif [[ "$basename" = "Argent" ]] ; then
 	echo -e ""
 	echo -e "Adjusting variables for Argent Server 2"
-	export releasename="argent"
-	export releasetarget="server"
-	export releaseversion="2"
+	export local releasename="argent"
+	export local releasetarget="server"
+	export local releaseversion="2"
+	export local kernelver="3.14.51-"$releasename""
 else
 	echo -e "Ooops, wrong basename "$basename"...it must be Kogaion or Argent...bye bye"
 	exit 1
@@ -46,7 +48,6 @@ export local chrootprofile="eselect profile set 1"
 
 # arch independent iso variables
 
-export local kernelver="3.14.0-"$releasename""
 export local bootcorepath="/tmp/bootcore"
 export local bootcorefiles="/tmp/bootcore/cdroot/boot"
 export local isouser="root"
