@@ -8,27 +8,32 @@
 # generic variables
 
 echo -e ""
-echo -e "Type in the core you want me to use (Kogaion or Argent)"
+echo -e "Choose the system core you want me to use"
 echo -e ""
-read -e "basename"
-if [[ "$basename" = "Kogaion" ]] ; then
-	echo -e ""
-	echo -e "Adjusting variables for Kogaion Desktop 3"
-	export local releasename="kogaion"
-	export local releasetarget="desktop"
-	export local releaseversion="3"
-	export local kernelver="3.14.50-"$releasename""
-elif [[ "$basename" = "Argent" ]] ; then
-	echo -e ""
-	echo -e "Adjusting variables for Argent Server 2"
-	export local releasename="argent"
-	export local releasetarget="server"
-	export local releaseversion="2"
-	export local kernelver="3.14.51-"$releasename""
-else
-	echo -e "Ooops, wrong basename "$basename"...it must be Kogaion or Argent...bye bye"
-	exit 1
-fi
+OPTIONS="Kogaion Argent"
+select systemcore in $OPTIONS; do
+	if [[ "$systemcore" = "Kogaion" ]] ; then
+		echo -e ""
+		echo -e "Adjusting variables for Kogaion Desktop 3"
+		export local releasename="kogaion"
+		export local releasetarget="desktop"
+		export local releaseversion="3"
+		export local kernelver="3.14.50-"$releasename""
+		break
+	elif [[ "$systemcore" = "Argent" ]] ; then
+		echo -e ""
+		echo -e "Adjusting variables for Argent Server 2"
+		export local releasename="argent"
+		export local releasetarget="server"
+		export local releaseversion="2"
+		export local kernelver="3.14.51-"$releasename""
+		break
+	else
+		echo -e ""
+		echo -e "Wrong choice, bye bye"
+		exit 1
+	fi
+done
 
 # arch independent build variables
 
