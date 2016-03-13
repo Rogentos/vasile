@@ -66,6 +66,7 @@ export local isoenvupdate="/usr/sbin/env-update && . /etc/profile"
 export local isoprofile="eselect profile set 1"
 export local isoramfs="dracut -N -a dmsquash-live -a pollcdrom --force --kver "$kernelver""
 export local isoramfsname="initramfs-"$kernelver".img"
+export local isoefiimg="grub2-mkimage -d /usr/lib64/grub/x86_64-efi -o bootx64.efi -O x86_64-efi ext2 fat udf btrfs ntfs reiserfs xfs hfsplus lvm ata part_msdos part_gpt part_apple bsd search_fs_uuid normal chain iso9660 configfile help loadenv reboot cat search memdisk tar boot linux chain"
 
 # x64 specific build variables
 

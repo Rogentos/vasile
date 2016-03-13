@@ -295,6 +295,12 @@ isoramfsx64 () {
 	chroot "$isosyncdirx64" su - "$isouser" -c "$isoramfs"
 }
 
+isoefiimgx64 () {
+	echo "generating live efi image"
+	echo ""
+	chroot "$isosyncdirx64" su - "$isouser" -c "$isoefiimg"
+}
+
 isochrootx64 () {
 	echo -e ""
 	echo -e "DROPPING YOU TO A ROOT SHELL INTO ISO ENVIRONMENT"

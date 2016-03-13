@@ -30,6 +30,12 @@ prepareisox64 () {
 	isostopx64
 	# copy live initramfs into cdroot
 	mv ""$isosyncdirx64"/boot/"$isoramfsname"" ""$isorootdirx64"/boot/initrd"
+	# generate live efi image
+	isostartx64
+	isoefiimgx64
+	isostopx64
+	# copy efi image into cdroot
+	mv ""$isosyncdirx64"/boot/grub/bootx64.efi" "$isoefibootdirx64"
 	# configure portage && give up control for package / desktop environment installation
 	isostartx64
 	isooverlaysx64
