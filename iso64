@@ -35,7 +35,7 @@ prepareisox64 () {
 	isoefiimgx64
 	isostopx64
 	# copy efi image into cdroot
-	mv ""$isosyncdirx64"/bootx64.efi" "$isoefibootdirx64"
+	mv ""$isosyncdirx64"/root/bootx64.efi" "$isoefibootdirx64"
 	# configure portage && give up control for package / desktop environment installation
 	isostartx64
 	isooverlaysx64
