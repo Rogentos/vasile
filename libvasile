@@ -90,7 +90,7 @@ chrootstartx64 () {
 	mount -t squashfs "$chrootx64" "$rodir"
 	if [[ "$(uname -r | cut -d . -f1,2)" = "3.14" ]] ; then
 		mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
-	elif [[ "$(uname -r | cut -d . -f1,2)" >= "3.18" ]] ; then
+	else # kernel version equal or above 3.18
 		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
 	fi
 	while : true ; do
@@ -172,7 +172,7 @@ chrootstartx86 () {
 	mount -t squashfs "$chrootx86" "$rodir"
 	if [[ "$(uname -r | cut -d . -f1,2)" = "3.14" ]] ; then
 		mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
-	elif [[ "$(uname -r | cut -d . -f1,2)" >= "3.18" ]] ; then
+	else # kernel version equal or above 3.18
 		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
 	fi
 	while : true ; do
