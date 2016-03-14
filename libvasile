@@ -1,7 +1,7 @@
 # generic arch independent functions (used for both build && iso creation)
 
 kernelconfig () {
-	if [[ $(zgrep 'CONFIG_OVERLAY_FS=' /proc/config.gz) && $(zgrep "CONFIG_SQUASHFS=" /proc/config.gz) &&  $(zgrep "CONFIG_BLK_DEV_LOOP=" /proc/config.gz) ]] ; then
+	if [[ $(zgrep 'CONFIG_OVERLAYFS_FS=' /proc/config.gz) && $(zgrep "CONFIG_SQUASHFS=" /proc/config.gz) &&  $(zgrep "CONFIG_BLK_DEV_LOOP=" /proc/config.gz) ]] ; then
 		echo ""
 		echo "Kernel configuration seems OK, moving on"
 		echo ""
@@ -89,7 +89,7 @@ chrootstartx64 () {
 	mount -t squashfs "$chrootx64" "$rodir"
 	if [[ "$(uname -r | cut -d . -f1,2)" = "3.14" ]] ; then
 		mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
-	else
+	elif [[ "$(uname -r | cut -d . -f1,2)" >= "3.18" ]] ; then
 		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
 	fi
 	while : true ; do
@@ -171,7 +171,7 @@ chrootstartx86 () {
 	mount -t squashfs "$chrootx86" "$rodir"
 	if [[ "$(uname -r | cut -d . -f1,2)" = "3.14" ]] ; then
 		mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
-	else
+	elif [[ "$(uname -r | cut -d . -f1,2)" >= "3.18" ]] ; then
 		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
 	fi
 	while : true ; do
@@ -290,14 +290,10 @@ isobuildsystemx64 () {
 }
 
 isoramfsx64 () {
-	echo "generating live initramfs"
-	echo ""
 	chroot "$isosyncdirx64" su - "$isouser" -c "$isoramfs"
 }
 
 isoefiimgx64 () {
-	echo "generating live efi image"
-	echo ""
 	chroot "$isosyncdirx64" su - "$isouser" -c "$isoefiimg"
 }
 
@@ -353,8 +349,6 @@ isobuildsystemx86 () {
 }
 
 isoramfsx86 () {
-	echo "generating live initramfs"
-	echo ""
 	linux32 chroot "$isosyncdirx86" su - "$isouser" -c "$isoramfs"
 }
 
