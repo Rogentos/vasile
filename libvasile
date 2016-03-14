@@ -2,6 +2,7 @@
 
 kernelconfig () {
 	if [[ $(zgrep 'CONFIG_OVERLAYFS_FS=' /proc/config.gz) && $(zgrep "CONFIG_SQUASHFS=" /proc/config.gz) &&  $(zgrep "CONFIG_BLK_DEV_LOOP=" /proc/config.gz) ]] ; then
+		# if you use 3.18 LTS or newer kernels, change CONFIG_OVERLAYFS_FS to CONFIG_OVERLAY_FS
 		echo ""
 		echo "Kernel configuration seems OK, moving on"
 		echo ""
