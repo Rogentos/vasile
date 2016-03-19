@@ -123,12 +123,9 @@ chrootstartx64 () {
 }
 
 chrootoverlaysx64 () {
-	echo "injecting "$releasename" main overlay into x64 environment"
-	sleep 1
-	chroot "$overlaydir" su - "$chrootuser" -c "$chrootmainoverlay"
 	echo "injecting "$releasename" "$releasetarget" overlay into x64 environment"
 	sleep 1
-	chroot "$overlaydir" su - "$chrootuser" -c "$chrootaddonoverlay"
+	chroot "$overlaydir" su - "$chrootuser" -c "$chrootmainoverlay"
 }
 
 chrootbuildsystemx64 () {
@@ -205,12 +202,9 @@ chrootstartx86 () {
 }
 
 chrootoverlaysx86 () {
-	echo "injecting "$releasename" main overlay into x86 environment"
-	sleep 1
-	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootmainoverlay"
 	echo "injecting "$releasename" "$releasetarget" overlay into x86 environment"
 	sleep 1
-	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootaddonoverlay"
+	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootmainoverlay"
 }
 
 chrootbuildsystemx86 () {
@@ -273,12 +267,9 @@ isostopx64 () {
 }
 
 isooverlaysx64 () {
-	echo "injecting "$releasename" main overlay into x64 environment"
-	sleep 1
-	chroot "$isosyncdirx64" su - "$isouser" -c "$isomainoverlay"
 	echo "injecting "$releasename" "$releasetarget" overlay into x64 environment"
 	sleep 1
-	chroot "$isosyncdirx64" su - "$isouser" -c "$isoaddonoverlay"
+	chroot "$isosyncdirx64" su - "$isouser" -c "$isomainoverlay"
 }
 
 isobuildsystemx64 () {
@@ -332,12 +323,9 @@ isostopx86 () {
 }
 
 isooverlaysx86 () {
-	echo "injecting "$releasename" main overlay into x86 environment"
-	sleep 1
-	linux32 chroot "$isosyncdirx86" su - "$isouser" -c "$isomainoverlay"
 	echo "injecting "$releasename" "$releasetarget" overlay into x86 environment"
 	sleep 1
-	linux32 chroot "$isosyncdirx86" su - "$isouser" -c "$isoaddonoverlay"
+	linux32 chroot "$isosyncdirx86" su - "$isouser" -c "$isomainoverlay"
 }
 
 isobuildsystemx86 () {
