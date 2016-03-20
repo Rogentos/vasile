@@ -55,7 +55,7 @@ prepareisox64 () {
 
 bootcoreisox64 () {
 	# configure live bootloader
-	git clone https://gitlab.com/kogaion/boot-core.git "$bootcorepath"
+	git clone https://gitlab.com/"$releasename"/boot-core.git "$bootcorepath"
 	cp -avx "$bootcorefiles" "$isorootdirx64"
 }
 
