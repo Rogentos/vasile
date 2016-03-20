@@ -47,7 +47,7 @@ prepareisox86 () {
 
 bootcoreisox86 () {
 	# configure live bootloader
-	git clone https://gitlab.com/rogentos/boot-core.git "$bootcorepath"
+	git clone https://gitlab.com/kogaion/boot-core.git "$bootcorepath"
 	cp -avx "$bootcorefiles" "$isorootdirx86"
 }
 
