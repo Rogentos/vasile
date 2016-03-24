@@ -282,11 +282,15 @@ isobuildsystemx64 () {
 }
 
 isoramfsx64 () {
-	chroot "$isosyncdirx64" su - "$isouser" -c "$isoramfs"
+	chroot "$isosyncdirx64" su - "$isouser" -c "$isodracutcmd"
+}
+
+systemramfsx64 () {
+	chroot "$isosyncdirx64" su - "$isouser" -c "$dracutcmdx64"
 }
 
 isoefiimgx64 () {
-	chroot "$isosyncdirx64" su - "$isouser" -c "$isoefiimg"
+	chroot "$isosyncdirx64" su - "$isouser" -c "$isoeficmd"
 }
 
 isochrootx64 () {
@@ -338,7 +342,11 @@ isobuildsystemx86 () {
 }
 
 isoramfsx86 () {
-	linux32 chroot "$isosyncdirx86" su - "$isouser" -c "$isoramfs"
+	linux32 chroot "$isosyncdirx86" su - "$isouser" -c "$isodracutcmd"
+}
+
+systemramfsx86 () {
+	linux32 chroot "$isosyncdirx86" su - "$isouser" -c "dracutcmdx86"
 }
 
 isochrootx86 () {

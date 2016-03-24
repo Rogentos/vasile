@@ -28,8 +28,12 @@ prepareisox64 () {
 	isostartx64
 	isoramfsx64
 	isostopx64
+	# generate system initramfs
+	isostartx64
+	systemramfsx64
+	isostopx64
 	# copy live initramfs into cdroot
-	mv ""$isosyncdirx64"/boot/"$isoramfsname"" ""$isorootdirx64"/boot/initrd"
+	mv ""$isosyncdirx64"/boot/"$isodracutrd"" ""$isorootdirx64"/boot/initrd"
 	# generate live efi image
 	isostartx64
 	isoefiimgx64

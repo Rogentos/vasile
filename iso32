@@ -27,8 +27,12 @@ prepareisox86 () {
 	isostartx86
 	isoramfsx86
 	isostopx86
+	# generate system initramfs
+	isostartx86
+	systemramfsx86
+	isostopx86
 	# copy live initramfs
-	mv ""$isosyncdirx86"/boot/"$isoramfsname"" ""$isorootdirx86"/boot/initrd"
+	mv ""$isosyncdirx86"/boot/"$isodracutrd"" ""$isorootdirx86"/boot/initrd"
 	# configure portage && give up control for package / desktop environment installation
 	isostartx86
 	isooverlaysx86

@@ -62,9 +62,9 @@ export local isobuildgit="cd /opt && git clone https://gitlab.com/"$releasename"
 export local isoportageconfig="ln -sf /opt/"$releasename"-build/conf/intel/portage /etc/portage"
 export local isoenvupdate="/usr/sbin/env-update && . /etc/profile"
 export local isoprofile="eselect profile set 1"
-export local isoramfs="dracut -N -a dmsquash-live -a pollcdrom -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver""
-export local isoramfsname="initramfs-"$kernelver".img"
-export local isoefiimg="grub2-mkimage -d /usr/lib64/grub/x86_64-efi -o bootx64.efi -O x86_64-efi ext2 fat udf btrfs ntfs reiserfs xfs hfsplus lvm ata part_msdos part_gpt part_apple bsd search_fs_uuid normal chain iso9660 configfile help loadenv reboot cat search memdisk tar boot linux chain"
+export local isodracutcmd="dracut -N -a dmsquash-live -a pollcdrom -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver""
+export local isodracutrd="initramfs-"$kernelver".img"
+export local isoeficmd="grub2-mkimage -d /usr/lib64/grub/x86_64-efi -o bootx64.efi -O x86_64-efi ext2 fat udf btrfs ntfs reiserfs xfs hfsplus lvm ata part_msdos part_gpt part_apple bsd search_fs_uuid normal chain iso9660 configfile help loadenv reboot cat search memdisk tar boot linux chain"
 
 # x64 specific build variables
 
@@ -91,6 +91,8 @@ export local isoliveosdirx64=""$isorootdirx64"/LiveOS"
 export local isosyncdirx64=""$isorootdirx64"/rootfs"
 export local isobootdirx64=""$isorootdirx64"/boot/grub"
 export local isoefibootdirx64=""$isorootdirx64"/efi/boot"
+export local dracutrdx64="initramfs-genkernel-"$isomainarchx64"-"$kernelver""
+export local dracutcmdx64="dracut -N -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver" "$dracutrdx64""
 
 # x86 specific iso variables
 
@@ -104,6 +106,8 @@ export local isolivesqfsdirx86=""$isosupersquashdirx86"/LiveOS"
 export local isoliveosdirx86=""$isorootdirx86"/LiveOS"
 export local isosyncdirx86=""$isorootdirx86"/rootfs"
 export local isobootdirx86=""$isorootdirx86"/boot/grub"
+export local dracutrdx86="initramfs-genkernel-"$isomainarchx86"-"$kernelver""
+export local dracutcmdx86="dracut -N -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver" "$dracutrdx86""
 
 source /usr/lib/vasile/libvasile
 
