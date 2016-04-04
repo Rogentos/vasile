@@ -92,7 +92,7 @@ export local isosyncdirx64=""$isorootdirx64"/rootfs"
 export local isobootdirx64=""$isorootdirx64"/boot/grub"
 export local isoefibootdirx64=""$isorootdirx64"/efi/boot"
 export local dracutrdx64="initramfs-genkernel-"$isomainarchx64"-"$kernelver""
-export local dracutcmdx64="dracut -N -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver" "$dracutrdx64""
+export local dracutcmdx64="dracut -N -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver" "/boot/"$dracutrdx64"""
 
 # x86 specific iso variables
 
@@ -107,7 +107,7 @@ export local isoliveosdirx86=""$isorootdirx86"/LiveOS"
 export local isosyncdirx86=""$isorootdirx86"/rootfs"
 export local isobootdirx86=""$isorootdirx86"/boot/grub"
 export local dracutrdx86="initramfs-genkernel-"$isomainarchx86"-"$kernelver""
-export local dracutcmdx86="dracut -N -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver" "$dracutrdx86""
+export local dracutcmdx86="dracut -N -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver" "/boot/"$dracutrdx86"""
 
 source /usr/lib/vasile/libvasile
 
