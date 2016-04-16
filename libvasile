@@ -207,7 +207,7 @@ chrootx86 () {
 # x64 specific iso functions
 
 isostartx64 () {
-	mount -o bind packages "$isosyncdirx64"/usr/portage/packages
+	mount -o bind portage "$isosyncdirx64"/usr/portage
 	mount -o bind targets "$isosyncdirx64"/mnt
 	mount -t proc proc "$isosyncdirx64"/proc
 	mount -t sysfs sysfs "$isosyncdirx64"/sys
@@ -224,7 +224,7 @@ isostopx64 () {
 	umount -l "$isosyncdirx64"/dev/shm > /dev/null 2>&1
 	umount -l "$isosyncdirx64"/dev > /dev/null 2>&1
 	umount -l "$isosyncdirx64"/tmp > /dev/null 2>&1
-	umount -l "$isosyncdirx64"/usr/portage/packages > /dev/null 2>&1
+	umount -l "$isosyncdirx64"/usr/portage > /dev/null 2>&1
 	umount -l "$isosyncdirx64"/mnt > /dev/null 2>&1
 }
 
@@ -267,7 +267,7 @@ isochrootx64 () {
 # x86 specific iso functions
 
 isostartx86 () {
-	mount -o bind packages "$isosyncdirx86"/usr/portage/packages
+	mount -o bind portage "$isosyncdirx86"/usr/portage
 	mount -o bind targets "$isosyncdirx86"/mnt
 	mount -t proc proc "$isosyncdirx86"/proc
 	mount -t sysfs sysfs "$isosyncdirx86"/sys
@@ -284,7 +284,7 @@ isostopx86 () {
 	umount -l "$isosyncdirx86"/dev/shm > /dev/null 2>&1
 	umount -l "$isosyncdirx86"/dev > /dev/null 2>&1
 	umount -l "$isosyncdirx86"/tmp > /dev/null 2>&1
-	umount -l "$isosyncdirx86"/usr/portage/packages > /dev/null 2>&1
+	umount -l "$isosyncdirx86"/usr/portage > /dev/null 2>&1
 	umount -l "$isosyncdirx86"/mnt > /dev/null 2>&1
 }
 
