@@ -78,7 +78,7 @@ chrootstop () {
 	umount -l "$overlaydir"/dev/shm > /dev/null 2>&1
 	umount -l "$overlaydir"/dev > /dev/null 2>&1
 	umount -l "$overlaydir"/tmp > /dev/null 2>&1
-	umount -l "$overlaydir"/usr/portage/packages > /dev/null 2>&1
+	umount -l "$overlaydir"/usr/portage > /dev/null 2>&1
 	umount -l "$overlaydir"/mnt > /dev/null 2>&1
 	umount -l "$overlaydir" > /dev/null 2>&1
 	umount -l "$rodir" > /dev/null 2>&1
@@ -93,26 +93,7 @@ chrootstartx64 () {
 	else # kernel version equal or above 3.18
 		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
 	fi
-	while : true ; do
-		if [[ ! -d packages ]] ; then
-			mkdir packages
-			mount -o bind packages "$overlaydir"/usr/portage/packages
-			break
-		elif [[ -d packages ]] ; then
-			mount -o bind packages "$overlaydir"/usr/portage/packages
-			break
-		fi
-	done
-	while : true ; do
-		if [[ ! -d distfiles ]] ; then
-			mkdir distfiles
-			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
-			break
-		elif [[ -d distfiles ]] ; then
-			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
-			break
-		fi
-	done
+	mount -o bind portage "$overlaydir"/usr/portage
 	mount -o bind targets "$overlaydir"/mnt
 	mount -t proc proc "$overlaydir"/proc
 	mount -t sysfs sysfs "$overlaydir"/sys
@@ -172,26 +153,7 @@ chrootstartx86 () {
 	else # kernel version equal or above 3.18
 		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
 	fi
-	while : true ; do
-		if [[ ! -d packages ]] ; then
-			mkdir packages
-			mount -o bind packages "$overlaydir"/usr/portage/packages
-			break
-		elif [[ -d packages ]] ; then
-			mount -o bind packages "$overlaydir"/usr/portage/packages
-			break
-		fi
-	done
-	while : true ; do
-		if [[ ! -d distfiles ]] ; then
-			mkdir distfiles
-			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
-			break
-		elif [[ -d distfiles ]] ; then
-			mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
-			break
-		fi
-	done
+	mount -o bind portage "$overlaydir"/usr/portage
 	mount -o bind targets "$overlaydir"/mnt
 	mount -t proc proc "$overlaydir"/proc
 	mount -t sysfs sysfs "$overlaydir"/sys
