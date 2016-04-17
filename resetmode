@@ -4,6 +4,9 @@ reset_current_mode() {
 	if [ -d /usr/portage/.git ] ; then
 		rm -rf /usr/portage/*
 		rm -rf /usr/portage/.git*
+		rm /etc/portage/make.conf
+		rm /etc/portage/make.profile
+		rm /etc/portage
 	fi
 }
 
