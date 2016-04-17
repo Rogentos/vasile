@@ -56,9 +56,9 @@ export local dracutcmd="dracut -N -o systemd -o systemd-initrd -o systemd-networ
 source /usr/lib/vasile-kogaion/libvasile-kogaion
 
 case $1 in
-	--build)		source /usr/share/vasile-kogaion/buildpkg
+	--buildpkg)		source /usr/share/vasile-kogaion/buildpkg
 					;;
-	--iso)			source /usr/share/vasile-kogaion/buildiso
+	--buildiso)		source /usr/share/vasile-kogaion/buildiso
 					;;
 	--usermode)		source /usr/share/vasile-kogaion/modereset
 					source /usr/share/vasile-kogaion/usermodeset
