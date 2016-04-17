@@ -25,7 +25,7 @@ checkroot () {
 	fi
 }
 
-chrootchecksumx64 () {
+chrootchecksum () {
 	while : true ; do
 		if [[ -f "$chrootx64" && -f "$chrootx64md5" ]] ; then
 			echo "good, squashed chroot && checksum file found ... verifying integrity"
