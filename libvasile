@@ -78,8 +78,8 @@ chrootstop () {
 	umount -l "$overlaydir"/dev/shm > /dev/null 2>&1
 	umount -l "$overlaydir"/dev > /dev/null 2>&1
 	umount -l "$overlaydir"/tmp > /dev/null 2>&1
-	umount -l "$overlaydir"/usr/portage > /dev/null 2>&1
-	umount -l "$overlaydir"/mnt > /dev/null 2>&1
+	umount -l "$overlaydir"/usr/portage/packages > /dev/null 2>&1
+	umount -l "$overlaydir"/usr/portage/distfiles > /dev/null 2>&1
 	umount -l "$overlaydir" > /dev/null 2>&1
 	umount -l "$rodir" > /dev/null 2>&1
 }
@@ -93,8 +93,8 @@ chrootstartx64 () {
 	else # kernel version equal or above 3.18
 		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
 	fi
-	mount -o bind portage "$overlaydir"/usr/portage
-	mount -o bind targets "$overlaydir"/mnt
+	mount -o bind packages "$overlaydir"/usr/portage/packages
+	mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
 	mount -t proc proc "$overlaydir"/proc
 	mount -t sysfs sysfs "$overlaydir"/sys
 	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$overlaydir"/dev
@@ -153,8 +153,8 @@ chrootstartx86 () {
 	else # kernel version equal or above 3.18
 		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
 	fi
-	mount -o bind portage "$overlaydir"/usr/portage
-	mount -o bind targets "$overlaydir"/mnt
+	mount -o bind packages "$overlaydir"/usr/portage/packages
+	mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
 	mount -t proc proc "$overlaydir"/proc
 	mount -t sysfs sysfs "$overlaydir"/sys
 	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$overlaydir"/dev
@@ -207,8 +207,7 @@ chrootx86 () {
 # x64 specific iso functions
 
 isostartx64 () {
-	mount -o bind portage/packages "$isosyncdirx64"/usr/portage/packages
-	mount -o bind targets "$isosyncdirx64"/mnt
+	mount -o bind packages "$isosyncdirx64"/usr/portage/packages
 	mount -t proc proc "$isosyncdirx64"/proc
 	mount -t sysfs sysfs "$isosyncdirx64"/sys
 	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$isosyncdirx64"/dev
@@ -225,7 +224,6 @@ isostopx64 () {
 	umount -l "$isosyncdirx64"/dev > /dev/null 2>&1
 	umount -l "$isosyncdirx64"/tmp > /dev/null 2>&1
 	umount -l "$isosyncdirx64"/usr/portage/packages > /dev/null 2>&1
-	umount -l "$isosyncdirx64"/mnt > /dev/null 2>&1
 }
 
 isooverlaysx64 () {
@@ -267,8 +265,7 @@ isochrootx64 () {
 # x86 specific iso functions
 
 isostartx86 () {
-	mount -o bind portage/packages "$isosyncdirx86"/usr/portage/packages
-	mount -o bind targets "$isosyncdirx86"/mnt
+	mount -o bind packages "$isosyncdirx86"/usr/portage/packages
 	mount -t proc proc "$isosyncdirx86"/proc
 	mount -t sysfs sysfs "$isosyncdirx86"/sys
 	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$isosyncdirx86"/dev
@@ -285,7 +282,6 @@ isostopx86 () {
 	umount -l "$isosyncdirx86"/dev > /dev/null 2>&1
 	umount -l "$isosyncdirx86"/tmp > /dev/null 2>&1
 	umount -l "$isosyncdirx86"/usr/portage/packages > /dev/null 2>&1
-	umount -l "$isosyncdirx86"/mnt > /dev/null 2>&1
 }
 
 isooverlaysx86 () {
