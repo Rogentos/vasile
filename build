@@ -29,9 +29,9 @@ chrootprepare () {
 main () {
 	chrootchecksum
 	chrootprepare
-	chrootdevtree
 	chrootoverlays
 	chrootbuildsystem
+	chrootdevtree
 	chrootbuild
 	chrootx64
 	chrootstop

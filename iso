@@ -43,9 +43,9 @@ prepareiso () {
 	chmod 755 ""$isoefibootdir"/bootx64.efi"
 	# configure portage && give up control for package / desktop environment installation
 	isostart
-	isousertree
 	isooverlays
 	isobuildsystem
+	isousertree
 	isochroot
 	isostop
 	# unmount rootfs before compression
