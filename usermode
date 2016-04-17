@@ -25,6 +25,7 @@ set_usermode_portage_tree () {
 
 main() {
 	fetch_usermode_portage_tree
+	set_usermode_portage_tree
 }
 
 main
