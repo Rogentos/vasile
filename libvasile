@@ -103,6 +103,12 @@ chrootstartx64 () {
 	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
 }
 
+chroottreex64 () {
+	echo "injecting full portage tree into x64 environment"
+	sleep 1
+	chroot "$overlaydir" su - "$chrootuser" -c "$chroottree"
+}
+
 chrootoverlaysx64 () {
 	echo "injecting "$releasename" "$releasetarget" overlay into x64 environment"
 	sleep 1
@@ -161,6 +167,12 @@ chrootstartx86 () {
 	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$overlaydir"/dev/pts
 	mount -t tmpfs -o nosuid,nodev none "$overlaydir"/dev/shm
 	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
+}
+
+chrottreex86 () {
+	echo "injecting full portage tree into x86 environment"
+	sleep 1
+	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chroottree"
 }
 
 chrootoverlaysx86 () {

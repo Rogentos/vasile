@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+fetch_portage_tree() {
+	cd /usr/portage && git init
+	git remote add origin git://anongit.gentoo.org/repo/gentoo.git
+	git pull --depth=1 origin master
+	git branch -u origin/master master
+}
+
+main() {
+	fetch_portage_tree
+}
+
+main
