@@ -22,7 +22,7 @@ export local overlaydir="overlaydir"
 export local chrootuser="root"
 export local chroottarget="${@:2}"
 export local chrootbuildtarget="emerge -kav "$chroottarget""
-export local chrootdevtree="/usr/share/vasile-kogaion/devmode"
+export local chrootdevtree="/usr/share/vasile-kogaion/devmodeset"
 export local chrootmainoverlay="layman -f -a "$releasename"-"$releasetarget" -o https://gitlab.com/"$releasename"/"$releasename"-"$releasetarget"/raw/master/overlay.xml"
 export local chrootbuildgit="cd /opt && git clone https://gitlab.com/"$releasename"/"$releasename"-build.git"
 
@@ -33,7 +33,7 @@ export local bootcorefiles="/tmp/bootcore/cdroot/boot"
 export local isouser="root"
 export local isotarget="${@:2}"
 export local isoinstalltarget="emerge -Kav "$isotarget""
-export local isousertree="/usr/share/vasile-kogaion/usermode"
+export local isousertree="/usr/share/vasile-kogaion/usermodeset"
 export local isomainoverlay="layman -f -a "$releasename"-"$releasetarget" -o https://gitlab.com/"$releasename"/"$releasename"-"$releasetarget"/raw/master/overlay.xml"
 export local isobuildgit="cd /opt && git clone https://gitlab.com/"$releasename"/"$releasename"-build.git"
 
@@ -56,24 +56,24 @@ export local dracutcmd="dracut -N -o systemd -o systemd-initrd -o systemd-networ
 source /usr/lib/vasile-kogaion/libvasile-kogaion
 
 case $1 in
-	--build)		source /usr/share/vasile-kogaion/build
+	--build)		source /usr/share/vasile-kogaion/buildpkg
 					;;
-	--iso)			source /usr/share/vasile-kogaion/iso
+	--iso)			source /usr/share/vasile-kogaion/buildiso
 					;;
-	--usermode)		source /usr/share/vasile-kogaion/resetmode
-					source /usr/share/vasile-kogaion/usermode
+	--usermode)		source /usr/share/vasile-kogaion/modereset
+					source /usr/share/vasile-kogaion/usermodeset
 					;;
-	--devmode)		source /usr/share/vasile-kogaion/resetmode
-					source /usr/share/vasile-kogaion/devmode
+	--devmode)		source /usr/share/vasile-kogaion/modereset
+					source /usr/share/vasile-kogaion/devmodeset
 					;;
 	--help)			echo -e ""
 					echo -e "Usage: vasile-kogaion [options]"
 					echo -e ""
 					echo -e "Options:"
-					echo -e "--build : build package/target in a clean squashed core"
-					echo -e "--iso : build iso based on clean squashed core + targets"
-					echo -e "--usermode : switch INSTALLED Kogaion system to usermode (use binary packages from repositories)"
-					echo -e "--devmode : switch INSTALLED Kogaion system to devmode (use source packages from portage tree )"
+					echo -e "--buildpkg : build package/target in a clean squashed core"
+					echo -e "--buildiso : build iso based on clean squashed core + targets"
+					echo -e "--usermodeset : switch INSTALLED Kogaion system to usermode (use binary packages from repositories)"
+					echo -e "--devmodeset : switch INSTALLED Kogaion system to devmode (use source packages from portage tree )"
 					echo -e "--help : display this help and exit"
 					echo -e ""
 					;;

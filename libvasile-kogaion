@@ -79,6 +79,7 @@ chrootstart () {
 }
 
 chrootdevtree () {
+	echo ""
 	echo "injecting full portage tree into build environment"
 	echo ""
 	sleep 1
@@ -147,6 +148,7 @@ isostop () {
 }
 
 isousertree () {
+	echo ""
 	echo "injecting minimal portage tree into environment (user mode)"
 	echo ""
 	sleep 1
