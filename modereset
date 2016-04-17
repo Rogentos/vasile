@@ -2,9 +2,7 @@
 
 reset_current_mode() {
 	if [ -d /usr/portage/.git ] ; then
-		for i in "(ls /usr/portage|grep -v packages|grep -v distfiles)"; do
-			rm -rf $i
-		done
+		rm -rf /usr/portage/*
 		rm -rf /usr/portage/.git*
 		rm /etc/portage/make.conf
 		rm /etc/portage/make.profile
