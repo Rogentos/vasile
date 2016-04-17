@@ -43,6 +43,7 @@ prepareisox64 () {
 	chmod 755 ""$isoefibootdirx64"/bootx64.efi"
 	# configure portage && give up control for package / desktop environment installation
 	isostartx64
+	isousertreex64
 	isooverlaysx64
 	isobuildsystemx64
 	isochrootx64

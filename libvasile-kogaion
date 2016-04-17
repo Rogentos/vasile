@@ -80,6 +80,7 @@ chrootstartx64 () {
 
 chrootdevtreex64 () {
 	echo "injecting full portage tree into build environment"
+	echo ""
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootdevtree"
 }
@@ -147,8 +148,15 @@ isostopx64 () {
 	umount -l "$isosyncdirx64"/usr/portage/packages > /dev/null 2>&1
 }
 
+isousertreex64 () {
+	echo "injecting minimal portage tree into environment (user mode)"
+	echo ""
+	sleep 1
+	chroot "$isosyncdirx64" su - "$isouser" -c "$isousertree"
+}
+
 isooverlaysx64 () {
-	echo "injecting "$releasename" "$releasetarget" overlay into x64 environment"
+	echo "injecting "$releasename" "$releasetarget" overlay into environment"
 	sleep 1
 	chroot "$isosyncdirx64" su - "$isouser" -c "$isomainoverlay"
 }
