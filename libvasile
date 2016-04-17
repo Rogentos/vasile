@@ -1,4 +1,4 @@
-# generic arch independent functions (used for both build && iso creation)
+# generic functions (used for both build && iso creation)
 
 kernelconfig () {
 	if [[ $(zgrep 'CONFIG_OVERLAYFS_FS=' /proc/config.gz) && $(zgrep "CONFIG_SQUASHFS=" /proc/config.gz) &&  $(zgrep "CONFIG_BLK_DEV_LOOP=" /proc/config.gz) ]] ; then
@@ -25,51 +25,28 @@ checkroot () {
 	fi
 }
 
-# generic x64 functions (used for both build && iso creation)
-
 chrootchecksumx64 () {
 	while : true ; do
 		if [[ -f "$chrootx64" && -f "$chrootx64md5" ]] ; then
-			echo "good, x64 squashed chroot && checksum file found ... verifying integrity"
+			echo "good, squashed chroot && checksum file found ... verifying integrity"
 			echo ""
 			if [[ "$(md5sum -c "$chrootx64md5")" ]] ; then
-				echo "good, x64 squashed chroot checksum passed ... starting engines"
+				echo "good, squashed chroot checksum passed ... starting engines"
 				echo ""
 				sleep 1
 				break
 			else
-				echo "ooops, x64 squashed chroot checksum failed ... aborting"
+				echo "ooops, squashed chroot checksum failed ... aborting"
 				exit 1
 			fi
 		else
-			echo "ooops, x64 squashed chroot or checksum file not found ... aborting"
+			echo "ooops, squashed chroot or checksum file not found ... aborting"
 			exit 1
 		fi
 	done
 }
 
-chrootchecksumx86 () {
-	while : true ; do
-		if [[ -f "$chrootx86" && -f "$chrootx86md5" ]] ; then
-			echo "good, x86 squashed chroot && checksum file found ... verifying integrity"
-			echo ""
-			if [[ "$(md5sum -c "$chrootx86md5")" ]] ; then
-				echo "good, x86 squashed chroot checksum found ... starting engines"
-				echo ""
-				sleep 1
-				break
-			else
-				echo "ooops, x86 squashed chroot checksum failed ... aborting"
-				exit 1
-			fi
-		else
-			echo "ooops, x86 squashed chroot or checksum file not found ... aborting"
-			exit 1
-		fi
-	done
-}
-
-# arch independent build functions
+# build functions
 
 chrootstop () {
 	umount -l "$overlaydir"/proc > /dev/null 2>&1
@@ -83,8 +60,6 @@ chrootstop () {
 	umount -l "$overlaydir" > /dev/null 2>&1
 	umount -l "$rodir" > /dev/null 2>&1
 }
-
-# x64 specific build functions
 
 chrootstartx64 () {
 	mount -t squashfs "$chrootx64" "$rodir"
@@ -104,19 +79,19 @@ chrootstartx64 () {
 }
 
 chroottreex64 () {
-	echo "injecting full portage tree into x64 environment"
+	echo "injecting full portage tree into build environment"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chroottree"
 }
 
 chrootoverlaysx64 () {
-	echo "injecting "$releasename" "$releasetarget" overlay into x64 environment"
+	echo "injecting "$releasename" "$releasetarget" overlay into build environment"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootmainoverlay"
 }
 
 chrootbuildsystemx64 () {
-	echo "injecting "$releasename" x64 buildsystem && setting up portage"
+	echo "injecting "$releasename" buildsystem && setting up portage"
 	echo ""
 	sleep 1
 	for cmd in "$chrootbuildgit" "$chrootportageconfig" "$chrootmakeconfx64" "$chrootprofile" "$chrootenvupdate" ; do
@@ -126,7 +101,7 @@ chrootbuildsystemx64 () {
 
 chrootbuildx64 () {
 	echo ""
-	echo "x64 Environment is up && running ... building targets"
+	echo "Environment is up && running ... building targets"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildtarget"
 }
@@ -150,73 +125,7 @@ chrootx64 () {
 	chroot "$overlaydir" su - "$chrootuser"
 }
 
-# x86 specific build functions
-
-chrootstartx86 () {
-	mount -t squashfs "$chrootx86" "$rodir"
-	if [[ "$(uname -r | cut -d . -f1,2)" = "3.14" ]] ; then
-		mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
-	else # kernel version equal or above 3.18
-		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
-	fi
-	mount -o bind packages "$overlaydir"/usr/portage/packages
-	mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
-	mount -t proc proc "$overlaydir"/proc
-	mount -t sysfs sysfs "$overlaydir"/sys
-	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$overlaydir"/dev
-	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$overlaydir"/dev/pts
-	mount -t tmpfs -o nosuid,nodev none "$overlaydir"/dev/shm
-	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
-}
-
-chrottreex86 () {
-	echo "injecting full portage tree into x86 environment"
-	sleep 1
-	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chroottree"
-}
-
-chrootoverlaysx86 () {
-	echo "injecting "$releasename" "$releasetarget" overlay into x86 environment"
-	sleep 1
-	linux32 chroot "$overlaydir" su - "$chrootuser" -c "$chrootmainoverlay"
-}
-
-chrootbuildsystemx86 () {
-	echo "injecting "$releasename" x86 buildsystem && setting up portage"
-	echo ""
-	sleep 1
-	for cmd in "$chrootbuildgit" "$chrootportageconfig" "$chrootmakeconfx86" "$chrootprofile" "$chrootenvupdate" ; do
-		linux32 chroot "$overlaydir" su - "$chrootuser" -c "$cmd"
-	done
-}
-
-chrootbuildx86 () {
-	echo ""
-	echo "x86 environment is up && running ... building targets"
-	sleep 1
-	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildtarget"
-}
-
-chrootx86 () {
-	echo -e ""
-	echo -e "#################################################################"
-	echo -e "#       ENTERING CHROOT ENV FOR YOU TO PUSH BUILT PACKAGES      #"
-	echo -e "#               OR TO FIX EVENTUAL BUILD ERRORS                 #"
-	echo -e "#################################################################"
-	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
-	echo -e "#################################################################"
-	echo -e "#       NEXT RUN OF THIS SCRIPT WILL DESTROY ALL YOUR WORK      #"
-	echo -e "#   DO NOT EXIT CHROOT UNTIL ALL PACKAGES ARE PUSHED TO REPOS   #"
-	echo -e "#  OR, IN CASE OF BUILD FAILURES, UNTIL ALL FIXES ARE COMMITED  #"
-	echo -e "#################################################################"
-	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
-	echo -e "#################################################################"
-	echo -e ""
-	echo -e ""
-	linux32 chroot "$overlaydir" su - "$chrootuser"
-}
-
-# x64 specific iso functions
+# iso functions
 
 isostartx64 () {
 	mount -o bind packages "$isosyncdirx64"/usr/portage/packages
@@ -245,7 +154,7 @@ isooverlaysx64 () {
 }
 
 isobuildsystemx64 () {
-	echo "injecting "$releasename" x64 buildsystem && setting up portage"
+	echo "injecting "$releasename" buildsystem && setting up portage"
 	echo ""
 	sleep 1
 	for cmd in "$isobuildgit" "$isoportageconfig" "$isomakeconfx64" "$isoprofile" "$isoenvupdate" ; do
@@ -272,58 +181,4 @@ isochrootx64 () {
 	echo -e "EXIT WHEN YOU'RE DONE AND I'LL CREATE THE IMAGE"
 	echo -e ""
 	chroot "$isosyncdirx64" su - "$isouser"
-}
-
-# x86 specific iso functions
-
-isostartx86 () {
-	mount -o bind packages "$isosyncdirx86"/usr/portage/packages
-	mount -t proc proc "$isosyncdirx86"/proc
-	mount -t sysfs sysfs "$isosyncdirx86"/sys
-	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$isosyncdirx86"/dev
-	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$isosyncdirx86"/dev/pts
-	mount -t tmpfs -o nosuid,nodev none "$isosyncdirx86"/dev/shm
-	mount -t tmpfs -o nosuid,nodev,noexec none  "$isosyncdirx86"/tmp
-}
-
-isostopx86 () {
-	umount -l "$isosyncdirx86"/proc > /dev/null 2>&1
-	umount -l "$isosyncdirx86"/sys > /dev/null 2>&1
-	umount -l "$isosyncdirx86"/dev/pts > /dev/null 2>&1
-	umount -l "$isosyncdirx86"/dev/shm > /dev/null 2>&1
-	umount -l "$isosyncdirx86"/dev > /dev/null 2>&1
-	umount -l "$isosyncdirx86"/tmp > /dev/null 2>&1
-	umount -l "$isosyncdirx86"/usr/portage/packages > /dev/null 2>&1
-}
-
-isooverlaysx86 () {
-	echo "injecting "$releasename" "$releasetarget" overlay into x86 environment"
-	sleep 1
-	linux32 chroot "$isosyncdirx86" su - "$isouser" -c "$isomainoverlay"
-}
-
-isobuildsystemx86 () {
-	echo "injecting "$releasename" x86 buildsystem && setting up portage"
-	echo ""
-	sleep 1
-	for cmd in "$isobuildgit" "$isoportageconfig" "$isomakeconfx86" "$isoprofile" "$isoenvupdate" ; do
-		linux32 chroot "$isosyncdirx86" su - "$isouser" -c "$cmd"
-	done
-}
-
-isoramfsx86 () {
-	linux32 chroot "$isosyncdirx86" su - "$isouser" -c "$isodracutcmd"
-}
-
-systemramfsx86 () {
-	linux32 chroot "$isosyncdirx86" su - "$isouser" -c "dracutcmdx86"
-}
-
-isochrootx86 () {
-	echo -e ""
-	echo -e "DROPPING YOU TO A ROOT SHELL INTO ISO ENVIRONMENT"
-	echo -e "INSTALL APPS & TARGETS & DES YOU WANT INSIDE ISO"
-	echo -e "EXIT WHEN YOU'RE DONE AND I'LL CREATE THE IMAGE"
-	echo -e ""
-	linux32 chroot "$isosyncdirx86" su - "$isouser"
 }
