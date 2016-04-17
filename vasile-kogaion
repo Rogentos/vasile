@@ -59,7 +59,7 @@ export local isoefibootdirx64=""$isorootdirx64"/efi/boot"
 export local dracutrdx64="initramfs-genkernel-"$isomainarchx64"-"$kernelver""
 export local dracutcmdx64="dracut -N -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver" "/boot/"$dracutrdx64"""
 
-source /usr/lib/vasile-kogaion/libvasile
+source /usr/lib/vasile-kogaion/libvasile-kogaion
 
 case $1 in
 	--build)		source /usr/share/vasile-kogaion/build
