@@ -78,10 +78,10 @@ chrootstartx64 () {
 	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
 }
 
-chroottreex64 () {
+chrootdevtreex64 () {
 	echo "injecting full portage tree into build environment"
 	sleep 1
-	chroot "$overlaydir" su - "$chrootuser" -c "$chroottree"
+	chroot "$overlaydir" su - "$chrootuser" -c "$chrootdevtree"
 }
 
 chrootoverlaysx64 () {
