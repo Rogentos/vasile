@@ -61,7 +61,7 @@ chrootstop () {
 	umount -l "$rodir" > /dev/null 2>&1
 }
 
-chrootstartx64 () {
+chrootstart () {
 	mount -t squashfs "$chrootx64" "$rodir"
 	if [[ "$(uname -r | cut -d . -f1,2)" = "3.14" ]] ; then
 		mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
@@ -78,29 +78,29 @@ chrootstartx64 () {
 	mount -t tmpfs -o nosuid,nodev,noexec none  "$overlaydir"/tmp
 }
 
-chrootdevtreex64 () {
+chrootdevtree () {
 	echo "injecting full portage tree into build environment"
 	echo ""
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootdevtree"
 }
 
-chrootoverlaysx64 () {
+chrootoverlays () {
 	echo "injecting "$releasename" "$releasetarget" overlay into build environment"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootmainoverlay"
 }
 
-chrootbuildsystemx64 () {
+chrootbuildsystem () {
 	echo "injecting "$releasename" buildsystem && setting up portage"
 	echo ""
 	sleep 1
-	for cmd in "$chrootbuildgit" "$chrootportageconfig" "$chrootmakeconfx64" "$chrootprofile" "$chrootenvupdate" ; do
+	for cmd in "$chrootbuildgit" "$chrootportageconfig" "$chrootmakeconf" "$chrootprofile" "$chrootenvupdate" ; do
 		chroot "$overlaydir" su - "$chrootuser" -c "$cmd"
 	done
 }
 
-chrootbuildx64 () {
+chrootbuild () {
 	echo ""
 	echo "Environment is up && running ... building targets"
 	sleep 1
@@ -128,65 +128,65 @@ chrootx64 () {
 
 # iso functions
 
-isostartx64 () {
-	mount -o bind packages "$isosyncdirx64"/usr/portage/packages
-	mount -t proc proc "$isosyncdirx64"/proc
-	mount -t sysfs sysfs "$isosyncdirx64"/sys
-	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$isosyncdirx64"/dev
-	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$isosyncdirx64"/dev/pts
-	mount -t tmpfs -o nosuid,nodev none "$isosyncdirx64"/dev/shm
-	mount -t tmpfs -o nosuid,nodev,noexec none  "$isosyncdirx64"/tmp
+isostart () {
+	mount -o bind packages "$isosyncdir"/usr/portage/packages
+	mount -t proc proc "$isosyncdir"/proc
+	mount -t sysfs sysfs "$isosyncdir"/sys
+	mount -t devtmpfs -o relatime,size=3055348k,nr_inodes=763837,mode=755 none "$isosyncdir"/dev
+	mount -t devpts -o nosuid,noexec,relatime,gid=5,mode=620 none "$isosyncdir"/dev/pts
+	mount -t tmpfs -o nosuid,nodev none "$isosyncdir"/dev/shm
+	mount -t tmpfs -o nosuid,nodev,noexec none  "$isosyncdir"/tmp
 }
 
-isostopx64 () {
-	umount -l "$isosyncdirx64"/proc > /dev/null 2>&1
-	umount -l "$isosyncdirx64"/sys > /dev/null 2>&1
-	umount -l "$isosyncdirx64"/dev/pts > /dev/null 2>&1
-	umount -l "$isosyncdirx64"/dev/shm > /dev/null 2>&1
-	umount -l "$isosyncdirx64"/dev > /dev/null 2>&1
-	umount -l "$isosyncdirx64"/tmp > /dev/null 2>&1
-	umount -l "$isosyncdirx64"/usr/portage/packages > /dev/null 2>&1
+isostop () {
+	umount -l "$isosyncdir"/proc > /dev/null 2>&1
+	umount -l "$isosyncdir"/sys > /dev/null 2>&1
+	umount -l "$isosyncdir"/dev/pts > /dev/null 2>&1
+	umount -l "$isosyncdir"/dev/shm > /dev/null 2>&1
+	umount -l "$isosyncdir"/dev > /dev/null 2>&1
+	umount -l "$isosyncdir"/tmp > /dev/null 2>&1
+	umount -l "$isosyncdir"/usr/portage/packages > /dev/null 2>&1
 }
 
-isousertreex64 () {
+isousertree () {
 	echo "injecting minimal portage tree into environment (user mode)"
 	echo ""
 	sleep 1
-	chroot "$isosyncdirx64" su - "$isouser" -c "$isousertree"
+	chroot "$isosyncdir" su - "$isouser" -c "$isousertree"
 }
 
-isooverlaysx64 () {
+isooverlays () {
 	echo "injecting "$releasename" "$releasetarget" overlay into environment"
 	sleep 1
-	chroot "$isosyncdirx64" su - "$isouser" -c "$isomainoverlay"
+	chroot "$isosyncdir" su - "$isouser" -c "$isomainoverlay"
 }
 
-isobuildsystemx64 () {
+isobuildsystem () {
 	echo "injecting "$releasename" buildsystem && setting up portage"
 	echo ""
 	sleep 1
-	for cmd in "$isobuildgit" "$isoportageconfig" "$isomakeconfx64" "$isoprofile" "$isoenvupdate" ; do
-		chroot "$isosyncdirx64" su - "$isouser" -c "$cmd"
+	for cmd in "$isobuildgit" "$isoportageconfig" "$isomakeconf" "$isoprofile" "$isoenvupdate" ; do
+		chroot "$isosyncdir" su - "$isouser" -c "$cmd"
 	done
 }
 
-isoramfsx64 () {
-	chroot "$isosyncdirx64" su - "$isouser" -c "$isodracutcmd"
+isoramfs () {
+	chroot "$isosyncdir" su - "$isouser" -c "$isodracutcmd"
 }
 
-systemramfsx64 () {
-	chroot "$isosyncdirx64" su - "$isouser" -c "$dracutcmdx64"
+systemramfs () {
+	chroot "$isosyncdir" su - "$isouser" -c "$dracutcmd"
 }
 
-isoefiimgx64 () {
-	chroot "$isosyncdirx64" su - "$isouser" -c "$isoeficmd"
+isoefiimg () {
+	chroot "$isosyncdir" su - "$isouser" -c "$isoeficmd"
 }
 
-isochrootx64 () {
+isochroot () {
 	echo -e ""
 	echo -e "DROPPING YOU TO A ROOT SHELL INTO ISO ENVIRONMENT"
 	echo -e "INSTALL APPS & TARGETS & DES YOU WANT INSIDE ISO"
 	echo -e "EXIT WHEN YOU'RE DONE AND I'LL CREATE THE IMAGE"
 	echo -e ""
-	chroot "$isosyncdirx64" su - "$isouser"
+	chroot "$isosyncdir" su - "$isouser"
 }

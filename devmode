@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+fetch_devmod_portage_tree() {
+	if [[ ! -d /usr/portage/.git ]] ; then
+		cd /usr/portage && git init > /dev/null 2>&1
+		git remote add origin git://anongit.gentoo.org/repo/gentoo.git
+		git pull --depth=1 origin master
+		git branch -u origin/master master
+		rm -rf /usr/portage/profiles/updates
+	fi
+}
+
+main() {
+	fetch_devmod_portage_tree
+}
+
+main

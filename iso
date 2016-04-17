@@ -5,83 +5,83 @@
 kernelconfig
 checkroot
 
-prepareisox64 () {
+prepareiso () {
 	# we really need this folder as quick as possible
-	mkdir -p "$isosyncdirx64"
+	mkdir -p "$isosyncdir"
 	# create an empty 20GB ext4 fs were our rootfs will stay
-	dd if=/dev/zero of=""$isosyncdirx64".img" bs=50M count=400
-	mkfs.ext4 ""$isosyncdirx64".img"
+	dd if=/dev/zero of=""$isosyncdir".img" bs=50M count=400
+	mkfs.ext4 ""$isosyncdir".img"
 	# create live iso layout
-	mkdir -p "$isostagingdirx64"
-	mkdir -p "$isobootdirx64"
-	mkdir -p "$isoefibootdirx64"
-	mkdir -p "$isoliveosdirx64"
-	mkdir -p "$isosupersquashdirx64"
-	mkdir -p "$isolivesqfsdirx64"
+	mkdir -p "$isostagingdir"
+	mkdir -p "$isobootdir"
+	mkdir -p "$isoefibootdir"
+	mkdir -p "$isoliveosdir"
+	mkdir -p "$isosupersquashdir"
+	mkdir -p "$isolivesqfsdir"
 	# mount && copy core stage 4 image
-	mount -t squashfs "$chrootx64" "$isostagingdirx64"
-	mount -t ext4 ""$isosyncdirx64".img" "$isosyncdirx64"
-	rsync -aHAXr --progress "$isostagingdirx64/" "$isosyncdirx64/"
+	mount -t squashfs "$chrootx64" "$isostagingdir"
+	mount -t ext4 ""$isosyncdir".img" "$isosyncdir"
+	rsync -aHAXr --progress "$isostagingdir/" "$isosyncdir/"
 	# copy kernel into cdroot
-	cp -avx ""$isosyncdirx64"/boot/"$isokernelnamex64"" ""$isorootdirx64"/boot/vmlinuz"
+	cp -avx ""$isosyncdir"/boot/"$isokernelname"" ""$isorootdir"/boot/vmlinuz"
 	# generate live initramfs
-	isostartx64
-	isoramfsx64
-	isostopx64
+	isostart
+	isoramfs
+	isostop
 	# generate system initramfs
-	isostartx64
-	systemramfsx64
-	isostopx64
+	isostart
+	systemramfs
+	isostop
 	# copy live initramfs into cdroot
-	mv ""$isosyncdirx64"/boot/"$isodracutrd"" ""$isorootdirx64"/boot/initrd"
+	mv ""$isosyncdir"/boot/"$isodracutrd"" ""$isorootdir"/boot/initrd"
 	# generate live efi image
-	isostartx64
-	isoefiimgx64
-	isostopx64
+	isostart
+	isoefiimg
+	isostop
 	# copy efi image into cdroot
-	mv ""$isosyncdirx64"/root/bootx64.efi" "$isoefibootdirx64"
-	chmod 755 ""$isoefibootdirx64"/bootx64.efi"
+	mv ""$isosyncdir"/root/bootx64.efi" "$isoefibootdir"
+	chmod 755 ""$isoefibootdir"/bootx64.efi"
 	# configure portage && give up control for package / desktop environment installation
-	isostartx64
-	isousertreex64
-	isooverlaysx64
-	isobuildsystemx64
-	isochrootx64
-	isostopx64
+	isostart
+	isousertree
+	isooverlays
+	isobuildsystem
+	isochroot
+	isostop
 	# unmount rootfs before compression
-	umount -l "$isosyncdirx64" > /dev/null 2>&1
+	umount -l "$isosyncdir" > /dev/null 2>&1
 	# move rootfs in place
-	mv ""$isosyncdirx64".img"  "$isolivesqfsdirx64"
+	mv ""$isosyncdir".img"  "$isolivesqfsdir"
 	# squash rootfs with best compression
-	mksquashfs "$isosupersquashdirx64" ""$isorootdirx64"/squashfs.img" -b 1048576 -comp xz -Xdict-size 100%
+	mksquashfs "$isosupersquashdir" ""$isorootdir"/squashfs.img" -b 1048576 -comp xz -Xdict-size 100%
 	# move squashed rootfs in place
-	mv ""$isorootdirx64/"squashfs.img" "$isoliveosdirx64"
+	mv ""$isorootdir/"squashfs.img" "$isoliveosdir"
 }
 
-bootcoreisox64 () {
+bootcoreiso () {
 	# configure live bootloader
 	git clone https://gitlab.com/"$releasename"/boot-core.git "$bootcorepath"
-	cp -avx "$bootcorefiles" "$isorootdirx64"
+	cp -avx "$bootcorefiles" "$isorootdir"
 }
 
-cleanupisox64 () {
-	umount "$isostagingdirx64"
-	rm -rf "$isosyncdirx64"
-	rm -rf "$isostagingdirx64"
-	rm -rf "$isosupersquashdirx64"
+cleanupiso () {
+	umount "$isostagingdir"
+	rm -rf "$isosyncdir"
+	rm -rf "$isostagingdir"
+	rm -rf "$isosupersquashdir"
 	rm -rf "$bootcorepath"
 }
 
-makeisox64 () {
-	grub2-mkrescue -o ""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarchx64".iso" "$isorootdirx64"
+makeiso () {
+	grub2-mkrescue -o ""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarch".iso" "$isorootdir"
 }
 
 main () {
-	chrootchecksumx64
-	prepareisox64
-	bootcoreisox64
-	cleanupisox64
-	makeisox64
+	chrootchecksum
+	prepareiso
+	bootcoreiso
+	cleanupiso
+	makeiso
 }
 
 main

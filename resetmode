@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+reset_current_mode() {
+	if [ -d /usr/portage/.git ] ; then
+		rm -rf /usr/portage/*
+		rm -rf /usr/portage/.git*
+	fi
+}
+
+main () {
+	reset_current_mode
+}
+main
