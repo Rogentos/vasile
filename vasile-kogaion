@@ -72,8 +72,8 @@ case $1 in
 					echo -e "Options:"
 					echo -e "--buildpkg : build package/target in a clean squashed core"
 					echo -e "--buildiso : build iso based on clean squashed core + targets"
-					echo -e "--usermodeset : switch INSTALLED Kogaion system to usermode (use binary packages from repositories)"
-					echo -e "--devmodeset : switch INSTALLED Kogaion system to devmode (use source packages from portage tree )"
+					echo -e "--usermode : switch INSTALLED Kogaion system to usermode (use binary packages from repositories)"
+					echo -e "--devmode : switch INSTALLED Kogaion system to devmode (use source packages from portage tree )"
 					echo -e "--help : display this help and exit"
 					echo -e ""
 					;;
