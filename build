@@ -29,6 +29,7 @@ chrootpreparex64 () {
 main () {
 	chrootchecksumx64
 	chrootpreparex64
+	chroottreex64
 	chrootoverlaysx64
 	chrootbuildsystemx64
 	chrootbuildx64
