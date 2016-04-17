@@ -15,8 +15,16 @@ fetch_usermode_portage_tree() {
 	fi
 }
 
+set_usermode_portage_tree () {
+	ln -sf /opt/kogaion-build/conf/intel/portage /etc/portage
+	ln -sf /etc/portage/make.conf.amd64-user /etc/portage/make.conf
+	eselect profile set 1
+	env-update
+	. /etc/profile
+}
+
 main() {
-	fetch_usermod_portage_tree
+	fetch_usermode_portage_tree
 }
 
 main

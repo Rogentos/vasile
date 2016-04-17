@@ -95,9 +95,7 @@ chrootbuildsystem () {
 	echo "injecting "$releasename" buildsystem && setting up portage"
 	echo ""
 	sleep 1
-	for cmd in "$chrootbuildgit" "$chrootportageconfig" "$chrootmakeconf" "$chrootprofile" "$chrootenvupdate" ; do
-		chroot "$overlaydir" su - "$chrootuser" -c "$cmd"
-	done
+	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildgit"
 }
 
 chrootbuild () {
@@ -165,9 +163,7 @@ isobuildsystem () {
 	echo "injecting "$releasename" buildsystem && setting up portage"
 	echo ""
 	sleep 1
-	for cmd in "$isobuildgit" "$isoportageconfig" "$isomakeconf" "$isoprofile" "$isoenvupdate" ; do
-		chroot "$isosyncdir" su - "$isouser" -c "$cmd"
-	done
+	chroot "$isosyncdir" su - "$isouser" -c "$isobuildgit"
 }
 
 isoramfs () {
