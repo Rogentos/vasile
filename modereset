@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
+export local portagedir="/usr/portage"
+export local confdir="/etc/portage"
+
 reset_current_mode() {
-	if [ -d /usr/portage/.git ] ; then
-		rm -rf /usr/portage/*
-		rm -rf /usr/portage/.git*
-		rm /etc/portage/make.conf
-		rm /etc/portage/make.profile
-		rm /etc/portage
+	if [ -d ""$portagedir"/.git" ] ; then
+		rm -rf $(find "$portagedir" -mindepth 1 | grep -v "distfiles" | grep -v "packages")
+		rm ""$confdir"/make.conf"
+		rm ""$confdir"/make.profile"
+		rm "$confdir"
 	fi
 }
 
