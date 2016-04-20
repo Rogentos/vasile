@@ -53,21 +53,21 @@ export local isoefibootdir=""$isorootdir"/efi/boot"
 export local dracutrd="initramfs-genkernel-"$isomainarch"-"$kernelver""
 export local dracutcmd="dracut -N -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver" "/boot/"$dracutrd"""
 
-source /usr/lib/vasile-kogaion/libvasile-kogaion
+source /usr/lib/kvasile/libkvasile
 
 case $1 in
-	--buildpkg)		source /usr/share/vasile-kogaion/buildpkg
+	--buildpkg)		source /usr/share/kvasile/buildpkg
 					;;
-	--buildiso)		source /usr/share/vasile-kogaion/buildiso
+	--buildiso)		source /usr/share/kvasile/buildiso
 					;;
-	--usermode)		source /usr/share/vasile-kogaion/modereset
-					source /usr/share/vasile-kogaion/usermodeset
+	--usermode)		source /usr/share/kvasile/modereset
+					source /usr/share/kvasile/usermodeset
 					;;
-	--devmode)		source /usr/share/vasile-kogaion/modereset
-					source /usr/share/vasile-kogaion/devmodeset
+	--devmode)		source /usr/share/kvasile/modereset
+					source /usr/share/kvasile/devmodeset
 					;;
 	--help)			echo -e ""
-					echo -e "Usage: vasile-kogaion [options]"
+					echo -e "Usage: kvasile [options]"
 					echo -e ""
 					echo -e "Options:"
 					echo -e "--buildpkg : build package/target in a clean squashed core"
