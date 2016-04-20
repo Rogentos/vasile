@@ -5,7 +5,7 @@ export local confdir="/etc/portage"
 
 reset_current_mode() {
 	if [ -d ""$portagedir"/.git" ] ; then
-		rm -rf $(find "$portagedir" -mindepth 1 | grep -v "distfiles" | grep -v "packages")
+		find "$portagedir" -mindepth 1 -name "packages" -prune -o -name "distfiles" -prune -o -exec rm -rf {} \; > /dev/null 2>&1
 		rm ""$confdir"/make.conf"
 		rm ""$confdir"/make.profile"
 		rm "$confdir"
