@@ -9,7 +9,7 @@
 export local releasename="kogaion"
 export local releasetarget="desktop"
 export local releaseversion="3"
-export local kernelver="3.14.50-"$releasename""
+export local kernelver="4.4.4-"$releasename""
 export local chrootx64=""$releasename"_"$releaseversion"_core_x64.squashfs"
 export local chrootx64md5=""$chrootx64".md5"
 
