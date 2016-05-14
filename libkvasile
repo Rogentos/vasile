@@ -180,6 +180,10 @@ isoefiimg () {
 	chroot "$isosyncdir" su - "$isouser" -c "$isoeficmd"
 }
 
+isochainload () {
+	chroot "$isosyncdir" su - "$isouser" -c "$isochainloadcmd"
+}
+
 isochroot () {
 	echo -e ""
 	echo -e "DROPPING YOU TO A ROOT SHELL INTO ISO ENVIRONMENT"

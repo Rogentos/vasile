@@ -41,6 +41,13 @@ prepareiso () {
 	# copy efi image into cdroot
 	mv ""$isosyncdir"/root/bootx64.efi" "$isoefibootdir"
 	chmod 755 ""$isoefibootdir"/bootx64.efi"
+	# generate grub chainloader for syslinux
+	isostart
+	isochainload
+	isostop
+	# copy chainloader parts into cdroot
+	mv ""$isosyncdir"/root/core.img" "$isobootdir"
+	cp -avx ""$isosyncdir"/usr/lib64/grub/i386-pc/lnxboot.img" "$isobootdir"
 	# configure portage && give up control for package / desktop environment installation
 	isostart
 	isooverlays
