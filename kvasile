@@ -57,9 +57,9 @@ export local dracutcmd="dracut -N -o systemd -o systemd-initrd -o systemd-networ
 source /usr/lib/kvasile/libkvasile
 
 case $1 in
-	--buildpkg)		source /usr/share/kvasile/makepkg
+	--makepkg)		source /usr/share/kvasile/makepkg
 					;;
-	--buildiso)		source /usr/share/kvasile/makeiso
+	--makeiso)		source /usr/share/kvasile/makeiso
 					;;
 	--usermode)		source /usr/share/kvasile/modereset
 					source /usr/share/kvasile/usermodeset
