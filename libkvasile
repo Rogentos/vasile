@@ -184,6 +184,12 @@ isochainload () {
 	chroot "$isosyncdir" su - "$isouser" -c "$isochainloadcmd"
 }
 
+isoservices () {
+	for service in cups kogaionlive lightdm NetworkManager virtualbox-guest-additions ; do
+		chroot "$isosyncdir" su - "$isouser" -c "systemctl enable "$service""
+	done
+}
+
 isochroot () {
 	echo -e ""
 	echo -e "DROPPING YOU TO A ROOT SHELL INTO ISO ENVIRONMENT"

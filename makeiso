@@ -55,6 +55,10 @@ prepareiso () {
 	isousertree
 	isochroot
 	isostop
+	# enable system services
+	isostart
+	isoservices
+	isostop
 	# unmount rootfs before compression
 	umount -l "$isosyncdir" > /dev/null 2>&1
 	# move rootfs in place
