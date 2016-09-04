@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-# Vasile needs root privileges and a proper kernel to run
-
-kernelconfig
-checkroot
-
 prepareiso () {
 	# we really need this folder as quick as possible
 	mkdir -p "$isosyncdir"

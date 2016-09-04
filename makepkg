@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-# Vasile needs root privileges and a proper kernel to run
-
-kernelconfig
-checkroot
-
 chrootprepare () {
 	# check our environment for sanity
 	# if safe, trigger start && break the loop to build packages

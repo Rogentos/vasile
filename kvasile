@@ -4,62 +4,24 @@
 # Dependencies : kernel built with squashfs + overlayfs + loopback support && sys-fs/grub:2 && sys-fs/squashfs-tools && dev-libs/libisoburn && sys-fs/mtools
 #
 
-# generic variables
-
-export local releasename="kogaion"
-export local releasetarget="desktop"
-export local releaseversion="3"
-export local kernelver="4.4.5-"$releasename""
-export local chrootx64=""$releasename"_"$releaseversion"_core_x64.squashfs"
-export local chrootx64md5=""$chrootx64".md5"
-
-# build variables
-
-export local rodir="rodir"
-export local rwdir="rwdir"
-export local workdir="workdir" # only needed for overlayfs on kernel greather than 3.18
-export local overlaydir="overlaydir"
-export local chrootuser="root"
-export local chroottarget="${@:2}"
-export local chrootbuildtarget="emerge -kav "$chroottarget""
-export local chrootdevtree="/usr/share/kvasile/devmodeset"
-export local chrootmainoverlay="layman -f -a "$releasename"-"$releasetarget" -o https://gitlab.com/"$releasename"/"$releasename"-"$releasetarget"/raw/master/overlay.xml"
-export local chrootbuildgit="cd /opt && git clone https://gitlab.com/"$releasename"/"$releasename"-build.git"
-
-# iso variables
-
-export local bootcorepath="/tmp/bootcore"
-export local bootcorefiles="/tmp/bootcore/cdroot/boot"
-export local isouser="root"
-export local isotarget="${@:2}"
-export local isoinstalltarget="emerge -Kav "$isotarget""
-export local isousertree="/usr/share/kvasile/usermodeset"
-export local isomainoverlay="layman -f -a "$releasename"-"$releasetarget" -o https://gitlab.com/"$releasename"/"$releasename"-"$releasetarget"/raw/master/overlay.xml"
-export local isobuildgit="cd /opt && git clone https://gitlab.com/"$releasename"/"$releasename"-build.git"
-
-export local isodracutcmd="dracut -N -a dmsquash-live -a pollcdrom -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver""
-export local isodracutrd="initramfs-"$kernelver".img"
-export local isoeficmd="grub2-mkimage -d /usr/lib64/grub/x86_64-efi -o bootx64.efi -O x86_64-efi ext2 fat udf btrfs ntfs reiserfs xfs hfsplus lvm ata part_msdos part_gpt part_apple bsd search_fs_uuid normal chain iso9660 configfile help loadenv reboot cat search memdisk tar boot linux chain"
-export local isochainloadcmd="grub2-mkimage -d /usr/lib64/grub/i386-pc -o core.img -O i386-pc biosdisk part_msdos fat"
-export local isomainarch="x86_64"
-export local isorootdir=""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarch""
-export local isokernelname="kernel-genkernel-"$isomainarch"-"$kernelver""
-export local isostagingdir="/tmp/"$isorootdir""
-export local isosupersquashdir=""$isorootdir"/CDroot"
-export local isolivesqfsdir=""$isosupersquashdir"/LiveOS"
-export local isoliveosdir=""$isorootdir"/LiveOS"
-export local isosyncdir=""$isorootdir"/rootfs"
-export local isobootdir=""$isorootdir"/boot/grub"
-export local isoefibootdir=""$isorootdir"/efi/boot"
-export local dracutrd="initramfs-genkernel-"$isomainarch"-"$kernelver""
-export local dracutcmd="dracut -N -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver" "/boot/"$dracutrd"""
+# Import our variables and functions
 
 source /usr/lib/kvasile/libkvasile
+
+# Vasile need root privileges and a proper kernel to run
+# Also, running it in live mode is a really bad idea
+
+checkroot
+checkiflive
+kernelconfig
+
 
 case $1 in
 	--makepkg)		source /usr/share/kvasile/makepkg
 					;;
 	--makeiso)		source /usr/share/kvasile/makeiso
+					;;
+	--resetmode)	source /usr/share/kvasile/modereset
 					;;
 	--usermode)		source /usr/share/kvasile/modereset
 					source /usr/share/kvasile/usermodeset
@@ -73,8 +35,9 @@ case $1 in
 					echo -e "Options:"
 					echo -e "--makepkg : build package/target in a clean squashed core"
 					echo -e "--makeiso : build iso based on clean squashed core + targets"
-					echo -e "--usermode : switch INSTALLED Kogaion system to usermode (use binary packages from repositories)"
-					echo -e "--devmode : switch INSTALLED Kogaion system to devmode (use source packages from portage tree)"
+					echo -e "--resetmode : reset INSTALLED Kogaion system state - You're on your own, you've been warned!"
+					echo -e "--usermode : switch INSTALLED Kogaion system state to usermode - use binary packages from repositories"
+					echo -e "--devmode : switch INSTALLED Kogaion system state to devmode (aka Gentoo mode) - use source packages from portage tree"
 					echo -e "--help : display this help and exit"
 					echo -e ""
 					;;
