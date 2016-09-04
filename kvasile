@@ -17,32 +17,39 @@ kernelconfig
 
 
 case $1 in
-	--makepkg)		source /usr/share/kvasile/makepkg
-					;;
-	--makeiso)		source /usr/share/kvasile/makeiso
-					;;
-	--resetmode)	source /usr/share/kvasile/modereset
-					;;
-	--usermode)		source /usr/share/kvasile/modereset
-					source /usr/share/kvasile/usermodeset
-					;;
-	--devmode)		source /usr/share/kvasile/modereset
-					source /usr/share/kvasile/devmodeset
-					;;
-	--help)			echo -e ""
-					echo -e "Usage: kvasile [options]"
-					echo -e ""
-					echo -e "Options:"
-					echo -e "--makepkg : build package/target in a clean squashed core"
-					echo -e "--makeiso : build iso based on clean squashed core + targets"
-					echo -e "--resetmode : reset INSTALLED Kogaion system state - You're on your own, you've been warned!"
-					echo -e "--usermode : switch INSTALLED Kogaion system state to usermode - use binary packages from repositories"
-					echo -e "--devmode : switch INSTALLED Kogaion system state to devmode (aka Gentoo mode) - use source packages from portage tree"
-					echo -e "--help : display this help and exit"
-					echo -e ""
-					;;
-	*)				echo -e "error: no operation specified, use --help for help"
-					;;
+	--makepkg)
+		source /usr/share/kvasile/makepkg
+		;;
+	--makeiso)
+		source /usr/share/kvasile/makeiso
+		;;
+	--resetmode)
+		source /usr/share/kvasile/modereset
+		;;
+	--usermode)
+		source /usr/share/kvasile/modereset
+		source /usr/share/kvasile/usermodeset
+		;;
+	--devmode)
+		source /usr/share/kvasile/modereset
+		source /usr/share/kvasile/devmodeset
+		;;
+	--help)
+		echo -e ""
+		echo -e "Usage: kvasile [options]"
+		echo -e ""
+		echo -e "Options:"
+		echo -e "--makepkg : build package/target in a clean squashed core"
+		echo -e "--makeiso : build iso based on clean squashed core + targets"
+		echo -e "--resetmode : reset INSTALLED Kogaion system state - You're on your own, you've been warned!"
+		echo -e "--usermode : switch INSTALLED Kogaion system state to usermode - use binary packages from repositories"
+		echo -e "--devmode : switch INSTALLED Kogaion system state to devmode (aka Gentoo mode) - use source packages from portage tree"
+		echo -e "--help : display this help and exit"
+		echo -e ""
+		;;
+	*)
+		echo -e "error: no operation specified, use --help for help"
+		;;
 esac
 
 exit 0
