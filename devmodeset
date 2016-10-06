@@ -2,7 +2,7 @@
 
 export local portagedir="/usr/portage"
 export local confdir="/etc/portage"
-export local gitdir="/opt/argentwork-build/conf/intel/portage"
+export local gitdir="/opt/argentws-build/conf/intel/portage"
 
 fetch_devmode_portage_tree() {
 	if [[ ! -d "$portagedir"/.git ]] ; then

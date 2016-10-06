@@ -3,7 +3,7 @@
 # generic variables
 
 export local releasename="argent"
-export local releasetarget="work"
+export local releasetarget="ws"
 export local releaseversion="1"
 export local kernelver="4.4.21-"$releasename""
 export local chrootx64=""$releasename"_"$releaseversion"_core_x64.squashfs"
