@@ -44,10 +44,9 @@ case $1 in
 		einfo "--usermode : switch INSTALLED Kogaion system state to usermode - use binary packages from repositories"
 		einfo "--devmode : switch INSTALLED Kogaion system state to devmode (aka Gentoo mode) - use source packages from portage tree"
 		einfo "--help : display this help and exit"
-		einfo ""
 		;;
 	*)
-		eerror -e "error: no operation specified, use --help for help"
+		eerror "error: no operation specified, use --help for help"
 		;;
 esac
 

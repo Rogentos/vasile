@@ -117,11 +117,7 @@ chrootstop () {
 
 chrootstart () {
 	mount -t squashfs "$chrootx64" "$rodir"
-	if [[ "$(uname -r | cut -d . -f1,2)" = "3.14" ]] ; then
-		mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
-	else # kernel version equal or above 3.18
-		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
-	fi
+	mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
 	mount -o bind packages "$overlaydir"/usr/portage/packages
 	mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
 	mount -t proc proc "$overlaydir"/proc
