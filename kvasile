@@ -35,20 +35,19 @@ case $1 in
 		source /usr/share/kvasile/devmodeset
 		;;
 	--help)
-		echo -e ""
-		echo -e "Usage: kvasile [options]"
-		echo -e ""
-		echo -e "Options:"
-		echo -e "--makepkg : build package/target in a clean squashed core"
-		echo -e "--makeiso : build iso based on clean squashed core + targets"
-		echo -e "--resetmode : reset INSTALLED Kogaion system state - You're on your own, you've been warned!"
-		echo -e "--usermode : switch INSTALLED Kogaion system state to usermode - use binary packages from repositories"
-		echo -e "--devmode : switch INSTALLED Kogaion system state to devmode (aka Gentoo mode) - use source packages from portage tree"
-		echo -e "--help : display this help and exit"
-		echo -e ""
+		einfo "Usage: kvasile [options]"
+		einfo ""
+		einfo "Options:"
+		einfo "--makepkg : build package/target in a clean squashed core"
+		einfo "--makeiso : build iso based on clean squashed core + targets"
+		einfo "--resetmode : reset INSTALLED Kogaion system state - You're on your own, you've been warned!"
+		einfo "--usermode : switch INSTALLED Kogaion system state to usermode - use binary packages from repositories"
+		einfo "--devmode : switch INSTALLED Kogaion system state to devmode (aka Gentoo mode) - use source packages from portage tree"
+		einfo "--help : display this help and exit"
+		einfo ""
 		;;
 	*)
-		echo -e "error: no operation specified, use --help for help"
+		eerror -e "error: no operation specified, use --help for help"
 		;;
 esac
 
