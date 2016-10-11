@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# import gentoo functions
+source /lib/gentoo/functions.sh
+
 # generic variables
 
 export local releasename="argent"
@@ -55,33 +58,25 @@ export local dracutcmd="dracut -N -o systemd -o systemd-initrd -o systemd-networ
 kernelconfig () {
 	if [[ $(zgrep 'CONFIG_OVERLAY_FS=' /proc/config.gz) && $(zgrep "CONFIG_SQUASHFS=" /proc/config.gz) &&  $(zgrep "CONFIG_BLK_DEV_LOOP=" /proc/config.gz) ]] ; then
 		# if you use 3.18 LTS or newer kernels, change CONFIG_OVERLAYFS_FS to CONFIG_OVERLAY_FS
-		echo ""
-		echo "Kernel configuration seems OK, moving on"
-		echo ""
+		einfo "Kernel configuration seems OK, moving on"
 		sleep 1
 	else
-		echo ""
-		echo "Vasile needs OVERLAYFS && SQUASHFS && LOOP DEVICES to work"
-		echo "Please rebuild the kernel with those activated to use it"
-		echo ""
+		eerror "Vasile needs OVERLAYFS && SQUASHFS && LOOP DEVICES to work"
+		eerror "Please rebuild the kernel with those activated to use it"
 		exit 1
 	fi
 }
 
 checkroot () {
 	if [[ "$(whoami)" != root ]] ; then
-		echo ""
-		echo "You're not root?...No cookies for you, go away !!!"
-		echo ""
+		eerror "You're not root?...No cookies for you, go away !!!"
 		exit 1
 	fi
 }
 
 checkiflive () {
 	if [[ -L /dev/mapper/live-base ]] ; then
-		echo ""
-		echo "Running Vasile in live mode is a bad idea ... aborting !!!"
-		echo ""
+		eerror "Running Vasile in live mode is a bad idea ... aborting !!!"
 		exit 1
 	fi
 }
@@ -89,19 +84,17 @@ checkiflive () {
 chrootchecksum () {
 	while : true ; do
 		if [[ -f "$chrootx64" && -f "$chrootx64md5" ]] ; then
-			echo "good, squashed chroot && checksum file found ... verifying integrity"
-			echo ""
+			einfo "good, squashed chroot && checksum file found ... verifying integrity"
 			if [[ "$(md5sum -c "$chrootx64md5")" ]] ; then
-				echo "good, squashed chroot checksum passed ... starting engines"
-				echo ""
+				einfo "good, squashed chroot checksum passed ... starting engines"
 				sleep 1
 				break
 			else
-				echo "ooops, squashed chroot checksum failed ... aborting"
+				eerror "ooops, squashed chroot checksum failed ... aborting"
 				exit 1
 			fi
 		else
-			echo "ooops, squashed chroot or checksum file not found ... aborting"
+			eerror "ooops, squashed chroot or checksum file not found ... aborting"
 			exit 1
 		fi
 	done
@@ -124,11 +117,7 @@ chrootstop () {
 
 chrootstart () {
 	mount -t squashfs "$chrootx64" "$rodir"
-	if [[ "$(uname -r | cut -d . -f1,2)" = "3.14" ]] ; then
-		mount -t overlayfs -o lowerdir="$rodir",upperdir="$rwdir" overlayfs "$overlaydir"
-	else # kernel version equal or above 3.18
-		mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
-	fi
+	mount -t overlay -o lowerdir="$rodir",upperdir="$rwdir",workdir="$workdir" overlay "$overlaydir"
 	mount -o bind packages "$overlaydir"/usr/portage/packages
 	mount -o bind distfiles "$overlaydir"/usr/portage/distfiles
 	mount -t proc proc "$overlaydir"/proc
@@ -140,49 +129,42 @@ chrootstart () {
 }
 
 chrootdevtree () {
-	echo ""
-	echo "injecting full portage tree into build environment"
-	echo ""
+	einfo "injecting full portage tree into build environment"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootdevtree"
 }
 
 chrootoverlays () {
-	echo "injecting "$releasename" "$releasetarget" overlay into build environment"
+	einfo "injecting "$releasename" "$releasetarget" overlay into build environment"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootmainoverlay"
 }
 
 chrootbuildsystem () {
-	echo "injecting "$releasename" buildsystem && setting up portage"
-	echo ""
+	einfo "injecting "$releasename" buildsystem && setting up portage"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildgit"
 }
 
 chrootbuild () {
-	echo ""
-	echo "Environment is up && running ... building targets"
+	einfo "Environment is up && running ... building targets"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildtarget"
 }
 
 chrootx64 () {
-	echo -e ""
-	echo -e "#################################################################"
-	echo -e "#       ENTERING CHROOT ENV FOR YOU TO PUSH BUILT PACKAGES      #"
-	echo -e "#               OR TO FIX EVENTUAL BUILD ERRORS                 #"
-	echo -e "#################################################################"
-	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
-	echo -e "#################################################################"
-	echo -e "#       NEXT RUN OF THIS SCRIPT WILL DESTROY ALL YOUR WORK      #"
-	echo -e "#   DO NOT EXIT CHROOT UNTIL ALL PACKAGES ARE PUSHED TO REPOS   #"
-	echo -e "#  OR, IN CASE OF BUILD FAILURES, UNTIL ALL FIXES ARE COMMITED  #"
-	echo -e "#################################################################"
-	echo -e "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
-	echo -e "#################################################################"
-	echo -e ""
-	echo -e ""
+	einfo "#################################################################"
+	einfo "#       ENTERING CHROOT ENV FOR YOU TO PUSH BUILT PACKAGES      #"
+	einfo "#               OR TO FIX EVENTUAL BUILD ERRORS                 #"
+	einfo "#################################################################"
+	einfo "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
+	einfo "#################################################################"
+	einfo "#       NEXT RUN OF THIS SCRIPT WILL DESTROY ALL YOUR WORK      #"
+	einfo "#   DO NOT EXIT CHROOT UNTIL ALL PACKAGES ARE PUSHED TO REPOS   #"
+	einfo "#  OR, IN CASE OF BUILD FAILURES, UNTIL ALL FIXES ARE COMMITED  #"
+	einfo "#################################################################"
+	einfo "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
+	einfo "#################################################################"
 	chroot "$overlaydir" su - "$chrootuser"
 }
 
@@ -209,22 +191,19 @@ isostop () {
 }
 
 isousertree () {
-	echo ""
-	echo "injecting minimal portage tree into environment (user mode)"
-	echo ""
+	einfo "injecting minimal portage tree into environment (user mode)"
 	sleep 1
 	chroot "$isosyncdir" su - "$isouser" -c "$isousertree"
 }
 
 isooverlays () {
-	echo "injecting "$releasename" "$releasetarget" overlay into environment"
+	einfo "injecting "$releasename" "$releasetarget" overlay into environment"
 	sleep 1
 	chroot "$isosyncdir" su - "$isouser" -c "$isomainoverlay"
 }
 
 isobuildsystem () {
-	echo "injecting "$releasename" buildsystem && setting up portage"
-	echo ""
+	einfo "injecting "$releasename" buildsystem && setting up portage"
 	sleep 1
 	chroot "$isosyncdir" su - "$isouser" -c "$isobuildgit"
 }
@@ -246,16 +225,14 @@ isochainload () {
 }
 
 isoservices () {
-	for service in cups connman dm-event argentlive lightdm lvm2-lvmetad lvm2-monitor NetworkManager ModemManager virtualbox-guest-additions ; do
+	for service in avahi-daemon cups connman dm-event argentlive lightdm lvm2-lvmetad lvm2-monitor NetworkManager ModemManager virtualbox-guest-additions ; do
 		chroot "$isosyncdir" su - "$isouser" -c "systemctl enable "$service""
 	done
 }
 
 isochroot () {
-	echo -e ""
-	echo -e "DROPPING YOU TO A ROOT SHELL INTO ISO ENVIRONMENT"
-	echo -e "INSTALL APPS & TARGETS & DES YOU WANT INSIDE ISO"
-	echo -e "EXIT WHEN YOU'RE DONE AND I'LL CREATE THE IMAGE"
-	echo -e ""
+	einfo "DROPPING YOU TO A ROOT SHELL INTO ISO ENVIRONMENT"
+	einfo "INSTALL APPS & TARGETS & DES YOU WANT INSIDE ISO"
+	einfo "EXIT WHEN YOU'RE DONE AND I'LL CREATE THE IMAGE"
 	chroot "$isosyncdir" su - "$isouser"
 }
