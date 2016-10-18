@@ -23,10 +23,6 @@ prepareiso () {
 	isostart
 	isoramfs
 	isostop
-	# generate system initramfs
-	isostart
-	systemramfs
-	isostop
 	# copy live initramfs into cdroot
 	mv ""$isosyncdir"/boot/"$isodracutrd"" ""$isorootdir"/boot/initrd"
 	# generate live efi image
