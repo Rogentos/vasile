@@ -50,8 +50,6 @@ export local isoliveosdir=""$isorootdir"/LiveOS"
 export local isosyncdir=""$isorootdir"/rootfs"
 export local isobootdir=""$isorootdir"/boot/grub"
 export local isoefibootdir=""$isorootdir"/efi/boot"
-export local dracutrd="initramfs-genkernel-"$isomainarch"-"$kernelver""
-export local dracutcmd="dracut -N -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver" "/boot/"$dracutrd"""
 
 # generic functions (used for both build && iso creation)
 
@@ -210,10 +208,6 @@ isobuildsystem () {
 
 isoramfs () {
 	chroot "$isosyncdir" su - "$isouser" -c "$isodracutcmd"
-}
-
-systemramfs () {
-	chroot "$isosyncdir" su - "$isouser" -c "$dracutcmd"
 }
 
 isoefiimg () {
