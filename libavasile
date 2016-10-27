@@ -30,8 +30,6 @@ export local chrootbuildgit="cd /opt && git clone https://gitlab.com/"$releasena
 export local bootcorepath="/tmp/bootcore"
 export local bootcorefiles="/tmp/bootcore/cdroot/boot"
 export local isouser="root"
-export local isotarget="${@:2}"
-export local isoinstalltarget="emerge -Kav "$isotarget""
 export local isousertree="/usr/share/avasile/usermodeset"
 export local isomainoverlay="layman -f -a "$releasename"-"$releasetarget" -o https://gitlab.com/"$releasename"/"$releasename"-"$releasetarget"/raw/master/overlay.xml"
 export local isobuildgit="cd /opt && git clone https://gitlab.com/"$releasename"/"$releasename""$releasetarget"-build.git"
@@ -74,7 +72,7 @@ checkroot () {
 
 checkiflive () {
 	if [[ -L /dev/mapper/live-base ]] ; then
-		eerror "Running Vasile in live mode is a bad idea ... aborting !!!"
+		eerror "Running in Live mode is unsupported"
 		exit 1
 	fi
 }
@@ -82,17 +80,17 @@ checkiflive () {
 chrootchecksum () {
 	while : true ; do
 		if [[ -f "$chrootx64" && -f "$chrootx64md5" ]] ; then
-			einfo "good, squashed chroot && checksum file found ... verifying integrity"
+			einfo "Squashed chroot & Checksum file found"
 			if [[ "$(md5sum -c "$chrootx64md5")" ]] ; then
-				einfo "good, squashed chroot checksum passed ... starting engines"
+				einfo "Squashed chroot checksum found"
 				sleep 1
 				break
 			else
-				eerror "ooops, squashed chroot checksum failed ... aborting"
+				eerror "Squashed chroot checksum failed"
 				exit 1
 			fi
 		else
-			eerror "ooops, squashed chroot or checksum file not found ... aborting"
+			eerror "Either squashed chroot or Checksum file were not found"
 			exit 1
 		fi
 	done
@@ -127,42 +125,34 @@ chrootstart () {
 }
 
 chrootdevtree () {
-	einfo "injecting full portage tree into build environment"
+	einfo "Injecting devmode portage tree"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootdevtree"
 }
 
 chrootoverlays () {
-	einfo "injecting "$releasename" "$releasetarget" overlay into build environment"
+	einfo "Injecting "$releasename" "$releasetarget" overlay"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootmainoverlay"
 }
 
 chrootbuildsystem () {
-	einfo "injecting "$releasename" buildsystem && setting up portage"
+	einfo "Injecting "$releasename" ws buildsystem"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildgit"
 }
 
 chrootbuild () {
-	einfo "Environment is up && running ... building targets"
+	einfo "Environment is ready!"
 	sleep 1
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildtarget"
 }
 
 chrootx64 () {
-	einfo "#################################################################"
-	einfo "#       ENTERING CHROOT ENV FOR YOU TO PUSH BUILT PACKAGES      #"
-	einfo "#               OR TO FIX EVENTUAL BUILD ERRORS                 #"
-	einfo "#################################################################"
-	einfo "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
-	einfo "#################################################################"
-	einfo "#       NEXT RUN OF THIS SCRIPT WILL DESTROY ALL YOUR WORK      #"
-	einfo "#   DO NOT EXIT CHROOT UNTIL ALL PACKAGES ARE PUSHED TO REPOS   #"
-	einfo "#  OR, IN CASE OF BUILD FAILURES, UNTIL ALL FIXES ARE COMMITED  #"
-	einfo "#################################################################"
-	einfo "#            !!! WARNING !!! WARNING !!! WARNING !!!            #"
-	einfo "#################################################################"
+	einfo "DROPPING YOU TO A ROOT SHELL INTO BUILD ENVIRONMENT"
+	einfo "FIX FAILURES && ADJUST PORTAGE CONFIGURATION FILES"
+	einfo "TEST USEFLAGS && KEYWORDS && MASKS IF REQUIRED"
+	einfo "IN THE END : DO NOT FORGET TO COMMIT YOUR CHANGES"
 	chroot "$overlaydir" su - "$chrootuser"
 }
 
@@ -189,19 +179,19 @@ isostop () {
 }
 
 isousertree () {
-	einfo "injecting minimal portage tree into environment (user mode)"
+	einfo "Injecting user mode portage tree"
 	sleep 1
 	chroot "$isosyncdir" su - "$isouser" -c "$isousertree"
 }
 
 isooverlays () {
-	einfo "injecting "$releasename" "$releasetarget" overlay into environment"
+	einfo "Injecting "$releasename" "$releasetarget" overlay"
 	sleep 1
 	chroot "$isosyncdir" su - "$isouser" -c "$isomainoverlay"
 }
 
 isobuildsystem () {
-	einfo "injecting "$releasename" buildsystem && setting up portage"
+	einfo "Injecting "$releasename" ws buildsystem"
 	sleep 1
 	chroot "$isosyncdir" su - "$isouser" -c "$isobuildgit"
 }
