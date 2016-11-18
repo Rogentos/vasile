@@ -39,6 +39,10 @@ case $1 in
 		source /usr/share/avasile/modereset
 		source /usr/share/avasile/devmodeset
 		;;
+	--srcmode)
+		source /usr/share/vasile/resetmode
+		source /usr/share/vasile/srcmode
+
 	--help)
 		einfo "Usage: avasile [options]"
 		einfo ""
@@ -48,6 +52,7 @@ case $1 in
 		einfo "--resetmode : reset INSTALLED Argent system state - You're on your own, you've been warned!"
 		einfo "--usermode : switch INSTALLED Argent system state to usermode - use binary packages from repositories"
 		einfo "--devmode : switch INSTALLED Argent system state to devmode (aka Gentoo mode) - use source packages from portage tree"
+		einfo "--srcmode : switch Argent Linux system state to source only mode (full Gentoo mode)"
 		einfo "--help : display this help and exit"
 		einfo ""
 		;;
