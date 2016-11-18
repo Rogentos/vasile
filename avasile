@@ -40,8 +40,8 @@ case $1 in
 		source /usr/share/avasile/devmodeset
 		;;
 	--srcmode)
-		source /usr/share/vasile/modereset
-		source /usr/share/vasile/srcmode
+		source /usr/share/avasile/modereset
+		source /usr/share/avasile/srcmode
 		;;
 
 	--help)
