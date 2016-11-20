@@ -420,7 +420,7 @@ fetchoverlays () {
 setbinmodeconfig() {
 	# set make.conf to binmode ( usermode ), portage will always use binary packages from binhost
 	ln -sf "$gitdir" "$confdir"
-	ln -sf "$confdir"/make.conf.amd64-usermode "$confdir"/make.conf
+	ln -sf "$confdir"/make.conf.amd64-user "$confdir"/make.conf
 	eselect profile set 1
 	env-update
 	. /etc/profile
@@ -431,7 +431,7 @@ setmixedmodeconfig() {
 	# but will use ebuilds if they are newer than binary packages from binhost
 	# or if the binary package is not available in binhost
 	ln -sf "$gitdir" "$confdir"
-	ln -sf "$confdir"/make.conf.amd64-devmode "$confdir"/make.conf
+	ln -sf "$confdir"/make.conf.amd64-devel "$confdir"/make.conf
 	eselect profile set 1
 	env-update
 	. /etc/profile
