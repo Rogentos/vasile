@@ -6,7 +6,7 @@ source /lib/gentoo/functions.sh
 
 # generic variables
 
-export local releasename="arent"
+export local releasename="argent"
 export local releasetarget="ws"
 export local releaseversion="1"
 
