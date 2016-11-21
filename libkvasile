@@ -37,7 +37,7 @@ export local chrootsrcmode="vasile --srcmode"
 
 export local isouser="root"
 export local isomainarch="x86_64"
-export local isobinmode="vasile --binmode"
+export local isobinmode="vasile --usermode"
 export local isokernelname="kernel-genkernel-"$isomainarch"-"$kernelver""
 export local isoramfscmd="dracut -N -a dmsquash-live -a pollcdrom -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver""
 export local isoramfsname="initramfs-"$kernelver".img"
@@ -382,7 +382,7 @@ fetchportageconfig() {
 fetchfullportagetree() {
 	# fetch full portage tree
 	if [[ ! -d "$portagedir"/.git ]] ; then
-		einfo "Injecting mixedmode/srcmode (full) gentoo portage tree"
+		einfo "Injecting devmode/srcmode (full) gentoo portage tree"
 		cd "$portagedir" && git init > /dev/null 2>&1
 		git remote add origin https://gitlab.com/kogaion/portage.git
 		git pull --depth=1 origin master
@@ -393,11 +393,11 @@ fetchfullportagetree() {
 
 fetchminimalportagetree() {
 	# fetch minimal portage tree
-	# in binmode we don't want the whole tree of gentoo ebuilds
+	# in binmode (usermode) we don't want the whole tree of gentoo ebuilds
 	# but we need portage profiles portage metadata && portage eclasses
 	# so make a sparse-checkout, to fetch only what we need
 	if [[ ! -d "$portagedir"/.git ]] ; then
-		einfo "Injecting binmode (minimal) gentoo portage tree"
+		einfo "Injecting binmode (usermode) (minimal) gentoo portage tree"
 		cd "$portagedir" && git init > /dev/null 2>&1
 		git remote add origin https://gitlab.com/kogaion/portage.git
 		git config core.sparsecheckout true
@@ -418,7 +418,7 @@ fetchoverlays () {
 }
 
 setbinmodeconfig() {
-	# set make.conf to binmode, portage will always use binary packages from binhost
+	# set make.conf to binmode (user), portage will always use binary packages from binhost
 	ln -sf "$gitdir" "$confdir"
 	ln -sf "$confdir"/make.conf.amd64-user "$confdir"/make.conf
 	eselect profile set 1
@@ -427,7 +427,7 @@ setbinmodeconfig() {
 }
 
 setmixedmodeconfig() {
-	# set make.conf to mixedmode, portage will prefer binary packages over ebuilds
+	# set make.conf to mixedmode ( devmode), portage will prefer binary packages over ebuilds
 	# but will use ebuilds if they are newer than binary packages from binhost
 	# or if the binary package is not available in binhost
 	ln -sf "$gitdir" "$confdir"
@@ -525,15 +525,15 @@ echo -e "\
 		!!! WARNING !!! : Never never never leave the system in this state. You will no longer be able to install/remove/upgrade any packages untill you set the system profile,
 		get the portage tree, overlays and configure portage by hand. Or, you can always activate one of the three other supported system states.
 
-	"$colorstart"--binmode"$colorstop"
-		This option will allow you to change the system state to binmode. In this state portage will allways use only binary packages from the binhost. It will fetch a minimal
+	"$colorstart"--usermode"$colorstop"
+		This option will allow you to change the system state to binmode ( usermode). In this state portage will allways use only binary packages from the binhost. It will fetch a minimal
 		portage tree without any ebuilds in it, but only with portage profiles, metadata and eclass. It will also fetch overlay and portage configuration files, and will adjust
 		"$colorstart"make.conf"$colorstop" for binary only usage. This system state is for those who just meet with the power of Gentoo.
 
 		!!! WARNING !!! : Never never never modify or create any file in "$colorstart"/etc/portage/"$colorstop" in this state.
 
-	"$colorstart"--mixedmode"$colorstop"
-		This option will allow you to change the system state to mixedmode. In this state portage will prefer binary packages from the binhost over ebuilds from the portage tree.
+	"$colorstart"--devmode"$colorstop"
+		This option will allow you to change the system state to mixedmode (devmode). In this state portage will prefer binary packages from the binhost over ebuilds from the portage tree.
 		It will fetch the full portage tree, the overlay and portage configuration files, and adjust "$colorstart"make.conf"$colorstop" for binary/ebuild usage. Usually you will find this system state
 		useful if you want to install a package not available in the binhost, you want to upgrade a package to a newer version from portage tree or if you wanna rebuild a package
 		with your own useflags.
