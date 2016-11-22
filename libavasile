@@ -31,13 +31,13 @@ export local overlaydir="overlaydir"
 export local chrootuser="root"
 export local chroottarget="${@:2}"
 export local chrootbuildtarget="emerge -kav "$chroottarget""
-export local chrootsrcmode="vasile --srcmode"
+export local chrootsrcmode="avasile --srcmode"
 
 # iso variables and commands to run inside core squahfs when making iso image
 
 export local isouser="root"
 export local isomainarch="x86_64"
-export local isobinmode="vasile --usermode"
+export local isobinmode="avasile --usermode"
 export local isokernelname="kernel-genkernel-"$isomainarch"-"$kernelver""
 export local isoramfscmd="dracut -N -a dmsquash-live -a pollcdrom -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver""
 export local isoramfsname="initramfs-"$kernelver".img"
@@ -67,7 +67,7 @@ export local clonedir="/opt/argentws-build"
 # generic functions (used for both build && iso creation)
 
 kernelconfig () {
-	# check if the host kernel has needed modules for vasile to work properly...fail to start if it doesn't
+	# check if the host kernel has needed modules for avasile to work properly...fail to start if it doesn't
 	if [[ $(zgrep 'CONFIG_OVERLAY_FS=' /proc/config.gz) && $(zgrep "CONFIG_SQUASHFS=" /proc/config.gz) &&  $(zgrep "CONFIG_BLK_DEV_LOOP=" /proc/config.gz) ]] ; then
 		einfo "Kernel configuration seems OK, moving on"
 		sleep 1
@@ -481,8 +481,8 @@ showhelp () {
 
 echo -e "\
 "$colorstart"SYNOPSIS"$colorstop"
-	"$colorstart"vasile --option"$colorstop" ["$colorstart"arguments"$colorstop"]
-	"$colorstart"vasile --help"$colorstop"
+	"$colorstart"avasile --option"$colorstop" ["$colorstart"arguments"$colorstop"]
+	"$colorstart"avasile --help"$colorstop"
 
 "$colorstart"DESCRIPTION"$colorstop"
 
@@ -494,13 +494,13 @@ echo -e "\
 
 		It must be run in the folder where the squashfs chroot jail resides, or else it will fail to mount the squahfs chroot jail and build the package(s).
 
-		The squashfs chroot jail and the md5sum checksum file are hardcored into "$colorstart"libvasile"$colorstop", but you may want to change them to suit your needs.
+		The squashfs chroot jail and the md5sum checksum file are hardcored into "$colorstart"libavasile"$colorstop", but you may want to change them to suit your needs.
 
-		You MUST provide package(s) to build as arguments, or else vasile will only mount the chroot jail
+		You MUST provide package(s) to build as arguments, or else avasile will only mount the chroot jail
 
 		Examples :
-			"$colorstart"vasile --makepkg wine"$colorstop"
-			"$colorstart"vasile --makepkg wine playonlinux q4wine"$colorstop"
+			"$colorstart"avasile --makepkg wine"$colorstop"
+			"$colorstart"avasile --makepkg wine playonlinux q4wine"$colorstop"
 
 		If the package(s) is/are already built, it will not build it/them again (unless newer version(s) is/are available), but install it/them into squahfs chroot jail
 
@@ -516,7 +516,7 @@ echo -e "\
 
 		It will ALLWAYS use package(s) built with "$colorstart"--makepkg"$colorstop" option. When you are happy with package selection, just exit the chroot environment and
 		the live filesystem will be compressed, live services will be autoenabled, live bootloader autoconfigured and in the end live iso image will be built. You will find
-		a list of predefined live services list hardcoded into "$colorstart"libvasile"$colorstop". Adjust it to suit your needs.
+		a list of predefined live services list hardcoded into "$colorstart"libavasile"$colorstop". Adjust it to suit your needs.
 
 	"$colorstart"--resetmode"$colorstop"
 		This option will allow you to reset the system state. It will remove whole portage tree, overlays and portage configuration files and reset the system profile. Usually
