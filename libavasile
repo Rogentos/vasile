@@ -414,7 +414,7 @@ fetchminimalportagetree() {
 fetchoverlays () {
 	# fetch argent overlay
 	einfo "Injecting "$releasename"-"$releasetarget" overlay"
-	layman -f -a "$releasename"-"$releasetarget" -o https://gitlab.com/"$releasename"/"$releasename"-"$releasetarget"/raw/master/overlay.xml
+	echo y | layman -f -a "$releasename"-"$releasetarget" -o https://gitlab.com/"$releasename"/"$releasename"-"$releasetarget"/raw/master/overlay.xml
 }
 
 setbinmodeconfig() {
