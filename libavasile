@@ -186,6 +186,11 @@ chrootx64 () {
 	chroot "$overlaydir" su - "$chrootuser"
 }
 
+regenerate_cache () {
+	env-update
+	. /etc/profile
+}
+
 makepkg () {
 	checkroot
 	chrootchecksum
@@ -253,6 +258,7 @@ isochroot () {
 	einfo "INSTALL APPS & TARGETS & DES YOU WANT INSIDE ISO"
 	einfo "EXIT WHEN YOU'RE DONE AND I'LL CREATE THE IMAGE"
 	chroot "$isorsynctarget" su - "$isouser"
+	chroot "$isorsynctarget" su - "$isouser" -c "env-update"
 }
 
 prepareiso () {
