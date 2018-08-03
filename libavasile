@@ -41,8 +41,8 @@ export local isobinmode="avasile --usermode"
 export local isokernelname="kernel-genkernel-"$isomainarch"-"$kernelver""
 export local isoramfscmd="dracut -N -a dmsquash-live -a pollcdrom -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver""
 export local isoramfsname="initramfs-"$kernelver".img"
-export local isoeficmd="grub2-mkimage -d /usr/lib64/grub/x86_64-efi -o bootx64.efi -O x86_64-efi ext2 fat udf btrfs ntfs reiserfs xfs hfsplus lvm ata part_msdos part_gpt part_apple bsd search_fs_uuid normal chain iso9660 configfile help loadenv reboot cat search memdisk tar boot linux chain"
-export local isochainloadcmd="grub2-mkimage -d /usr/lib64/grub/i386-pc -o core.img -O i386-pc biosdisk part_msdos fat"
+export local isoeficmd="grub-mkimage -d /usr/lib64/grub/x86_64-efi -o bootx64.efi -O x86_64-efi ext2 fat udf btrfs ntfs reiserfs xfs hfsplus lvm ata part_msdos part_gpt part_apple bsd search_fs_uuid normal chain iso9660 configfile help loadenv reboot cat search memdisk tar boot linux chain"
+export local isochainloadcmd="grub-mkimage -d /usr/lib64/grub/i386-pc -o core.img -O i386-pc biosdisk part_msdos fat"
 
 # iso image layout variables
 
@@ -333,7 +333,7 @@ cleanupiso () {
 
 makeisoimg () {
 	# create iso image
-	grub2-mkrescue -o ""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarch".iso" "$isorootdir"
+	grub-mkrescue -o ""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarch".iso" "$isorootdir"
 }
 
 makeiso () {
