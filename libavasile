@@ -41,8 +41,8 @@ export local isobinmode="avasile --usermode"
 export local isokernelname="kernel-genkernel-"$isomainarch"-"$kernelver""
 export local isoramfscmd="dracut -N -a dmsquash-live -a pollcdrom -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver""
 export local isoramfsname="initramfs-"$kernelver".img"
-export local isoeficmd="grub-mkimage -d /usr/lib64/grub/x86_64-efi -o bootx64.efi -O x86_64-efi ext2 fat udf btrfs ntfs reiserfs xfs hfsplus lvm ata part_msdos part_gpt part_apple bsd search_fs_uuid normal chain iso9660 configfile help loadenv reboot cat search memdisk tar boot linux chain"
-export local isochainloadcmd="grub-mkimage -d /usr/lib64/grub/i386-pc -o core.img -O i386-pc biosdisk part_msdos fat"
+export local isoeficmd="grub-mkimage -d /usr/lib64/grub/x86_64-efi -o bootx64.efi -O x86_64-efi ext2 fat udf btrfs ntfs reiserfs xfs hfsplus lvm ata part_msdos part_gpt part_apple bsd search_fs_uuid normal chain iso9660 configfile help loadenv reboot cat search memdisk tar boot linux chain -p /boot/grub"
+export local isochainloadcmd="grub-mkimage -d /usr/lib64/grub/i386-pc -o core.img -O i386-pc biosdisk part_msdos fat -p /boot/grub"
 
 # iso image layout variables
 
@@ -287,14 +287,30 @@ prepareiso () {
 	isostart
 	isoefiimg
 	isostop
-	mv ""$isorsynctarget"/root/bootx64.efi" "$isoefidir"
-	chmod 755 ""$isoefidir"/bootx64.efi"
+	if [[ -e "$isorsynctarget"/root/bootx64.efi ]] ; then
+		mv ""$isorsynctarget"/root/bootx64.efi" "$isoefidir"
+		chmod 755 ""$isoefidir"/bootx64.efi"
+	else
+		echo "You do not have a "$isorsynctarget"/root/bootx64.efi"
+		echo "Please generate it yourself!"
+	fi
 	# generate and copy syslinux -> grub chainloader for unetbootin compatibility
 	isostart
 	isochainloader
 	isostop
-	mv ""$isorsynctarget"/root/core.img" "$isogrubdir"
-	cp -avx ""$isorsynctarget"/usr/lib64/grub/i386-pc/lnxboot.img" "$isogrubdir"
+	if [[ -e ""$isorsynctarget"/root/core.img" ]] ; then
+		mv ""$isorsynctarget"/root/core.img" "$isogrubdir"
+	else
+		echo "You do not have ""$isorsynctarget"/root/core.img""
+		echo "Please generate it yourself!"
+	fi
+
+	if [[ -e ""$isorsynctarget"/usr/lib64/grub/i386-pc/lnxboot.img" ]] ; then
+		cp -avx ""$isorsynctarget"/usr/lib64/grub/i386-pc/lnxboot.img" "$isogrubdir"
+	else
+		echo "You do not have ""$isorsynctarget"/usr/lib64/grub/i386-pc/lnxboot.img""
+		echo "Please generate it yourself!"
+	fi
 	# enable live iso image system services
 	isostart
 	isousertree
