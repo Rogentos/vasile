@@ -471,6 +471,14 @@ setsrcmodeconfig () {
 	. /etc/profile
 }
 
+setsrcmodecustom () {
+	ln -sf "$gitdir" "$confdir"
+	ln -sf "$confdir"/make.conf.amd64-customsrc "$confdir"/make.conf
+	eselect profile set "argent-ws:default/linux/amd64/13.0"
+	env-update
+	. /etc/profile
+}
+
 binmode() {
 	resetmode
 	fetchminimalportagetree
@@ -493,6 +501,17 @@ srcmode() {
 	fetchoverlays
 	fetchportageconfig
 	setsrcmodeconfig
+}
+
+srccustom() {
+	if [[ ! -e "$confdir"/make.conf.amd64-customsrc ]] ; then
+		cp "$confdir"/make.conf.amd64-devel "$confdir"/make.conf.amd64-customsrc
+	fi
+	resetmode
+	fetchfullportagetree
+	fetchoverlays
+	fetchportageconfig
+	setsrcmodecustom
 }
 
 # help menu color variables
@@ -571,9 +590,15 @@ echo -e "\
 		from the binhost will be ignored, and you will only install packages building from portage tree using emerge. It will fetch the full portage tree, the overlay and portage
 		configuration files and adjust "$colorstart"make.conf"$colorstop" for ebuild only usage.
 
-		In this system state you can modify whatever you want in "$colorstart"/etc/portage/"$colorstop". You can adjust useflags, keywords, masks, build environment and rebuild the whole system to suit you.
-		You have the full power of Gentoo available only one command away!
+		This system will still be synced with main Argent overlay. Even if you do modifications, the updates will overwrite your modifications. If you want more independent make.conf, please switch to
+		customsrc stance.
 
-		!!! WARNING !!! : Only use this system state if you have a strong knowledge of Gentoo tools e.g.: "$colorstart"emerge, equery, layman, eix, qlist, useflags, keywords, masks"$colorstop".	"
+		!!! WARNING !!! : Only use this system state if you have a strong knowledge of Gentoo tools e.g.: "$colorstart"emerge, equery, layman, eix, qlist, useflags, keywords, masks"$colorstop"
+	"$colorstart"--customsrc"$colorstop"
+		This option will allow you to change the system state to customsrc. It will change the system from standard Argent system to custom made Gentoo-specific system. Binary packages
+		from the main repository will be optional, hence if you have the Argent main repository set, you will receive precompiled packages. But if your USE flags have changed, your packages will
+		automatically be recompiled.
+
+		In this system state you can modify all the USE flags, and have the full Gentoo system available at your side.	"
 exit 0
 }
