@@ -473,7 +473,7 @@ setsrcmodeconfig () {
 
 setsrcmodecustom () {
 	ln -sf "$gitdir" "$confdir"
-	ln -sf "$confdir"/make.conf.amd64-customsrc "$confdir"/make.conf
+	ln -sf "$confdir"/make.conf.amd64-custom "$confdir"/make.conf
 	eselect profile set "argent-ws:default/linux/amd64/13.0"
 	env-update
 	. /etc/profile
@@ -504,8 +504,8 @@ srcmode() {
 }
 
 srccustom() {
-	if [[ ! -e "$confdir"/make.conf.amd64-customsrc ]] ; then
-		cp "$confdir"/make.conf.amd64-devel "$confdir"/make.conf.amd64-customsrc
+	if [[ ! -e "$confdir"/make.conf.amd64-custom ]] ; then
+		cp "$confdir"/make.conf.amd64-devel "$confdir"/make.conf.amd64-custom
 	fi
 	resetmode
 	fetchfullportagetree
@@ -594,7 +594,7 @@ echo -e "\
 		customsrc stance.
 
 		!!! WARNING !!! : Only use this system state if you have a strong knowledge of Gentoo tools e.g.: "$colorstart"emerge, equery, layman, eix, qlist, useflags, keywords, masks"$colorstop"
-	"$colorstart"--customsrc"$colorstop"
+	"$colorstart"--custom"$colorstop"
 		This option will allow you to change the system state to customsrc. It will change the system from standard Argent system to custom made Gentoo-specific system. Binary packages
 		from the main repository will be optional, hence if you have the Argent main repository set, you will receive precompiled packages. But if your USE flags have changed, your packages will
 		automatically be recompiled.

@@ -35,7 +35,7 @@ case $1 in
 	--srcmode)
 		srcmode
 		;;
-	--customsrc)
+	--custom)
 		srccustom
 		;;
 	--help)
