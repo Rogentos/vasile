@@ -505,7 +505,7 @@ srcmode() {
 
 srccustom() {
 	echo -e ""
-	if [[ -e /opt/argentws-build/ ]] ; then
+	if [[ -e "$clonedir" ]] ; then
 		if [[ ! -e "$confdir"/make.conf.amd64-custom ]] ; then
 			cp "$confdir"/make.conf.amd64-devel "$confdir"/make.conf.amd64-custom
 		fi
