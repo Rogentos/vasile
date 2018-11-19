@@ -504,9 +504,15 @@ srcmode() {
 }
 
 srccustom() {
+	echo -e ""
 	if [[ ! -e "$confdir"/make.conf.amd64-custom ]] ; then
 		cp "$confdir"/make.conf.amd64-devel "$confdir"/make.conf.amd64-custom
+	elif [[ -e /opt/argentws-build/ ]] ; then
+		rm -rf "$clonedir"/.git
+		rm -rf "$clonedir"/conf/intel/portage/package.keywords/*
+		rm -rf "$clonedir"/conf/intel/portage/package.use/*
 	fi
+	echo -e ""
 	resetmode
 	fetchfullportagetree
 	fetchoverlays
