@@ -419,6 +419,17 @@ fetchfullportagetree() {
 	fi
 }
 
+fetchfullargentbuilddir() {
+	if [[ ! -e "$clonedir"/.git ]] ; then
+		echo -e ""
+		einfo "Injecting GIT sync to central Argent overlay. Please stand by!"
+		cd "$clonedir" && git init > /dev/null 2>&1
+		git remote add origin https://gitlab.com/argent/portage.git
+		git pull --depth=1 origin master
+		git branch -u origin/master master
+	fi
+}
+
 fetchminimalportagetree() {
 	# fetch minimal portage tree
 	# in usermode we don't want the whole tree of gentoo ebuilds
@@ -572,6 +583,29 @@ decentralized_custom () {
 	fi
 	echo -e ""
 }
+
+decentralized_gentoo () {
+	echo -e ""
+	if [[ -e "$clonedir" ]] ; then
+		if [[ ! -e "$confdir"/make.conf.amd64-custom ]] ; then
+			cp "$confdir"/make.conf.amd64-devel "$confdir"/make.conf.amd64-custom
+		fi
+		ln -sf "$confdir"/make.conf.amd64-custom "$confdir"/make.conf
+		eselect profile set "argent-ws:default/linux/amd64/13.0"
+		env-update
+		. /etc/profile
+	fi
+	rm -rf "$confdir"/.git
+	sed -i 's|!||g' "$clonedir"/conf/intel/portage/package.keywords/.gitignore
+	for i in $( cat "$clonedir"/conf/intel/portage/package.keywords/.gitignore | grep keyword ) ; do
+		rm -f "$clonedir"/conf/intel/portage/package.keywords/$i
+	done
+	sed -i 's|!||g' "$clonedir"/conf/intel/portage/package.use/.gitignore
+	for i in $( cat "$clonedir"/conf/intel/portage/package.use/.gitignore | grep use ) ; do
+		rm -f "$clonedir"/conf/intel/portage/package.keywords/$i
+	done
+	echo -e ""
+}
 # help menu color variables
 
 export local colorstart="\e[1;49;34m"
@@ -686,6 +720,15 @@ echo -e "\
                 In this system state you can modify all the USE flags, and have the full Gentoo system available at your side.
 
 		It will decentralize your system from main Argent repository and maintain your previous changes at modes switch ( between decentralized modes only! )
-		After each decentralized mode switch, you must run either "$colorstart"epkg update"$colorstop" or emerge --sync in order to still receive Argent changes!"
+		After each decentralized mode switch, you must run either "$colorstart"epkg update"$colorstop" or emerge --sync in order to still receive Argent changes!
+	"$colorstart"--decentralize-gentoo"$colorstop"
+		This option will reduce your Argent's /etc/portage into pure Gentoo /etc/portage under total control of the user. That being you. The system will forget it ever was Argent before
+		and considers itself "pure Gentoo". At a grand upgrade, if your Gentoo settings do not prove stable enough, the system will either fail to compile packages or not even
+		start the compilation and/or upgrade. Exactly like in a usual unmaintained Gentoo where you accidentally delete your USE flags and package.keywords.
+
+		Previous modifications are maintained. Modifications are also maintained between decentralized modes, although central authority will never be established over this stance
+		or any other decentralized stance anymore. This is a one-way ticket.
+
+		To remove this stance and become centralized again to Argent, you have to reinitialize the ArgentWS-Build GIT system in the folder. "
 exit 0
 }

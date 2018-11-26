@@ -50,6 +50,9 @@ case $1 in
 	--decentralize-custom)
 		decentralized_custom
 		;;
+	--decentralize-gentoo)
+		decentralized_gentoo
+		;;
 	--help)
 		showhelp
 		;;
