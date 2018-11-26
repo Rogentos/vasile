@@ -38,6 +38,18 @@ case $1 in
 	--custom)
 		srccustom
 		;;
+	--decentralize-user)
+		decentralized_user
+		;;
+	--decentralize-dev)
+		decentralized_devel
+		;;
+	--decentralize-source)
+		decentralized_source
+		;;
+	--decentralize-custom)
+		decentralized_custom
+		;;
 	--help)
 		showhelp
 		;;

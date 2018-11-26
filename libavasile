@@ -64,6 +64,9 @@ export local confdir="/etc/portage"
 export local gitdir="/opt/argentws-build/conf/intel/portage"
 export local clonedir="/opt/argentws-build"
 
+# Support SUDO for avasile
+export ARGENT_USE_SUDO="${ARGENT_USE_SUDO:-0}"
+
 # generic functions (used for both build && iso creation)
 
 kernelconfig () {
@@ -80,7 +83,7 @@ kernelconfig () {
 
 checkroot () {
 	# check for root privileges, needed for mount && chroot...fail to start if not root
-	if [[ "$(whoami)" != root ]] ; then
+	if [[ "${UID}" != "0" ]] ; then
 		eerror "You're not root?...No cookies for you, go away !!!"
 		exit 1
 	fi
@@ -521,6 +524,54 @@ srccustom() {
 	setsrcmodecustom
 }
 
+
+decentralized_user () {
+	echo -e ""
+        if [[ -e "$clonedir" ]] ; then
+		rm -f "$confdir"/make.conf
+		ln -sf "$confdir"/make.conf.amd64-user "$confdir"/make.conf
+		eselect profile set "argent-ws:default/linux/amd64/13.0"
+		env-update
+		. /etc/profile
+	fi
+	echo -e ""
+}
+
+decentralized_devel () {
+	echo -e ""
+	if [[ -e "$clonedir" ]] ; then
+		ln -sf "$confdir"/make.conf.amd64-devel "$confdir"/make.conf
+		eselect profile set "argent-ws:default/linux/amd64/13.0"
+		env-update
+		. /etc/profile
+	fi
+	echo -e ""
+}
+
+decentralized_source () {
+	echo -e ""
+	if [[ -e "$clonedir" ]] ; then
+		ln -sf "$confdir"/make.conf.amd64-srcmode "$confdir"/make.conf
+		eselect profile set "argent-ws:default/linux/amd64/13.0"
+		env-update
+		. /etc/profile
+	fi
+	echo -e ""
+}
+
+decentralized_custom () {
+	echo -e ""
+	if [[ -e "$clonedir" ]] ; then
+		if [[ ! -e "$confdir"/make.conf.amd64-custom ]] ; then
+			cp "$confdir"/make.conf.amd64-devel "$confdir"/make.conf.amd64-custom
+		fi
+		ln -sf "$confdir"/make.conf.amd64-custom "$confdir"/make.conf
+		eselect profile set "argent-ws:default/linux/amd64/13.0"
+		env-update
+		. /etc/profile
+	fi
+	echo -e ""
+}
 # help menu color variables
 
 export local colorstart="\e[1;49;34m"
@@ -537,7 +588,8 @@ echo -e "\
 
 "$colorstart"DESCRIPTION"$colorstop"
 
-	Vasile is an acronym for ** Versatile Advanced Script for Iso and Latest Enchantments **
+	Vasile is an acronym for ** Versatile Advanced Script for Iso and Latest Enhancements **
+	Avasile stands for Argent Vasile
 
 "$colorstart"OPTIONS"$colorstop"
 	"$colorstart"--makepkg"$colorstop" ["$colorstart"package(s)"$colorstop"]
@@ -606,6 +658,34 @@ echo -e "\
 		from the main repository will be optional, hence if you have the Argent main repository set, you will receive precompiled packages. But if your USE flags have changed, your packages will
 		automatically be recompiled.
 
-		In this system state you can modify all the USE flags, and have the full Gentoo system available at your side.	"
+		In this system state you can modify all the USE flags, and have the full Gentoo system available at your side.
+
+	"$colorstart"--decentralize-user"$colorstop"
+		This option will allow you to change to decentralized user stance. That means you are free to decide and modify your own precompiled Gentoo system without depending on our
+		central repositories. It is a highly-advanced stance that requires advanced to expert Gentoo knowledge with precompiled binaries and binhost.conf file.
+
+		It will decentralize your system from the main Argent repository and maintain your previous changes at modes switch ( between decentralized modes only! )
+		After each decentralized mode switch, you must run either "$colorstart"epkg update"$colorstop" or emerge --sync in order to still receive Argent changes!
+	"$colorstart"--decentralize-dev"$colorstop"
+		This option will allow you to switch to decentralized development stance. That means you are free to decide and modify your own USE flags and anything that is Gentoo related
+		in your /etc/portage, but prioritize remote precompiled binary packages that come from your binhost.conf configuration.
+
+		It will decentralize your system from main Argent repository and maintain your previous changes at modes switch ( between decentralized modes only! )
+		After each decentralized mode switch, you must run either "$colorstart"epkg update"$colorstop" or emerge --sync in order to still receive Argent changes!
+	"$colorstart"--decentralize-source"$colorstop"
+		This option will allow you to switch to decentralized source only stance. That means you are free to decide and modify everything in /etc/portage as long as you have some
+		Gentoo expert knowledge. This stance will no longer prioritize Argent precompiled binaries, and instead use source-only ebuilds that are present on your system.
+
+		It will decentralize your system from main Argent repository and maintain your previous changes at modes switch ( between decentralized modes only! )
+		After each decentralized mode switch, you must run either "$colorstart"epkg update"$colorstop" or emerge --sync in order to still receive Argent changes!
+
+	"$colorstart"--decentralize-custom"$colorstop"
+                This option will allow you to change the system state to customsrc. It will change the system from standard Argent system to custom made Gentoo-specific system. Binary packages
+                from the main repository will be optional, hence if you have the Argent main repository set, you will receive precompiled packages. But if your USE flags have changed, your packages will
+                automatically be recompiled.
+                In this system state you can modify all the USE flags, and have the full Gentoo system available at your side.
+
+		It will decentralize your system from main Argent repository and maintain your previous changes at modes switch ( between decentralized modes only! )
+		After each decentralized mode switch, you must run either "$colorstart"epkg update"$colorstop" or emerge --sync in order to still receive Argent changes!"
 exit 0
 }
