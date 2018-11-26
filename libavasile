@@ -739,7 +739,7 @@ echo -e "\
 
 		"$colorstart"git pull --depth=1 origin server
 		git branch -u origin/server server"$colorstop"
-		
+
 		This has a fallback on decentralize-custom."
 echo -e ""
 exit 0
