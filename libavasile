@@ -84,8 +84,15 @@ kernelconfig () {
 checkroot () {
 	# check for root privileges, needed for mount && chroot...fail to start if not root
 	if [[ "${UID}" != "0" ]] ; then
-		eerror "You're not root?...No cookies for you, go away !!!"
-		exit 1
+		eerror "You're not root user? Perhaps you have 'sudo', although not security-wise."
+		echo -e ""
+		if [[ -x "$(command -v sudo)" ]] ; then
+		    sudo "$0" "$@"
+		else
+		    eerror "You do not have sudo either. Exitting."
+		    echo -e ""
+		    exit 1
+		fi
 	fi
 }
 
