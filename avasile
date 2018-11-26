@@ -13,14 +13,15 @@ source /usr/lib/avasile/libavasile
 # Also, running it in live mode is a really bad idea
 
 checkiflive
-kernelconfig
 
 
 case $1 in
 	--makepkg)
+		kernelconfig
 		makepkg
 		;;
 	--makeiso)
+		kernelconfig
 		makeiso
 		;;
 	--resetmode)
