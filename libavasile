@@ -424,7 +424,7 @@ fetchfullargentbuilddir() {
 		echo -e ""
 		einfo "Injecting GIT sync to central Argent overlay. Please stand by!"
 		cd "$clonedir" && git init > /dev/null 2>&1
-		git remote add origin https://gitlab.com/argent/portage.git
+		git remote add origin https://gitlab.com/argent/argentws-build.git
 		git pull --depth=1 origin master
 		git branch -u origin/master master
 	fi
@@ -729,6 +729,18 @@ echo -e "\
 		Previous modifications are maintained. Modifications are also maintained between decentralized modes, although central authority will never be established over this stance
 		or any other decentralized stance anymore. This is a one-way ticket.
 
-		To remove this stance and become centralized again to Argent, you have to reinitialize the ArgentWS-Build GIT system in the folder. "
+		To remove this stance and become centralized again to Argent, you have to reinitialize the ArgentWS-Build GIT system in the folder:
+                "$colorstart"cd /etc/portage && git init > /dev/null 2>&1
+                git remote add origin https://gitlab.com/argent/argentws-build.git
+                git pull --depth=1 origin master
+                git branch -u origin/master master"$colorstop"
+
+		or
+
+		"$colorstart"git pull --depth=1 origin server
+		git branch -u origin/server server"$colorstop"
+		
+		This has a fallback on decentralize-custom."
+echo -e ""
 exit 0
 }
