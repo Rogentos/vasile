@@ -467,7 +467,7 @@ setbinmodeconfig() {
 	# set make.conf to binmode ( usermode ), portage will always use binary packages from binhost
 	ln -sf "$gitdir" "$confdir"
 	ln -sf "$confdir"/make.conf.amd64-user "$confdir"/make.conf
-	eselect profile set "argent-ws:default/linux/amd64/13.0"
+	eselect profile set "argent-ws:default/linux/amd64/17.0"
 	env-update
 	. /etc/profile
 }
@@ -478,7 +478,7 @@ setmixedmodeconfig() {
 	# or if the binary package is not available in binhost
 	ln -sf "$gitdir" "$confdir"
 	ln -sf "$confdir"/make.conf.amd64-devel "$confdir"/make.conf
-	eselect profile set "argent-ws:default/linux/amd64/13.0"
+	eselect profile set "argent-ws:default/linux/amd64/17.0"
 	env-update
 	. /etc/profile
 }
@@ -487,7 +487,7 @@ setsrcmodeconfig () {
 	# set make.conf to srcmode, portage will always use ebuilds
 	ln -sf "$gitdir" "$confdir"
 	ln -sf "$confdir"/make.conf.amd64-srcmode "$confdir"/make.conf
-	eselect profile set "argent-ws:default/linux/amd64/13.0"
+	eselect profile set "argent-ws:default/linux/amd64/17.0"
 	env-update
 	. /etc/profile
 }
@@ -495,7 +495,7 @@ setsrcmodeconfig () {
 setsrcmodecustom () {
 	ln -sf "$gitdir" "$confdir"
 	ln -sf "$confdir"/make.conf.amd64-custom "$confdir"/make.conf
-	eselect profile set "argent-ws:default/linux/amd64/13.0"
+	eselect profile set "argent-ws:default/linux/amd64/17.0"
 	env-update
 	. /etc/profile
 }
@@ -548,7 +548,7 @@ decentralized_user () {
         if [[ -e "$clonedir" ]] ; then
 		rm -f "$confdir"/make.conf
 		ln -sf "$confdir"/make.conf.amd64-user "$confdir"/make.conf
-		eselect profile set "argent-ws:default/linux/amd64/13.0"
+		eselect profile set "argent-ws:default/linux/amd64/17.0"
 		env-update
 		. /etc/profile
 	fi
@@ -559,7 +559,7 @@ decentralized_devel () {
 	echo -e ""
 	if [[ -e "$clonedir" ]] ; then
 		ln -sf "$confdir"/make.conf.amd64-devel "$confdir"/make.conf
-		eselect profile set "argent-ws:default/linux/amd64/13.0"
+		eselect profile set "argent-ws:default/linux/amd64/17.0"
 		env-update
 		. /etc/profile
 	fi
@@ -570,7 +570,7 @@ decentralized_source () {
 	echo -e ""
 	if [[ -e "$clonedir" ]] ; then
 		ln -sf "$confdir"/make.conf.amd64-srcmode "$confdir"/make.conf
-		eselect profile set "argent-ws:default/linux/amd64/13.0"
+		eselect profile set "argent-ws:default/linux/amd64/17.0"
 		env-update
 		. /etc/profile
 	fi
@@ -584,7 +584,7 @@ decentralized_custom () {
 			cp "$confdir"/make.conf.amd64-devel "$confdir"/make.conf.amd64-custom
 		fi
 		ln -sf "$confdir"/make.conf.amd64-custom "$confdir"/make.conf
-		eselect profile set "argent-ws:default/linux/amd64/13.0"
+		eselect profile set "argent-ws:default/linux/amd64/17.0"
 		env-update
 		. /etc/profile
 	fi
@@ -598,7 +598,7 @@ decentralized_gentoo () {
 			cp "$confdir"/make.conf.amd64-devel "$confdir"/make.conf.amd64-custom
 		fi
 		ln -sf "$confdir"/make.conf.amd64-custom "$confdir"/make.conf
-		eselect profile set "argent-ws:default/linux/amd64/13.0"
+		eselect profile set "argent-ws:default/linux/amd64/17.0"
 		env-update
 		. /etc/profile
 	fi
