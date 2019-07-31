@@ -258,7 +258,7 @@ isochainloader () {
 isoservices () {
 	# enable live iso image system services
 	set -x
-	for service in avahi-daemon argentlive cups connman dkms dm-event lightdm lvm2-lvmetad lvm2-monitor ModemManager sddm virtualbox-guest-additions ; do
+	for service in argentlive argent-config-vbox avahi-daemon cups connman dkms dm-event lightdm lvm2-lvmetad lvm2-monitor ModemManager sddm virtualbox-guest-additions ; do
 		chroot "$isorsynctarget" su - "$isouser" -c "systemctl enable "$service""
 	done
 	set +x
