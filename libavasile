@@ -81,6 +81,23 @@ kernelconfig () {
 	fi
 }
 
+checkmode() {
+	CHECK_AVASILE_MODE=$( readlink -f /etc/portage/make.conf )
+
+	if [[ "${CHECK_AVASILE_MODE}" = "/opt/argentws-build/conf/intel/portage/make.conf.amd64-user" ]] ; then
+		echo "$0 is on --usermode"
+	elif [[ "${CHECK_AVASILE_MODE}" = "/opt/argentws-build/conf/intel/portage/make.conf.amd64-devel" ]] ; then
+		echo "$0 is on --devmode!"
+	elif [[ "${CHECK_AVASILE_MODE}" = "/opt/argentws-build/conf/intel/portage/make.conf.amd64-srcmode" ]] ; then
+		echo "$0 is on --srcmode!"
+	elif [[ "${CHECK_AVASILE_MODE}" = "/opt/argentws-build/conf/intel/portage/make.conf.amd64-custom" ]] ; then
+		echo "$0 is on your own custom mode!"
+	elif [[ "${CHECK_AVASILE_MODE##*-}" != "user" ]] || [[ "${CHECK_AVASILE_MODE##*-}" != "devel" ]] || \
+		[[ "${CHECK_AVASILE_MODE##*-}" != "srcmode" ]] || [[ "${CHECK_AVASILE_MODE##*-}" != "custom" ]] ; then
+		echo "$0 is not on any known modes"
+	fi
+}
+
 checkroot () {
 	# check for root privileges, needed for mount && chroot...fail to start if not root
 	if [[ "${UID}" != "0" ]] ; then
@@ -269,12 +286,21 @@ isochroot () {
 	einfo "DROPPING YOU TO A ROOT SHELL INTO ISO ENVIRONMENT"
 	einfo "INSTALL APPS & TARGETS & DES YOU WANT INSIDE ISO"
 	einfo "EXIT WHEN YOU'RE DONE AND I'LL CREATE THE IMAGE"
-	if [[ -z "$2" ]] ; then
+	if [[ -z "${@:2}" ]] ; then
 		chroot "$isorsynctarget" su - "$isouser"
 		chroot "$isorsynctarget" su - "$isouser" -c "env-update"
 	else
-		echo "No need to drop into shell, there is no argument"
+                echo "No need to drop into shell, you provided a list to install"
+                if [[ -e ""$isorsynctarget"/ISO_Installed_Packages" ]] ; then
+                        rm -f "$isorsynctarget"/ISO_Installed_Packages
+                fi
+                for i in "${@:2}" ; do cat $i >> "$isorsynctarget"/ISO_Installed_Packages ; done
+                mapfile -t ISO_ARGENT_PACKAGES_LIST < "$isorsynctarget"/ISO_Installed_Packages
+
+                chroot "$isorsynctarget" su - "$isouser" -c "epkg autoinstall ${ISO_ARGENT_PACKAGES_LIST[*]} "
 		chroot "$isorsynctarget" su - "$isouser" -c "env-update"
+
+		unset ISO_ARGENT_PACKAGES_LIST
 	fi
 }
 
@@ -334,7 +360,7 @@ prepareiso () {
 	# enable live iso image system services
 	isostart
 	isousertree
-	isochroot
+	isochroot "$@"
 	isostop
 	isostart
 	isoservices
@@ -375,7 +401,7 @@ makeisoimg () {
 makeiso () {
 	checkroot
 	chrootchecksum
-	prepareiso
+	prepareiso "$@"
 	bootloaderiso
 	cleanupiso
 	makeisoimg
@@ -648,10 +674,15 @@ echo -e "\
 
 "$colorstart"DESCRIPTION"$colorstop"
 
-	Vasile is an acronym for ** Versatile Advanced Script for Iso and Latest Enhancements **
+	Vasile is an acronym for ** Versatile Advanced Script for ISOs and Latest Enhancements **
 	Avasile stands for Argent Vasile
 
 "$colorstart"OPTIONS"$colorstop"
+	"$colorstart"--status"$colorstop"
+		The option shows the current state of Avasile mode ( user, devel, source, custom, non-custom )
+
+		Standard options available are described bellow
+
 	"$colorstart"--makepkg"$colorstop" ["$colorstart"package(s)"$colorstop"]
 		This option will allow you to build a package or multiple packages in an overlayfs mounted squashfs chroot jail.
 
@@ -680,6 +711,9 @@ echo -e "\
 		It will ALLWAYS use package(s) built with "$colorstart"--makepkg"$colorstop" option. When you are happy with package selection, just exit the chroot environment and
 		the live filesystem will be compressed, live services will be autoenabled, live bootloader autoconfigured and in the end live iso image will be built. You will find
 		a list of predefined live services list hardcoded into "$colorstart"libavasile"$colorstop". Adjust it to suit your needs.
+
+		If used like: "$colorstart"--makeiso"$colorstop" <filename_with_packagenames>, it will create a list and automatically install your packages
+		Example: "$colorstart"avasile --makeiso /etc/portage/sets/artwork "$colorstop", will install all artwork packages in the specific set
 
 	"$colorstart"--resetmode"$colorstop"
 		This option will allow you to reset the system state. It will remove whole portage tree, overlays and portage configuration files and reset the system profile. Usually

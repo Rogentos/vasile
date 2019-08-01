@@ -16,13 +16,16 @@ checkiflive
 
 
 case $1 in
+	--status)
+		checkmode
+		;;
 	--makepkg)
 		kernelconfig
 		makepkg
 		;;
 	--makeiso)
 		kernelconfig
-		makeiso
+		makeiso "$@"
 		;;
 	--resetmode)
 		resetmode
