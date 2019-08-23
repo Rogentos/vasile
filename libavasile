@@ -420,9 +420,14 @@ removeportagetree() {
 removeoverlays() {
 	# remove argent overlay
 	einfo "Removing "$releasename"-"$releasetarget" overlay"
-	layman -d "$releasename"-"$releasetarget" > /dev/null 2>&1
-	if [[ -d "/var/lib/layman/$releasename-$releasetarget" ]] ; then
-		rm -rf "/var/lib/layman/$releasename-$releasetarget" || die
+
+	if [[ -e $(command -v layman) ]] ; then
+		layman -d "$releasename"-"$releasetarget" > /dev/null 2>&1
+		if [[ -d "/var/lib/layman/$releasename-$releasetarget" ]] ; then
+			rm -rf "/var/lib/layman/$releasename-$releasetarget" || die
+		fi
+	else
+		emerge --sync
 	fi
 }
 
@@ -496,7 +501,12 @@ fetchminimalportagetree() {
 fetchoverlays () {
 	# fetch argent overlay
 	einfo "Injecting "$releasename"-"$releasetarget" overlay"
-	echo y | layman -f -a "$releasename"-"$releasetarget" -o https://gitlab.com/"$releasename"/"$releasename"-"$releasetarget"/raw/master/overlay.xml
+
+	if [[ -e $(command -v layman) ]] ; then
+		echo y | layman -f -a "$releasename"-"$releasetarget" -o https://gitlab.com/"$releasename"/"$releasename"-"$releasetarget"/raw/master/overlay.xml
+	else
+		emaint sync -r argent-ws
+	fi
 }
 
 setbinmodeconfig() {
