@@ -426,8 +426,8 @@ removeoverlays() {
 		if [[ -d "/var/lib/layman/$releasename-$releasetarget" ]] ; then
 			rm -rf "/var/lib/layman/$releasename-$releasetarget" || die
 		fi
-	else
-		emerge --sync
+	elif [[ -e "/var/lib/layman/$releasename-$releasetarget" ]] ; then
+		rm -rf "/var/lib/layman/$releasename-$releasetarget"
 	fi
 }
 
@@ -505,7 +505,7 @@ fetchoverlays () {
 	if [[ -e $(command -v layman) ]] ; then
 		echo y | layman -f -a "$releasename"-"$releasetarget" -o https://gitlab.com/"$releasename"/"$releasename"-"$releasetarget"/raw/master/overlay.xml
 	else
-		emaint sync -r argent-ws
+		emaint sync -r "$releasename"-"$releasetarget"
 	fi
 }
 
@@ -514,7 +514,7 @@ setbinmodeconfig() {
 	ln -sf "$gitdir" "$confdir"
 	ln -sf "$confdir"/make.conf.amd64-user "$confdir"/make.conf
 	ln -sf "$confdir"/binhost-main.conf "$confdir"/binhost.conf
-	eselect profile set "argent-ws:default/linux/amd64/17.0"
+	eselect profile set "$releasename-$releasetarget:default/linux/amd64/17.0"
 	env-update
 	. /etc/profile
 }
@@ -526,7 +526,7 @@ setmixedmodeconfig() {
 	ln -sf "$gitdir" "$confdir"
 	ln -sf "$confdir"/make.conf.amd64-devel "$confdir"/make.conf
 	ln -sf "$confdir"/binhost-main.conf "$confdir"/binhost.conf
-	eselect profile set "argent-ws:default/linux/amd64/17.0"
+	eselect profile set "$releasename-$releasetarget:default/linux/amd64/17.0"
 	env-update
 	. /etc/profile
 }
@@ -536,7 +536,7 @@ setsrcmodeconfig () {
 	ln -sf "$gitdir" "$confdir"
 	ln -sf "$confdir"/make.conf.amd64-srcmode "$confdir"/make.conf
 	ln -sf "$confdir"/binhost-main.conf "$confdir"/binhost.conf
-	eselect profile set "argent-ws:default/linux/amd64/17.0"
+	eselect profile set "$releasename-$releasetarget:default/linux/amd64/17.0"
 	env-update
 	. /etc/profile
 }
@@ -545,7 +545,7 @@ setsrcmodecustom () {
 	ln -sf "$gitdir" "$confdir"
 	ln -sf "$confdir"/make.conf.amd64-custom "$confdir"/make.conf
 	ln -sf "$confdir"/binhost-main.conf "$confdir"/binhost.conf
-	eselect profile set "argent-ws:default/linux/amd64/17.0"
+	eselect profile set "$releasename-$releasetarget:default/linux/amd64/17.0"
 	env-update
 	. /etc/profile
 }
