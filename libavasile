@@ -288,6 +288,7 @@ isochroot () {
 	einfo "EXIT WHEN YOU'RE DONE AND I'LL CREATE THE IMAGE"
 	if [[ -z "${@:2}" ]] ; then
 		chroot "$isorsynctarget" su - "$isouser"
+		chroot "$isorsynctarget" su - "$isouser" -c "umount -f /mnt/argent_efipart/dev/*"
 		chroot "$isorsynctarget" su - "$isouser" -c "env-update"
 	else
                 echo "No need to drop into shell, you provided a list to install"
@@ -297,7 +298,8 @@ isochroot () {
                 for i in "${@:2}" ; do cat $i >> "$isorsynctarget"/ISO_Installed_Packages ; done
                 mapfile -t ISO_ARGENT_PACKAGES_LIST < "$isorsynctarget"/ISO_Installed_Packages
 
-                chroot "$isorsynctarget" su - "$isouser" -c "epkg autoinstall ${ISO_ARGENT_PACKAGES_LIST[*]} "
+		chroot "$isorsynctarget" su - "$isouser" -c "epkg autoinstall ${ISO_ARGENT_PACKAGES_LIST[*]} "
+		chroot "$isorsynctarget" su - "$isouser" -c "umount -f /mnt/argent_efipart/dev/*"
 		chroot "$isorsynctarget" su - "$isouser" -c "env-update"
 
 		unset ISO_ARGENT_PACKAGES_LIST
