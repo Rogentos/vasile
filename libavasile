@@ -16,7 +16,7 @@ export local kernelver="4.19.60-"$releasename""
 
 # core squahfs name and md5 checksum file
 
-export local chrootx64=""$releasename"_"$releaseversion"_core_x64.squashfs"
+export local chrootx64=""$releasename"_"$releasetarget"_"$releaseversion"_core_x64.squashfs"
 export local chrootx64md5=""$chrootx64".md5"
 
 # overlay mount variables
@@ -204,7 +204,7 @@ chrootbuild () {
 	chroot "$overlaydir" su - "$chrootuser" -c "$chrootbuildtarget"
 }
 
-chrootx64 () {
+chrootx64_iso () {
 	# land into a chroot env into overlay mounted core squashfs and make build adjustments, if needed
 	einfo "DROPPING YOU TO A ROOT SHELL INTO BUILD ENVIRONMENT"
 	einfo "FIX FAILURES && ADJUST PORTAGE CONFIGURATION FILES"
@@ -224,7 +224,7 @@ makepkg () {
 	chrootprepare
 	chrootdevtree
 	chrootbuild
-	chrootx64
+	chrootx64_iso
 	chrootstop
 }
 
