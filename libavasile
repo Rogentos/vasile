@@ -12,7 +12,7 @@ export local releaseversion="1"
 
 # kernel version && name from inside core squashfs
 
-export local kernelver="4.19.60-"$releasename""
+export local kernelver="6.12.9-"$releasename""
 
 # core squahfs name and md5 checksum file
 
@@ -59,7 +59,7 @@ export local isosquashfsdir=""$isorootdir"/LiveOS"
 
 # modechange variables
 
-export local portagedir="/usr/portage"
+export local portagedir="/var/db/repos/gentoo"
 export local confdir="/etc/portage"
 export local gitdir="/opt/argentws-build/conf/intel/portage"
 export local clonedir="/opt/argentws-build"
@@ -84,13 +84,13 @@ kernelconfig () {
 checkmode() {
 	CHECK_AVASILE_MODE=$( readlink -f /etc/portage/make.conf )
 
-	if [[ "${CHECK_AVASILE_MODE}" = "/opt/argentws-build/conf/intel/portage/make.conf.amd64-user" ]] ; then
+	if [[ "${CHECK_AVASILE_MODE}" = "${clonedir}/conf/intel/portage/make.conf.amd64-user" ]] ; then
 		echo "$0 is on --usermode"
-	elif [[ "${CHECK_AVASILE_MODE}" = "/opt/argentws-build/conf/intel/portage/make.conf.amd64-devel" ]] ; then
+	elif [[ "${CHECK_AVASILE_MODE}" = "${clonedir}/conf/intel/portage/make.conf.amd64-devel" ]] ; then
 		echo "$0 is on --devmode!"
-	elif [[ "${CHECK_AVASILE_MODE}" = "/opt/argentws-build/conf/intel/portage/make.conf.amd64-srcmode" ]] ; then
+	elif [[ "${CHECK_AVASILE_MODE}" = "${clonedir}/conf/intel/portage/make.conf.amd64-srcmode" ]] ; then
 		echo "$0 is on --srcmode!"
-	elif [[ "${CHECK_AVASILE_MODE}" = "/opt/argentws-build/conf/intel/portage/make.conf.amd64-custom" ]] ; then
+	elif [[ "${CHECK_AVASILE_MODE}" = "${clonedir}/conf/intel/portage/make.conf.amd64-custom" ]] ; then
 		echo "$0 is on your own custom mode!"
 	elif [[ "${CHECK_AVASILE_MODE##*-}" != "user" ]] || [[ "${CHECK_AVASILE_MODE##*-}" != "devel" ]] || \
 		[[ "${CHECK_AVASILE_MODE##*-}" != "srcmode" ]] || [[ "${CHECK_AVASILE_MODE##*-}" != "custom" ]] ; then
@@ -172,8 +172,8 @@ chrootstop () {
 	umount -l "$overlaydir"/dev/shm > /dev/null 2>&1
 	umount -l "$overlaydir"/dev > /dev/null 2>&1
 	umount -l "$overlaydir"/tmp > /dev/null 2>&1
-	umount -l "$overlaydir"/usr/portage/packages > /dev/null 2>&1
-	umount -l "$overlaydir"/usr/portage/distfiles > /dev/null 2>&1
+	umount -l "$overlaydir"/var/cache/binpkgs > /dev/null 2>&1
+	umount -l "$overlaydir"/var/cache/distfiles > /dev/null 2>&1
 	umount -l "$overlaydir" > /dev/null 2>&1
 	umount -l "$rodir" > /dev/null 2>&1
 }
@@ -413,9 +413,9 @@ makeiso () {
 
 removeportagetree() {
 	# remove portage tree, but leave packages and distfiles directories intact
-	if [ -d ""$portagedir"/.git" ] ; then
+	if [ -d ""${portagedir}"/.git" ] ; then
 		einfo "Removing gentoo portage tree"
-		find "$portagedir" -mindepth 1 -name "packages" -prune -o -name "distfiles" -prune -o -exec rm -rf {} \; > /dev/null 2>&1
+		find "${portagedir}" -mindepth 1 -name "packages" -prune -o -name "distfiles" -prune -o -exec rm -rf {} \; > /dev/null 2>&1
 	fi
 }
 
@@ -459,13 +459,13 @@ fetchportageconfig() {
 
 fetchfullportagetree() {
 	# fetch full portage tree
-	if [[ ! -d "$portagedir"/.git ]] ; then
+	if [[ ! -d "${portagedir}"/.git ]] ; then
 		einfo "Injecting devmode/srcmode (full) gentoo portage tree"
-		cd "$portagedir" && git init > /dev/null 2>&1
+		cd "${portagedir}" && git init > /dev/null 2>&1
 		git remote add origin https://gitlab.com/argent/portage.git
 		git pull --depth=1 origin master
 		git branch -u origin/master master
-		rm -rf ""$portagedir"/profiles/updates"
+		rm -rf ""${portagedir}"/profiles/updates"
 	fi
 }
 
@@ -485,9 +485,9 @@ fetchminimalportagetree() {
 	# in usermode we don't want the whole tree of gentoo ebuilds
 	# but we need portage profiles portage metadata && portage eclasses
 	# so make a sparse-checkout, to fetch only what we need
-	if [[ ! -d "$portagedir"/.git ]] ; then
+	if [[ ! -d "${portagedir}"/.git ]] ; then
 		einfo "Injecting usermode (minimal) gentoo portage tree"
-		cd "$portagedir" && git init > /dev/null 2>&1
+		cd "${portagedir}" && git init > /dev/null 2>&1
 		git remote add origin https://gitlab.com/argent/portage.git
 		git config core.sparsecheckout true
 		echo "profiles/*" >> .git/info/sparse-checkout
@@ -496,7 +496,7 @@ fetchminimalportagetree() {
 		echo ".gitignore" >> .git/info/sparse-checkout
 		git pull --depth=1 origin master
 		git branch -u origin/master master
-		rm -rf ""$portagedir"/profiles/updates"
+		rm -rf ""${portagedir}"/profiles/updates"
 	fi
 }
 
