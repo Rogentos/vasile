@@ -516,7 +516,8 @@ setbinmodeconfig() {
 	ln -sf "$gitdir" "$confdir"
 	ln -sf "$confdir"/make.conf.amd64-user "$confdir"/make.conf
 	ln -sf "$confdir"/binhost-main.conf "$confdir"/binhost.conf
-	eselect profile set "$releasename-$releasetarget:default/linux/amd64/17.0"
+#	eselect profile set "$releasename-$releasetarget:default/linux/amd64/17.0"
+	eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
 	env-update
 	. /etc/profile
 }
@@ -528,7 +529,8 @@ setmixedmodeconfig() {
 	ln -sf "$gitdir" "$confdir"
 	ln -sf "$confdir"/make.conf.amd64-devel "$confdir"/make.conf
 	ln -sf "$confdir"/binhost-main.conf "$confdir"/binhost.conf
-	eselect profile set "$releasename-$releasetarget:default/linux/amd64/17.0"
+#	eselect profile set "$releasename-$releasetarget:default/linux/amd64/17.0"
+	eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
 	env-update
 	. /etc/profile
 }
@@ -538,7 +540,8 @@ setsrcmodeconfig () {
 	ln -sf "$gitdir" "$confdir"
 	ln -sf "$confdir"/make.conf.amd64-srcmode "$confdir"/make.conf
 	ln -sf "$confdir"/binhost-main.conf "$confdir"/binhost.conf
-	eselect profile set "$releasename-$releasetarget:default/linux/amd64/17.0"
+#	eselect profile set "$releasename-$releasetarget:default/linux/amd64/17.0"
+	eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
 	env-update
 	. /etc/profile
 }
@@ -547,7 +550,8 @@ setsrcmodecustom () {
 	ln -sf "$gitdir" "$confdir"
 	ln -sf "$confdir"/make.conf.amd64-custom "$confdir"/make.conf
 	ln -sf "$confdir"/binhost-main.conf "$confdir"/binhost.conf
-	eselect profile set "$releasename-$releasetarget:default/linux/amd64/17.0"
+#	eselect profile set "$releasename-$releasetarget:default/linux/amd64/17.0"
+	eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
 	env-update
 	. /etc/profile
 }
