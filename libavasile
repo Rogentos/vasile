@@ -6,63 +6,63 @@ source /lib/gentoo/functions.sh
 
 # generic variables
 
-export local releasename="argent"
-export local releasetarget="ws"
-export local releaseversion="1"
+export releasename="argent"
+export releasetarget="ws"
+export releaseversion="1"
 
 # kernel version && name from inside core squashfs
 
-export local kernelver="6.12.9-"$releasename""
+export kernelver="6.12.9-"$releasename""
 
 # core squahfs name and md5 checksum file
 
-export local chrootx64=""$releasename"_"$releasetarget"_"$releaseversion"_core_x64.squashfs"
-export local chrootx64md5=""$chrootx64".md5"
+export chrootx64=""$releasename"_"$releasetarget"_"$releaseversion"_core_x64.squashfs"
+export chrootx64md5=""$chrootx64".md5"
 
 # overlay mount variables
 
-export local rodir="rodir"
-export local rwdir="rwdir"
-export local workdir="workdir" # only needed for overlayfs on kernel greather than 3.18
-export local overlaydir="overlaydir"
+export rodir="rodir"
+export rwdir="rwdir"
+export workdir="workdir" # only needed for overlayfs on kernel greather than 3.18
+export overlaydir="overlaydir"
 
 # build variables and commands to run inside core squashfs when building packages
 
-export local chrootuser="root"
-export local chroottarget="${@:2}"
-export local chrootbuildtarget="emerge -kav "$chroottarget""
-export local chrootsrcmode="avasile --srcmode"
+export chrootuser="root"
+export chroottarget="${@:2}"
+export chrootbuildtarget="emerge -kav "$chroottarget""
+export chrootsrcmode="avasile --srcmode"
 
 # iso variables and commands to run inside core squahfs when making iso image
 
-export local isouser="root"
-export local isomainarch="x86_64"
-export local isobinmode="avasile --usermode"
-export local isokernelname="kernel-genkernel-"$isomainarch"-"$kernelver""
-export local isoramfscmd="dracut -N -a dmsquash-live -a pollcdrom -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver" /boot/initramfs-genkernel-"$isomainarch"-"$kernelver""
-export local isoramfsname="initramfs-genkernel-"$isomainarch"-"$kernelver""
-export local isoeficmd="grub2-mkimage -d /usr/lib/grub/x86_64-efi -o bootx64.efi -O x86_64-efi ext2 fat udf btrfs ntfs reiserfs xfs hfsplus lvm ata part_msdos part_gpt part_apple bsd search_fs_uuid normal chain iso9660 configfile help loadenv reboot cat search memdisk tar boot linux chain -p /boot/grub"
-export local isochainloadcmd="grub2-mkimage -d /usr/lib/grub/i386-pc -o core.img -O i386-pc biosdisk part_msdos fat -p /boot/grub"
+export isouser="root"
+export isomainarch="x86_64"
+export isobinmode="avasile --usermode"
+export isokernelname="kernel-genkernel-"$isomainarch"-"$kernelver""
+export isoramfscmd="dracut -N -a dmsquash-live -a pollcdrom -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd --force --kver "$kernelver" /boot/initramfs-genkernel-"$isomainarch"-"$kernelver""
+export isoramfsname="initramfs-genkernel-"$isomainarch"-"$kernelver""
+export isoeficmd="grub2-mkimage -d /usr/lib/grub/x86_64-efi -o bootx64.efi -O x86_64-efi ext2 fat udf btrfs ntfs reiserfs xfs hfsplus lvm ata part_msdos part_gpt part_apple bsd search_fs_uuid normal chain iso9660 configfile help loadenv reboot cat search memdisk tar boot linux chain -p /boot/grub"
+export isochainloadcmd="grub2-mkimage -d /usr/lib/grub/i386-pc -o core.img -O i386-pc biosdisk part_msdos fat -p /boot/grub"
 
 # iso image layout variables
 
-export local bootloaderfetchpath="/tmp/bootcore"
-export local bootloaderconfigs=""$bootloaderfetchpath"/cdroot/boot"
-export local isorootdir=""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarch""
-export local isogrubdir=""$isorootdir"/boot/grub"
-export local isoefidir=""$isorootdir"/efi/boot"
-export local isorsynctarget=""$isorootdir"/rootfs"
-export local isorsyncsource="/tmp/"$isorootdir""
-export local isocdrootdir=""$isorootdir"/CDroot"
-export local isorealfsdir=""$isocdrootdir"/LiveOS"
-export local isosquashfsdir=""$isorootdir"/LiveOS"
+export bootloaderfetchpath="/tmp/bootcore"
+export bootloaderconfigs=""$bootloaderfetchpath"/cdroot/boot"
+export isorootdir=""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarch""
+export isogrubdir=""$isorootdir"/boot/grub"
+export isoefidir=""$isorootdir"/efi/boot"
+export isorsynctarget=""$isorootdir"/rootfs"
+export isorsyncsource="/tmp/"$isorootdir""
+export isocdrootdir=""$isorootdir"/CDroot"
+export isorealfsdir=""$isocdrootdir"/LiveOS"
+export isosquashfsdir=""$isorootdir"/LiveOS"
 
 # modechange variables
 
-export local portagedir="/var/db/repos/gentoo"
-export local confdir="/etc/portage"
-export local gitdir="/opt/argentws-build/conf/intel/portage"
-export local clonedir="/opt/argentws-build"
+export portagedir="/var/db/repos/gentoo"
+export confdir="/etc/portage"
+export gitdir="/opt/argentws-build/conf/intel/portage"
+export clonedir="/opt/argentws-build"
 
 # Support SUDO for avasile
 export ARGENT_USE_SUDO="${ARGENT_USE_SUDO:-0}"
@@ -414,7 +414,7 @@ makeiso () {
 removeportagetree() {
 	# remove portage tree, but leave packages and distfiles directories intact
 	if [ -d ""${portagedir}"/.git" ] ; then
-		einfo "Removing gentoo portage tree"
+		einfo "Removing gentoo portage tree excluding possible folders packages and distfiles"
 		find "${portagedir}" -mindepth 1 -name "packages" -prune -o -name "distfiles" -prune -o -exec rm -rf {} \; > /dev/null 2>&1
 	fi
 }
@@ -601,7 +601,7 @@ decentralized_user () {
 		rm -f "$confdir"/make.conf
 		ln -sf "$confdir"/make.conf.amd64-user "$confdir"/make.conf
 		ln -sf "$confdir"/binhost-main.conf "$confdir"/binhost.conf
-		eselect profile set "argent-ws:default/linux/amd64/17.0"
+		eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
 		env-update
 		. /etc/profile
 	fi
@@ -613,7 +613,7 @@ decentralized_devel () {
 	if [[ -e "$clonedir" ]] ; then
 		ln -sf "$confdir"/make.conf.amd64-devel "$confdir"/make.conf
 		ln -sf "$confdir"/binhost-main.conf "$confdir"/binhost.conf
-		eselect profile set "argent-ws:default/linux/amd64/17.0"
+		eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
 		env-update
 		. /etc/profile
 	fi
@@ -625,7 +625,7 @@ decentralized_source () {
 	if [[ -e "$clonedir" ]] ; then
 		ln -sf "$confdir"/make.conf.amd64-srcmode "$confdir"/make.conf
 		ln -sf "$confdir"/binhost-main.conf "$confdir"/binhost.conf
-		eselect profile set "argent-ws:default/linux/amd64/17.0"
+		eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
 		env-update
 		. /etc/profile
 	fi
@@ -640,7 +640,7 @@ decentralized_custom () {
 		fi
 		ln -sf "$confdir"/make.conf.amd64-custom "$confdir"/make.conf
 		ln -sf "$confdir"/binhost-main.conf "$confdir"/binhost.conf
-		eselect profile set "argent-ws:default/linux/amd64/17.0"
+		eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
 		env-update
 		. /etc/profile
 	fi
@@ -655,7 +655,7 @@ decentralized_gentoo () {
 		fi
 		ln -sf "$confdir"/make.conf.amd64-custom "$confdir"/make.conf
 		ln -sf "$confdir"/binhost-main.conf "$confdir"/binhost.conf
-		eselect profile set "argent-ws:default/linux/amd64/17.0"
+		eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
 		env-update
 		. /etc/profile
 	fi
@@ -672,8 +672,8 @@ decentralized_gentoo () {
 }
 # help menu color variables
 
-export local colorstart="\e[1;49;34m"
-export local colorstop="\e[0m"
+export colorstart="\e[1;49;34m"
+export colorstop="\e[0m"
 
 # help menu function
 
