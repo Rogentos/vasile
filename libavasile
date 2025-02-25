@@ -147,19 +147,22 @@ chrootchecksum () {
 chrootprepare () {
 	# always start from fresh overlay mount path, if previous exists, remove it and start over
 	while : true ; do
-		if [[ ! -d "$rodir" && ! -d "$rwdir" && ! -d "$workdir" && ! -d "$overlaydir" ]] ; then
-			for i in "$rodir" "$rwdir" "$workdir" "$overlaydir" ; do
-				mkdir "$i"
-			done
-			chrootstart
-			break
-		elif [[ -d "$rodir" && -d "$rwdir" && -d "$workdir" && -d "$overlaydir" ]] ; then
-			chrootstop
-			for i in "$rodir" "$rwdir" "$workdir" "$overlaydir" ; do
-				rm -rf "$i"
-			done
-			continue
-		fi
+	for dir in "$rodir" "$rwdir" "$workdir" "$overlaydir"; do
+	    if [[ ! -d "$dir" ]]; then
+		mkdir "$dir"
+	    fi
+	done
+
+	if [[ -d "$rodir" && -d "$rwdir" && -d "$workdir" && -d "$overlaydir" ]]; then
+		chrootstart
+		break
+	else
+	chrootstop
+	    for dir in "$rodir" "$rwdir" "$workdir" "$overlaydir"; do
+		rm -rf "$dir"
+	    done
+		continue
+	fi
 	done
 
 }
