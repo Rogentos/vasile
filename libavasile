@@ -400,7 +400,7 @@ cleanupiso () {
 
 makeisoimg () {
 	# create iso image
-	grub2-mkrescue -o ""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarch".iso" "$isorootdir"
+	grub-mkrescue -o ""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarch".iso" "$isorootdir"
 }
 
 makeiso () {
