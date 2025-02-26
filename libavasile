@@ -325,7 +325,12 @@ prepareiso () {
 	mount -t ext4 ""$isorsynctarget".img" "$isorsynctarget"
 	rsync -aHAXr --progress "$isorsyncsource/" "$isorsynctarget/"
 	# copy the kernel for live boot
-	cp -avx ""$isorsynctarget"/boot/"$isokernelname"" ""$isorootdir"/boot/vmlinuz"
+	if [[ ! -f ""$isorsynctarget"/boot/"$isokernelname"" ]]; then
+		dracut -H -f -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd -o plymouth --early-microcode --kver="$kernelver" /boot/"$isokernelname" || continue
+		cp -avx ""$isorsynctarget"/boot/"$isokernelname"" ""$isorootdir"/boot/vmlinuz" || continue
+	else
+		cp -avx ""$isorsynctarget"/boot/"$isokernelname"" ""$isorootdir"/boot/vmlinuz"
+	fi
 	# generate and copy initramfs for live boot
 	isostart
 	isoramfs
