@@ -326,6 +326,7 @@ prepareiso () {
 	rsync -aHAXr --progress "$isorsyncsource/" "$isorsynctarget/"
 	# copy the kernel for live boot
 	if [[ ! -f ""$isorsynctarget"/boot/"$isokernelname"" ]]; then
+		# Found no $isokernelname in $isorsynctarget
 		dracut -H -f -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd -o plymouth --early-microcode --kver="$kernelver" ""$isorsynctarget"/boot/"$isokernelname"" || continue
 		cp -avx ""$isorsynctarget"/boot/"$isokernelname"" ""$isorootdir"/boot/vmlinuz" || continue
 	else
@@ -566,33 +567,33 @@ setsrcmodecustom () {
 
 binmode() {
 	resetmode
+	fetchportageconfig
 	fetchminimalportagetree
 	fetchoverlays
-	fetchportageconfig
 	setbinmodeconfig
 }
 
 mixedmode() {
 	resetmode
+	fetchportageconfig
 	fetchfullportagetree
 	fetchoverlays
-	fetchportageconfig
 	setmixedmodeconfig
 }
 
 srcmode() {
 	resetmode
+	fetchportageconfig
 	fetchfullportagetree
 	fetchoverlays
-	fetchportageconfig
 	setsrcmodeconfig
 }
 
 srccustom() {
 	resetmode
+	fetchportageconfig
 	fetchfullportagetree
 	fetchoverlays
-	fetchportageconfig
         echo -e ""
         if [[ -e "$clonedir" ]] ; then
                 if [[ ! -e "$confdir"/make.conf.amd64-custom ]] ; then
