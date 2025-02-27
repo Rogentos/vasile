@@ -819,11 +819,6 @@ echo -e "\
                 git pull --depth=1 origin master
                 git branch -u origin/master master"$colorstop"
 
-		or
-
-		"$colorstart"git pull --depth=1 origin server
-		git branch -u origin/server server"$colorstop"
-
 		This has a fallback on decentralize-custom."
 echo -e ""
 exit 0
