@@ -461,7 +461,7 @@ fetchportageconfig() {
 	# fetch argent buildsystem (portage configuration)
 	pushd /opt > /dev/null 2>&1
 	einfo "Injecting "$releasename"-"$releasetarget" buildsystem"
-	git clone https://gitlab.com/argent/argentws-build.git
+	git clone --branch master https://gitlab.com/argent/argentws-build.git
 	popd > /dev/null 2>&1
 }
 
