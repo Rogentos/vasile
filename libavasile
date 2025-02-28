@@ -569,24 +569,24 @@ binmode() {
 	resetmode
 	fetchportageconfig
 	fetchminimalportagetree
-	fetchoverlays
 	setbinmodeconfig
+	fetchoverlays
 }
 
 mixedmode() {
 	resetmode
 	fetchportageconfig
 	fetchfullportagetree
-	fetchoverlays
 	setmixedmodeconfig
+	fetchoverlays
 }
 
 srcmode() {
 	resetmode
 	fetchportageconfig
 	fetchfullportagetree
-	fetchoverlays
 	setsrcmodeconfig
+	fetchoverlays
 }
 
 srccustom() {
