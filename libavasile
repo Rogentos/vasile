@@ -590,8 +590,8 @@ binmode() {
 	resetmode
 	fetchportageconfig
 	fetchminimalportagetree
-	setbinmodeconfig
 	fetchminimalargenttree
+	setbinmodeconfig
 }
 
 mixedmode() {
