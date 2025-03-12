@@ -60,6 +60,7 @@ export isosquashfsdir=""$isorootdir"/LiveOS"
 # modechange variables
 
 export portagedir="/var/db/repos/gentoo"
+export argentdir="/var/db/repos/argent"
 export confdir="/etc/portage"
 export gitdir="/opt/argentws-build/conf/intel/portage"
 export clonedir="/opt/argentws-build"
@@ -505,13 +506,33 @@ fetchminimalportagetree() {
 		echo ".gitignore" >> .git/info/sparse-checkout
 		git pull --depth=1 origin master
 		git branch -u origin/master master
-		rm -rf ""${portagedir}"/profiles/updates"
+		rm -rf "${portagedir}/profiles/updates"
+	fi
+}
+
+fetchminimalargenttree() {
+	# fetch minimal portage tree
+	# in usermode we don't want the whole tree of gentoo ebuilds
+	# but we need portage profiles portage metadata && portage eclasses
+	# so make a sparse-checkout, to fetch only what we need
+	if [[ ! -d "${argentdir}"/.git ]] ; then
+		einfo "Injecting usermode (minimal) argent overlay tree"
+		cd "${argentdir}" && git init > /dev/null 2>&1
+		git remote add origin https://gitlab.com/argent/argent-ws.git
+		git config core.sparsecheckout true
+		echo "profiles/*" >> .git/info/sparse-checkout
+		echo "metadata/*" >> .git/info/sparse-checkout
+		echo "eclass/*" >> .git/info/sparse-checkout
+		echo ".gitignore" >> .git/info/sparse-checkout
+		git pull --depth=1 origin master
+		git branch -u origin/master master
+		rm -rf "${argentdir}/profiles/updates"
 	fi
 }
 
 fetchoverlays () {
 	# fetch argent overlay
-	einfo "Injecting "$releasename"-"$releasetarget" overlay"
+	einfo "Injecting $releasename-$releasetarget overlay"
 
 	if [[ -e $(command -v layman) ]] ; then
 		echo y | layman -f -a "$releasename"-"$releasetarget" -o https://gitlab.com/"$releasename"/"$releasename"-"$releasetarget"/raw/master/overlay.xml
@@ -570,7 +591,7 @@ binmode() {
 	fetchportageconfig
 	fetchminimalportagetree
 	setbinmodeconfig
-	fetchoverlays
+	fetchminimalargenttree
 }
 
 mixedmode() {
