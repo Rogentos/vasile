@@ -407,7 +407,7 @@ cleanupiso () {
 
 makeisoimg () {
 	# create iso image
-	grub-mkrescue --mbr-force-bootable -volid "ARGENT" -joliet -iso-level 3 -o ""$releasename"-"$releasetarget"-"$releaseversion"-"$isomainarch".iso" "$isorootdir"
+	grub-mkrescue --mbr-force-bootable -volid "ARGENT" -joliet -iso-level 3 -o "$releasename-$releasetarget-$releaseversion-$isomainarch.iso" "$isorootdir"
 }
 
 makeiso () {
@@ -423,7 +423,7 @@ makeiso () {
 
 removeportagetree() {
 	# remove portage tree, but leave packages and distfiles directories intact
-	if [ -d ""${portagedir}"/.git" ] ; then
+	if [ -d "${portagedir}/.git" ] ; then
 		einfo "Removing gentoo portage tree excluding possible folders packages and distfiles"
 		find "${portagedir}" -mindepth 1 -name "packages" -prune -o -name "distfiles" -prune -o -exec rm -rf {} \; > /dev/null 2>&1
 	fi
@@ -431,7 +431,7 @@ removeportagetree() {
 
 removeoverlays() {
 	# remove argent overlay
-	einfo "Removing "$releasename"-"$releasetarget" overlay"
+	einfo "Removing $releasename-$releasetarget overlay"
 
 	if [[ -e $(command -v layman) ]] ; then
 		layman -d "$releasename"-"$releasetarget" > /dev/null 2>&1
@@ -439,15 +439,18 @@ removeoverlays() {
 			rm -rf "/var/lib/layman/$releasename-$releasetarget" || die
 		fi
 	elif [[ -e "/var/db/repos/$releasename-$releasetarget" ]] ; then
-		rm -rf "/var/db/repos/$releasename-$releasetarget"
+		if [ -d "${argentdir}/.git" ] ; then
+			einfo "Removing argent overlay tree excluding possible folders packages and distfiles"
+			find "${argentdir}" -mindepth 1 -name "packages" -prune -o -name "distfiles" -prune -o -exec rm -rf {} \; > /dev/null 2>&1
+		fi
 	fi
 }
 
 removeportageconfig() {
 	# remove argent buildsystem (portage configuration)
-	einfo "Removing "$releasename"-"$releasetarget" buildsystem"
-	rm ""$confdir"/make.conf" > /dev/null 2>&1
-	rm ""$confdir"/make.profile" > /dev/null 2>&1
+	einfo "Removing $releasename-$releasetarget buildsystem"
+	rm "$confdir/make.conf" > /dev/null 2>&1
+	rm "$confdir/make.profile" > /dev/null 2>&1
 	rm "$confdir" > /dev/null 2>&1
 	rm -rf "$clonedir" > /dev/null 2>&1
 }
