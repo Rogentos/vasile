@@ -284,8 +284,9 @@ isoservices () {
 	done
 
 	# small pipewire and wireplumber enable
-	chroot "$isorsynctarget" su - "$isouser" -c "systemctl enable --user pipewire"
-	chroot "$isorsynctarget" su - "$isouser" -c "systemctl enable --user wireplumber"
+	chroot "$isorsynctarget" su - "$isouser" -c "systemctl --user disable --now pulseaudio.socket pulseaudio.service"
+	chroot "$isorsynctarget" su - "$isouser" -c "systemctl --user enable --now pipewire-pulse.socket wireplumber.service"
+	chroot "$isorsynctarget" su - "$isouser" -c "systemctl --user enable --now pipewire.service"
 	set +x
 }
 
