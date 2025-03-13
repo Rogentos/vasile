@@ -280,8 +280,12 @@ isoservices () {
 	# enable live iso image system services
 	set -x
 	for service in argentlive argent-config-vbox avahi-daemon cups dkms dm-event lvm2-lvmetad lvm2-monitor NetworkManager ModemManager sddm virtualbox-guest-additions ; do
-		chroot "$isorsynctarget" su - "$isouser" -c "systemctl enable "$service""
+		chroot "$isorsynctarget" su - "$isouser" -c "systemctl enable $service"
 	done
+
+	# small pipewire and wireplumber enable
+	chroot "$isorsynctarget" su - "$isouser" -c "systemctl enable --user pipewire"
+	chroot "$isorsynctarget" su - "$isouser" -c "systemctl enable --user wireplumber"
 	set +x
 }
 
@@ -296,7 +300,7 @@ isochroot () {
 		chroot "$isorsynctarget" su - "$isouser" -c "env-update"
 	else
                 echo "No need to drop into shell, you provided a list to install"
-                if [[ -e ""$isorsynctarget"/ISO_Installed_Packages" ]] ; then
+                if [[ -e "$isorsynctarget/ISO_Installed_Packages" ]] ; then
                         rm -f "$isorsynctarget"/ISO_Installed_Packages
                 fi
                 for i in "${@:2}" ; do cat $i >> "$isorsynctarget"/ISO_Installed_Packages ; done
@@ -313,8 +317,8 @@ isochroot () {
 prepareiso () {
 	# prepare iso image layout
 	mkdir -p "$isorsynctarget"
-	dd if=/dev/zero of=""$isorsynctarget".img" bs=50M count=400
-	mkfs.ext4 -F ""$isorsynctarget".img"
+	dd if=/dev/zero of="$isorsynctarget.img" bs=50M count=400
+	mkfs.ext4 -F "$isorsynctarget.img"
 	mkdir -p "$isorsyncsource"
 	mkdir -p "$isocdrootdir"
 	mkdir -p "$isosquashfsdir"
@@ -323,15 +327,15 @@ prepareiso () {
 	mkdir -p "$isoefidir"
 	# mount core squashfs and rsync it's contents into core iso image
 	mount -t squashfs "$chrootx64" "$isorsyncsource"
-	mount -t ext4 ""$isorsynctarget".img" "$isorsynctarget"
+	mount -t ext4 "$isorsynctarget.img" "$isorsynctarget"
 	rsync -aHAXr --progress "$isorsyncsource/" "$isorsynctarget/"
 	# copy the kernel for live boot
-	if [[ ! -f ""$isorsynctarget"/boot/"$isokernelname"" ]]; then
+	if [[ ! -f "$isorsynctarget/boot/$isokernelname" ]]; then
 		# Found no $isokernelname in $isorsynctarget
-		dracut -H -f -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd -o plymouth --early-microcode --kver="$kernelver" ""$isorsynctarget"/boot/"$isokernelname"" || continue
-		cp -avx ""$isorsynctarget"/boot/"$isokernelname"" ""$isorootdir"/boot/vmlinuz" || continue
+		dracut -H -f -o systemd -o systemd-initrd -o systemd-networkd -o dracut-systemd -o plymouth --early-microcode --kver="$kernelver" "$isorsynctarget/boot/$isokernelname"
+		cp -avx "$isorsynctarget/boot/$isokernelname" "$isorootdir/boot/vmlinuz" || continue
 	else
-		cp -avx ""$isorsynctarget"/boot/"$isokernelname"" ""$isorootdir"/boot/vmlinuz"
+		cp -avx "$isorsynctarget/boot/$isokernelname" "$isorootdir/boot/vmlinuz"
 	fi
 	# generate and copy initramfs for live boot
 	isostart
@@ -339,34 +343,34 @@ prepareiso () {
 	isostop
 	echo "WE MOVE THE INITRAMFS TO INITRD..."
 	ls -la "$isorsynctarget"/boot/
-	mv ""$isorsynctarget"/boot/"$isoramfsname"" ""$isorootdir"/boot/initrd"
+	mv "$isorsynctarget/boot/$isoramfsname" "$isorootdir/boot/initrd"
 	echo "DONE REMOVING."
 	# generate and copy efi bootloader for live boot
 	isostart
 	isoefiimg
 	isostop
 	if [[ -e "$isorsynctarget"/root/bootx64.efi ]] ; then
-		mv ""$isorsynctarget"/root/bootx64.efi" "$isoefidir"
-		chmod 755 ""$isoefidir"/bootx64.efi"
+		mv "$isorsynctarget/root/bootx64.efi" "$isoefidir"
+		chmod 755 "$isoefidir/bootx64.efi"
 	else
-		echo "You do not have a "$isorsynctarget"/root/bootx64.efi"
+		echo "You do not have a $isorsynctarget/root/bootx64.efi"
 		echo "Please generate it yourself!"
 	fi
 	# generate and copy syslinux -> grub chainloader for unetbootin compatibility
 	isostart
 	isochainloader
 	isostop
-	if [[ -e ""$isorsynctarget"/root/core.img" ]] ; then
-		mv ""$isorsynctarget"/root/core.img" "$isogrubdir"
+	if [[ -e "$isorsynctarget/root/core.img" ]] ; then
+		mv "$isorsynctarget/root/core.img" "$isogrubdir"
 	else
-		echo "You do not have ""$isorsynctarget"/root/core.img""
+		echo "You do not have "$isorsynctarget/root/core.img""
 		echo "Please generate it yourself!"
 	fi
 
-	if [[ -e ""$isorsynctarget"/usr/lib/grub/i386-pc/lnxboot.img" ]] ; then
-		cp -avx ""$isorsynctarget"/usr/lib/grub/i386-pc/lnxboot.img" "$isogrubdir"
+	if [[ -e "$isorsynctarget/usr/lib/grub/i386-pc/lnxboot.img" ]] ; then
+		cp -avx "$isorsynctarget/usr/lib/grub/i386-pc/lnxboot.img" "$isogrubdir"
 	else
-		echo "You do not have ""$isorsynctarget"/usr/lib/grub/i386-pc/lnxboot.img""
+		echo "You do not have "$isorsynctarget/usr/lib/grub/i386-pc/lnxboot.img""
 		echo "Please generate it yourself!"
 	fi
 	# enable live iso image system services
@@ -379,9 +383,9 @@ prepareiso () {
 	isostop
 	umount -l "$isorsynctarget" > /dev/null 2>&1
 	# move "real" live filesystem into right place
-	mv ""$isorsynctarget".img"  "$isorealfsdir"
+	mv "$isorsynctarget.img"  "$isorealfsdir"
 	# compress "fake" live filesystem
-	mksquashfs "$isocdrootdir" ""$isorootdir"/squashfs.img" -b 1048576 -comp xz -Xdict-size 100%
+	mksquashfs "$isocdrootdir" "$isorootdir/squashfs.img" -b 1048576 -comp xz -Xdict-size 100%
 	mv ""$isorootdir/"squashfs.img" "$isosquashfsdir"
 	# dracut requires "real" ext4 live filesystem to be placed 
 	# into a "fake" squashfs live filesystem as bellow :
