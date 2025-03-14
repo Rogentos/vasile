@@ -279,14 +279,16 @@ isochainloader () {
 isoservices () {
 	# enable live iso image system services
 	set -x
-	for service in argentlive argent-config-vbox avahi-daemon cups dkms dm-event lvm2-lvmetad lvm2-monitor NetworkManager ModemManager sddm virtualbox-guest-additions ; do
+	for service in argentlive argent-config-vbox avahi-daemon connman cups dkms dm-event lvm2-lvmetad lvm2-monitor NetworkManager ModemManager sddm virtualbox-guest-additions ; do
 		chroot "$isorsynctarget" su - "$isouser" -c "systemctl enable $service"
 	done
 
 	# small pipewire and wireplumber enable
-	chroot "$isorsynctarget" su - "$isouser" -c "systemctl --user disable --now pulseaudio.socket pulseaudio.service"
-	chroot "$isorsynctarget" su - "$isouser" -c "systemctl --user enable --now pipewire-pulse.socket wireplumber.service"
-	chroot "$isorsynctarget" su - "$isouser" -c "systemctl --user enable --now pipewire.service"
+	chroot "$isorsynctarget" su - "$isouser" -c "rm -f /etc/resolv.conf"
+	chroot "$isorsynctarget" su - "$isouser" -c "ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf"
+	chroot "$isorsynctarget" su - "$isouser" -c "systemctl --user disable pulseaudio.socket pulseaudio.service"
+	chroot "$isorsynctarget" su - "$isouser" -c "systemctl --user enable pipewire-pulse.socket wireplumber.service"
+	chroot "$isorsynctarget" su - "$isouser" -c "systemctl --user enable pipewire.service"
 	set +x
 }
 
@@ -307,7 +309,7 @@ isochroot () {
                 for i in "${@:2}" ; do cat $i >> "$isorsynctarget"/ISO_Installed_Packages ; done
                 mapfile -t ISO_ARGENT_PACKAGES_LIST < "$isorsynctarget"/ISO_Installed_Packages
 
-		chroot "$isorsynctarget" su - "$isouser" -c "epkg autoinstall ${ISO_ARGENT_PACKAGES_LIST[*]} "
+		chroot "$isorsynctarget" su - "$isouser" -c "epkg --skip-check autoinstall ${ISO_ARGENT_PACKAGES_LIST[*]} "
 		chroot "$isorsynctarget" su - "$isouser" -c "umount -f /mnt/argent_efipart/dev/*"
 		chroot "$isorsynctarget" su - "$isouser" -c "env-update"
 
