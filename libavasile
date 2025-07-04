@@ -60,7 +60,7 @@ export isosquashfsdir=""$isorootdir"/LiveOS"
 # modechange variables
 
 export portagedir="/var/db/repos/gentoo"
-export argentdir="/var/db/repos/argent"
+export argentdir="/var/db/repos/argent-ws"
 export confdir="/etc/portage"
 export gitdir="/opt/argentws-build/conf/intel/portage"
 export clonedir="/opt/argentws-build"
