@@ -505,18 +505,34 @@ fetchminimalportagetree() {
 	# in usermode we don't want the whole tree of gentoo ebuilds
 	# but we need portage profiles portage metadata && portage eclasses
 	# so make a sparse-checkout, to fetch only what we need
-	if [[ ! -d "${portagedir}"/.git ]] ; then
+	if [[ ! -d "${portagedir}/.git" ]] ; then
 		einfo "Injecting usermode (minimal) gentoo portage tree"
+
 		cd "${portagedir}" && git init > /dev/null 2>&1
 		git remote add origin https://gitlab.com/argent/portage.git
-		git config core.sparsecheckout true
-		echo "profiles/*" >> .git/info/sparse-checkout
-		echo "metadata/*" >> .git/info/sparse-checkout
-		echo "eclass/*" >> .git/info/sparse-checkout
+
+		git config core.sparseCheckout true
+		git config extensions.partialClone origin
+		git config remote.origin.promisor true
+		git config fetch.fsckObjects false
+		git config remote.origin.partialCloneFilter blob:none
+
+		echo "profiles/" > .git/info/sparse-checkout
+		echo "metadata/" >> .git/info/sparse-checkout
+		echo "eclass/" >> .git/info/sparse-checkout
 		echo ".gitignore" >> .git/info/sparse-checkout
-		git pull --depth=1 origin master
-		git branch -u origin/master master
-		rm -rf "${portagedir}/profiles/updates"
+
+		git fetch --depth=1 origin master
+		git checkout master
+
+		git sparse-checkout init --cone
+		git sparse-checkout set profiles metadata eclass .gitignore
+
+		git reflog expire --expire=now --all
+		git gc --prune=now --aggressive
+
+		rm -rf profiles/updates
+		find profiles/default/linux/ -mindepth 1 -maxdepth 1 -type d ! -name amd64 -exec rm -rf {} +
 	fi
 }
 
@@ -525,18 +541,33 @@ fetchminimalargenttree() {
 	# in usermode we don't want the whole tree of gentoo ebuilds
 	# but we need portage profiles portage metadata && portage eclasses
 	# so make a sparse-checkout, to fetch only what we need
-	if [[ ! -d "${argentdir}"/.git ]] ; then
+	if [[ ! -d "${argentdir}/.git" ]] ; then
 		einfo "Injecting usermode (minimal) argent overlay tree"
+
 		cd "${argentdir}" && git init > /dev/null 2>&1
 		git remote add origin https://gitlab.com/argent/argent-ws.git
-		git config core.sparsecheckout true
-		echo "profiles/*" >> .git/info/sparse-checkout
-		echo "metadata/*" >> .git/info/sparse-checkout
-		echo "eclass/*" >> .git/info/sparse-checkout
+
+		git config core.sparseCheckout true
+		git config extensions.partialClone origin
+		git config remote.origin.promisor true
+		git config fetch.fsckObjects false
+		git config remote.origin.partialCloneFilter blob:none
+
+		echo "profiles/" > .git/info/sparse-checkout
+		echo "metadata/" >> .git/info/sparse-checkout
+		echo "eclass/" >> .git/info/sparse-checkout
 		echo ".gitignore" >> .git/info/sparse-checkout
-		git pull --depth=1 origin master
-		git branch -u origin/master master
-		rm -rf "${argentdir}/profiles/updates"
+
+		git fetch --depth=1 origin master
+		git checkout master
+
+		git sparse-checkout init --cone
+		git sparse-checkout set profiles metadata eclass .gitignore
+
+		git reflog expire --expire=now --all
+		git gc --prune=now --aggressive
+
+		rm -rf profiles/updates
 	fi
 }
 
