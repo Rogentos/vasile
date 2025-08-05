@@ -560,12 +560,16 @@ fetchminimalargenttree() {
 
 		git fetch --depth=1 origin master
 		git checkout master
+		git branch -u origin/master master
 
 		git sparse-checkout init --cone
 		git sparse-checkout set profiles metadata eclass .gitignore
 
 		git reflog expire --expire=now --all
 		git gc --prune=now --aggressive
+
+		git submodule update --init --recursive --depth=1
+		git submodule foreach --recursive 'git reflog expire --expire=now --all && git gc --prune=now --aggressive'
 
 		rm -rf profiles/updates
 	fi
