@@ -1025,10 +1025,27 @@ setsrcmodecustom() {
 # Primary System Mode Functions
 # ============================================================================
 
+check_portage_directory() {
+	local current_dir
+	current_dir=$(pwd)
+	
+	if [[ "${current_dir}" == "/etc/portage"* ]]; then
+		ewarn "You are currently in the /etc/portage directory"
+		ewarn "This directory will be modified during mode switching"
+		einfo "Changing to /etc/ directory for safety..."
+		cd /etc/ || {
+			eerror "Failed to change to /etc/ directory"
+			exit 1
+		}
+		einfo "Directory changed to: $(pwd)"
+	fi
+}
+
 binmode() {
 	# Initialize binary-only mode (usermode)
 	einfo "Setting up binary mode (usermode)"
 	
+	check_portage_directory
 	resetmode
 	fetchportageconfig
 	fetchminimalportagetree
@@ -1042,6 +1059,7 @@ mixedmode() {
 	# Initialize mixed development mode
 	einfo "Setting up mixed mode (development)"
 	
+	check_portage_directory
 	resetmode
 	fetchportageconfig
 	fetchfullportagetree
@@ -1055,6 +1073,7 @@ srcmode() {
 	# Initialize source-only mode
 	einfo "Setting up source mode"
 	
+	check_portage_directory
 	resetmode
 	fetchportageconfig
 	fetchfullportagetree
@@ -1068,6 +1087,7 @@ srccustom() {
 	# Initialize custom source mode with user-defined configuration
 	einfo "Setting up custom source mode"
 	
+	check_portage_directory
 	resetmode
 	fetchportageconfig
 	fetchfullportagetree
