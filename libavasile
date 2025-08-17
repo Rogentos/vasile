@@ -34,8 +34,8 @@ export overlaydir="overlaydir"
 
 # Build Environment Variables
 export chrootuser="root"
-export chroottarget="${@:2}"
-export chrootbuildtarget="emerge -kav ${chroottarget}"
+export chroot_target="${@:2}"
+export chrootbuildtarget="emerge -kav ${chroot_target}"
 export chrootsrcmode="avasile --srcmode"
 
 # ISO Creation Variables
@@ -61,23 +61,24 @@ export isochainloadcmd="grub-mkimage -d /usr/lib/grub/i386-pc -o core.img \
     -O i386-pc biosdisk part_msdos fat -p /boot/grub"
 
 # ISO Directory Layout
-export bootloaderfetchpath="/tmp/bootcore"
-export bootloaderconfigs="${bootloaderfetchpath}/cdroot/boot"
-export isorootdir="${releasename}-${releasetarget}-${releaseversion}-${isomainarch}"
-export isogrubdir="${isorootdir}/boot/grub"
-export isoefidir="${isorootdir}/efi/boot"
-export isorsynctarget="${isorootdir}/rootfs"
-export isorsyncsource="/tmp/${isorootdir}"
-export isocdrootdir="${isorootdir}/CDroot"
-export isorealfsdir="${isocdrootdir}/LiveOS"
-export isosquashfsdir="${isorootdir}/LiveOS"
+export BOOTLOADER_FETCH_PATH="/tmp/bootcore"
+export BOOTLOADER_CONFIGS="${BOOTLOADER_FETCH_PATH}/cdroot/boot"
+export ISO_ROOT_DIR="${releasename}-${releasetarget}-${releaseversion}-${isomainarch}"
+export ISO_GRUB_DIR="${ISO_ROOT_DIR}/boot/grub"
+export ISO_EFI_DIR="${ISO_ROOT_DIR}/efi/boot"
+export ISO_RSYNC_TARGET="${ISO_ROOT_DIR}/rootfs"
+export ISO_RSYNC_SOURCE="/tmp/${ISO_ROOT_DIR}"
+export ISO_CDROOT_DIR="${ISO_ROOT_DIR}/CDroot"
+export ISO_REALFS_DIR="${ISO_CDROOT_DIR}/LiveOS"
+export ISO_SQUASHFS_DIR="${ISO_ROOT_DIR}/LiveOS"
 
 # Repository and Configuration Paths
-export portagedir="/var/db/repos/gentoo"
-export argentdir="/var/db/repos/argent-ws"
-export confdir="/etc/portage"
-export gitdir="/opt/argentws-build/conf/intel/portage"
-export clonedir="/opt/argentws-build"
+export PORTAGE_MAIN_DIR="/var/db/repos/gentoo"
+export ARGENT_MAIN_DIR="${ARGENT_MAIN_DIR:-/var/db/repos/argent-ws}"
+export PORTAGE_LINK_CONFDIR="/etc/portage"
+export PORTAGE_GITDIR="${PORTAGE_GITDIR:-/opt/argentws-build/conf/intel/portage}"
+export PORTAGE_MAIN_CONFDIR="${PORTAGE_MAIN_CONFDIR:-/opt/argentws-build}"
+export PORTAGE_REPO="${PORTAGE_REPO:-https://gitlab.com/argent/argentws-build.git}"
 
 # Feature Flags
 export ARGENT_USE_SUDO="${ARGENT_USE_SUDO:-0}"
@@ -119,16 +120,16 @@ checkmode() {
 	avasile_mode=$(readlink -f /etc/portage/make.conf)
 	
 	case "${avasile_mode}" in
-		"${clonedir}/conf/intel/portage/make.conf.amd64-user")
+		"${PORTAGE_MAIN_CONFDIR}/conf/intel/portage/make.conf.amd64-user")
 			echo "$0 is on --usermode"
 			;;
-		"${clonedir}/conf/intel/portage/make.conf.amd64-devel")
+		"${PORTAGE_MAIN_CONFDIR}/conf/intel/portage/make.conf.amd64-devel")
 			echo "$0 is on --devmode!"
 			;;
-		"${clonedir}/conf/intel/portage/make.conf.amd64-srcmode")
+		"${PORTAGE_MAIN_CONFDIR}/conf/intel/portage/make.conf.amd64-srcmode")
 			echo "$0 is on --srcmode!"
 			;;
-		"${clonedir}/conf/intel/portage/make.conf.amd64-custom")
+		"${PORTAGE_MAIN_CONFDIR}/conf/intel/portage/make.conf.amd64-custom")
 			echo "$0 is on your own custom mode!"
 			;;
 		*)
@@ -322,13 +323,13 @@ makepkg() {
 isostart() {
 	# Mount ISO image core filesystems
 	local mount_points=(
-		"packages:${isorsynctarget}/usr/portage/packages:bind"
-		"proc:${isorsynctarget}/proc:proc"
-		"sysfs:${isorsynctarget}/sys:sysfs"
-		"devtmpfs:${isorsynctarget}/dev:devtmpfs:-o relatime,size=3055348k,nr_inodes=763837,mode=755"
-		"devpts:${isorsynctarget}/dev/pts:devpts:-o nosuid,noexec,relatime,gid=5,mode=620"
-		"tmpfs:${isorsynctarget}/dev/shm:tmpfs:-o nosuid,nodev"
-		"tmpfs:${isorsynctarget}/tmp:tmpfs:-o nosuid,nodev,noexec"
+		"packages:${ISO_RSYNC_TARGET}/usr/portage/packages:bind"
+		"proc:${ISO_RSYNC_TARGET}/proc:proc"
+		"sysfs:${ISO_RSYNC_TARGET}/sys:sysfs"
+		"devtmpfs:${ISO_RSYNC_TARGET}/dev:devtmpfs:-o relatime,size=3055348k,nr_inodes=763837,mode=755"
+		"devpts:${ISO_RSYNC_TARGET}/dev/pts:devpts:-o nosuid,noexec,relatime,gid=5,mode=620"
+		"tmpfs:${ISO_RSYNC_TARGET}/dev/shm:tmpfs:-o nosuid,nodev"
+		"tmpfs:${ISO_RSYNC_TARGET}/tmp:tmpfs:-o nosuid,nodev,noexec"
 	)
 	
 	for mount_spec in "${mount_points[@]}"; do
@@ -346,13 +347,13 @@ isostart() {
 isostop() {
 	# Unmount ISO image core filesystems
 	local mount_points=(
-		"${isorsynctarget}/proc"
-		"${isorsynctarget}/sys"
-		"${isorsynctarget}/dev/pts"
-		"${isorsynctarget}/dev/shm"
-		"${isorsynctarget}/dev"
-		"${isorsynctarget}/tmp"
-		"${isorsynctarget}/usr/portage/packages"
+		"${ISO_RSYNC_TARGET}/proc"
+		"${ISO_RSYNC_TARGET}/sys"
+		"${ISO_RSYNC_TARGET}/dev/pts"
+		"${ISO_RSYNC_TARGET}/dev/shm"
+		"${ISO_RSYNC_TARGET}/dev"
+		"${ISO_RSYNC_TARGET}/tmp"
+		"${ISO_RSYNC_TARGET}/usr/portage/packages"
 	)
 	
 	for mount_point in "${mount_points[@]}"; do
@@ -362,22 +363,22 @@ isostop() {
 
 isousertree() {
 	# Initialize portage tree and overlay in ISO environment
-	chroot "${isorsynctarget}" su - "${isouser}" -c "${isobinmode}"
+	chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c "${isobinmode}"
 }
 
 isoramfs() {
 	# Generate ISO initramfs with live boot modules
-	chroot "${isorsynctarget}" su - "${isouser}" -c "${isoramfscmd}"
+	chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c "${isoramfscmd}"
 }
 
 isoefiimg() {
 	# Generate EFI bootloader
-	chroot "${isorsynctarget}" su - "${isouser}" -c "${isoeficmd}"
+	chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c "${isoeficmd}"
 }
 
 isochainloader() {
 	# Generate GRUB chainloader for unetbootin compatibility
-	chroot "${isorsynctarget}" su - "${isouser}" -c "${isochainloadcmd}"
+	chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c "${isochainloadcmd}"
 }
 
 isoservices() {
@@ -402,18 +403,18 @@ isoservices() {
 	
 	# Enable system services
 	for service in "${services[@]}"; do
-		chroot "${isorsynctarget}" su - "${isouser}" -c "systemctl enable ${service}"
+		chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c "systemctl enable ${service}"
 	done
 	
 	# Configure networking
-	chroot "${isorsynctarget}" su - "${isouser}" -c "rm -f /etc/resolv.conf"
-	chroot "${isorsynctarget}" su - "${isouser}" -c \
+	chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c "rm -f /etc/resolv.conf"
+	chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c \
 		"ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf"
 	
 	# Configure audio services (disable PulseAudio, enable PipeWire)
-	chroot "${isorsynctarget}" su - "${isouser}" -c \
+	chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c \
 		"systemctl --user disable pulseaudio.socket pulseaudio.service"
-	chroot "${isorsynctarget}" su - "${isouser}" -c \
+	chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c \
 		"systemctl --user enable pipewire-pulse.socket wireplumber.service pipewire.service"
 	
 	set +x
@@ -432,41 +433,41 @@ isochroot() {
 		einfo "- Exit when finished"
 		einfo "========================================"
 		
-		chroot "${isorsynctarget}" su - "${isouser}"
-		chroot "${isorsynctarget}" su - "${isouser}" -c "umount -f /mnt/argent_efipart/dev/* 2>/dev/null || true"
-		chroot "${isorsynctarget}" su - "${isouser}" -c "env-update"
+		chroot "${ISO_RSYNC_TARGET}" su - "${isouser}"
+		chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c "umount -f /mnt/argent_efipart/dev/* 2>/dev/null || true"
+		chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c "env-update"
 	else
 		einfo "Automated installation mode"
 		einfo "Installing packages from provided lists..."
 		
 		# Clean up previous package list
-		if [[ -e "${isorsynctarget}/ISO_Installed_Packages" ]]; then
-			rm -f "${isorsynctarget}/ISO_Installed_Packages"
+		if [[ -e "${ISO_RSYNC_TARGET}/ISO_Installed_Packages" ]]; then
+			rm -f "${ISO_RSYNC_TARGET}/ISO_Installed_Packages"
 		fi
 		
 		# Combine all package lists
 		for package_list in "${@:2}"; do
 			if [[ -f "${package_list}" ]]; then
-				cat "${package_list}" >> "${isorsynctarget}/ISO_Installed_Packages"
+				cat "${package_list}" >> "${ISO_RSYNC_TARGET}/ISO_Installed_Packages"
 			else
 				ewarn "Package list not found: ${package_list}"
 			fi
 		done
 		
-		if [[ -f "${isorsynctarget}/ISO_Installed_Packages" ]]; then
-			mapfile -t iso_packages < "${isorsynctarget}/ISO_Installed_Packages"
+		if [[ -f "${ISO_RSYNC_TARGET}/ISO_Installed_Packages" ]]; then
+			mapfile -t iso_packages < "${ISO_RSYNC_TARGET}/ISO_Installed_Packages"
 			
 			if [[ ${#iso_packages[@]} -gt 0 ]]; then
 				einfo "Installing ${#iso_packages[@]} packages..."
-				chroot "${isorsynctarget}" su - "${isouser}" -c "epkg autoinstall ${iso_packages[*]}"
+				chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c "epkg autoinstall ${iso_packages[*]}"
 			else
 				ewarn "No packages found in provided lists"
 			fi
 		fi
 		
 		# Cleanup
-		chroot "${isorsynctarget}" su - "${isouser}" -c "umount -f /mnt/argent_efipart/dev/* 2>/dev/null || true"
-		chroot "${isorsynctarget}" su - "${isouser}" -c "env-update"
+		chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c "umount -f /mnt/argent_efipart/dev/* 2>/dev/null || true"
+		chroot "${ISO_RSYNC_TARGET}" su - "${isouser}" -c "env-update"
 	fi
 }
 
@@ -478,13 +479,13 @@ prepareiso() {
 	
 	# Create directory structure
 	local iso_directories=(
-		"${isorsynctarget}"
-		"${isorsyncsource}"
-		"${isocdrootdir}"
-		"${isosquashfsdir}"
-		"${isorealfsdir}"
-		"${isogrubdir}"
-		"${isoefidir}"
+		"${ISO_RSYNC_TARGET}"
+		"${ISO_RSYNC_SOURCE}"
+		"${ISO_CDROOT_DIR}"
+		"${ISO_SQUASHFS_DIR}"
+		"${ISO_REALFS_DIR}"
+		"${ISO_GRUB_DIR}"
+		"${ISO_EFI_DIR}"
 	)
 	
 	for dir in "${iso_directories[@]}"; do
@@ -493,34 +494,34 @@ prepareiso() {
 	
 	# Create base filesystem image
 	einfo "Creating base filesystem image (20GB)..."
-	dd if=/dev/zero of="${isorsynctarget}.img" bs=50M count=400 status=progress
-	mkfs.ext4 -F "${isorsynctarget}.img"
+	dd if=/dev/zero of="${ISO_RSYNC_TARGET}.img" bs=50M count=400 status=progress
+	mkfs.ext4 -F "${ISO_RSYNC_TARGET}.img"
 	
 	# Mount and sync core squashfs contents
 	einfo "Mounting core squashfs and syncing contents..."
-	mount -t squashfs "${chrootx64}" "${isorsyncsource}"
-	mount -t ext4 "${isorsynctarget}.img" "${isorsynctarget}"
-	rsync -aHAXr --progress "${isorsyncsource}/" "${isorsynctarget}/"
+	mount -t squashfs "${chrootx64}" "${ISO_RSYNC_SOURCE}"
+	mount -t ext4 "${ISO_RSYNC_TARGET}.img" "${ISO_RSYNC_TARGET}"
+	rsync -aHAXr --progress "${ISO_RSYNC_SOURCE}/" "${ISO_RSYNC_TARGET}/"
 	
 	# Handle kernel for live boot
 	einfo "Preparing kernel for live boot..."
-	if [[ ! -f "${isorsynctarget}/boot/${isokernelname}" ]]; then
+	if [[ ! -f "${ISO_RSYNC_TARGET}/boot/${isokernelname}" ]]; then
 		ewarn "Kernel not found, generating with dracut..."
 		dracut -H -f \
 			-o systemd -o systemd-initrd -o systemd-networkd \
 			-o dracut-systemd -o plymouth \
 			--early-microcode --kver="${kernelver}" \
-			"${isorsynctarget}/boot/${isokernelname}"
+			"${ISO_RSYNC_TARGET}/boot/${isokernelname}"
 		
-		if [[ -f "${isorsynctarget}/boot/${isokernelname}" ]]; then
-			cp -avx "${isorsynctarget}/boot/${isokernelname}" "${isorootdir}/boot/vmlinuz"
+		if [[ -f "${ISO_RSYNC_TARGET}/boot/${isokernelname}" ]]; then
+			cp -avx "${ISO_RSYNC_TARGET}/boot/${isokernelname}" "${ISO_ROOT_DIR}/boot/vmlinuz"
 		else
 			eerror "Failed to generate kernel"
 			exit 1
 		fi
 	else
 		einfo "Using existing kernel..."
-		cp -avx "${isorsynctarget}/boot/${isokernelname}" "${isorootdir}/boot/vmlinuz"
+		cp -avx "${ISO_RSYNC_TARGET}/boot/${isokernelname}" "${ISO_ROOT_DIR}/boot/vmlinuz"
 	fi
 	
 	# Generate initramfs
@@ -529,9 +530,9 @@ prepareiso() {
 	isoramfs
 	isostop
 	
-	if [[ -f "${isorsynctarget}/boot/${isoramfsname}" ]]; then
+	if [[ -f "${ISO_RSYNC_TARGET}/boot/${isoramfsname}" ]]; then
 		einfo "Moving initramfs to final location..."
-		mv "${isorsynctarget}/boot/${isoramfsname}" "${isorootdir}/boot/initrd"
+		mv "${ISO_RSYNC_TARGET}/boot/${isoramfsname}" "${ISO_ROOT_DIR}/boot/initrd"
 	else
 		eerror "Failed to generate initramfs"
 		exit 1
@@ -543,9 +544,9 @@ prepareiso() {
 	isoefiimg
 	isostop
 	
-	if [[ -e "${isorsynctarget}/root/bootx64.efi" ]]; then
-		mv "${isorsynctarget}/root/bootx64.efi" "${isoefidir}/"
-		chmod 755 "${isoefidir}/bootx64.efi"
+	if [[ -e "${ISO_RSYNC_TARGET}/root/bootx64.efi" ]]; then
+		mv "${ISO_RSYNC_TARGET}/root/bootx64.efi" "${ISO_EFI_DIR}/"
+		chmod 755 "${ISO_EFI_DIR}/bootx64.efi"
 		einfo "EFI bootloader installed successfully"
 	else
 		ewarn "EFI bootloader not generated - you may need to create it manually"
@@ -557,16 +558,16 @@ prepareiso() {
 	isochainloader
 	isostop
 	
-	if [[ -e "${isorsynctarget}/root/core.img" ]]; then
-		mv "${isorsynctarget}/root/core.img" "${isogrubdir}/"
+	if [[ -e "${ISO_RSYNC_TARGET}/root/core.img" ]]; then
+		mv "${ISO_RSYNC_TARGET}/root/core.img" "${ISO_GRUB_DIR}/"
 		einfo "GRUB chainloader installed successfully"
 	else
 		ewarn "GRUB chainloader not generated - you may need to create it manually"
 	fi
 	
 	# Copy additional GRUB files
-	if [[ -e "${isorsynctarget}/usr/lib/grub/i386-pc/lnxboot.img" ]]; then
-		cp -avx "${isorsynctarget}/usr/lib/grub/i386-pc/lnxboot.img" "${isogrubdir}/"
+	if [[ -e "${ISO_RSYNC_TARGET}/usr/lib/grub/i386-pc/lnxboot.img" ]]; then
+		cp -avx "${ISO_RSYNC_TARGET}/usr/lib/grub/i386-pc/lnxboot.img" "${ISO_GRUB_DIR}/"
 	else
 		ewarn "lnxboot.img not found - some boot features may not work"
 	fi
@@ -584,24 +585,24 @@ prepareiso() {
 	
 	# Finalize filesystem
 	einfo "Finalizing ISO filesystem..."
-	umount -l "${isorsynctarget}" >/dev/null 2>&1
+	umount -l "${ISO_RSYNC_TARGET}" >/dev/null 2>&1
 	
 	# Move real filesystem to proper location
-	mv "${isorsynctarget}.img" "${isorealfsdir}/rootfs.img"
+	mv "${ISO_RSYNC_TARGET}.img" "${ISO_REALFS_DIR}/rootfs.img"
 	
 	# Create compressed squashfs overlay
 	einfo "Creating compressed squashfs overlay..."
-	mksquashfs "${isocdrootdir}" "${isorootdir}/squashfs.img" \
+	mksquashfs "${ISO_CDROOT_DIR}" "${ISO_ROOT_DIR}/squashfs.img" \
 		-b 1048576 -comp xz -Xdict-size 100%
-	mv "${isorootdir}/squashfs.img" "${isosquashfsdir}/"
+	mv "${ISO_ROOT_DIR}/squashfs.img" "${ISO_SQUASHFS_DIR}/"
 	
 	einfo "========================================"
 	einfo "ISO PREPARATION COMPLETE"
 	einfo "========================================"
 	einfo "Filesystem structure:"
-	einfo "- Real filesystem: ${isorealfsdir}/rootfs.img"
-	einfo "- Compressed overlay: ${isosquashfsdir}/squashfs.img"
-	einfo "- Boot files: ${isorootdir}/boot/"
+	einfo "- Real filesystem: ${ISO_REALFS_DIR}/rootfs.img"
+	einfo "- Compressed overlay: ${ISO_SQUASHFS_DIR}/squashfs.img"
+	einfo "- Boot files: ${ISO_ROOT_DIR}/boot/"
 	einfo "========================================"
 }
 
@@ -609,9 +610,9 @@ bootloaderiso() {
 	# Fetch and install GRUB2 live boot configuration
 	einfo "Fetching GRUB2 boot configuration..."
 	
-	if git clone "https://gitlab.com/${releasename}/boot-core.git" "${bootloaderfetchpath}"; then
-		if [[ -d "${bootloaderconfigs}" ]]; then
-			cp -avx "${bootloaderconfigs}" "${isorootdir}/"
+	if git clone "https://gitlab.com/${releasename}/boot-core.git" "${BOOTLOADER_FETCH_PATH}"; then
+		if [[ -d "${BOOTLOADER_CONFIGS}" ]]; then
+			cp -avx "${BOOTLOADER_CONFIGS}" "${ISO_ROOT_DIR}/"
 			einfo "Boot configuration installed successfully"
 		else
 			ewarn "Boot configuration directory not found in repository"
@@ -627,14 +628,14 @@ cleanupiso() {
 	einfo "Cleaning up temporary files..."
 	
 	local cleanup_targets=(
-		"${isorsyncsource}"
-		"${isorsynctarget}"
-		"${isocdrootdir}"
-		"${bootloaderfetchpath}"
+		"${ISO_RSYNC_SOURCE}"
+		"${ISO_RSYNC_TARGET}"
+		"${ISO_CDROOT_DIR}"
+		"${BOOTLOADER_FETCH_PATH}"
 	)
 	
 	# Unmount any remaining mounts
-	umount "${isorsyncsource}" >/dev/null 2>&1
+	umount "${ISO_RSYNC_SOURCE}" >/dev/null 2>&1
 	
 	# Remove temporary directories
 	for target in "${cleanup_targets[@]}"; do
@@ -661,7 +662,7 @@ makeisoimg() {
 		-joliet \
 		-iso-level 3 \
 		-o "${iso_filename}" \
-		"${isorootdir}"; then
+		"${ISO_ROOT_DIR}"; then
 		
 		einfo "========================================"
 		einfo "ISO CREATION SUCCESSFUL!"
@@ -699,9 +700,9 @@ makeiso() {
 
 removeportagetree() {
 	# Remove portage tree while preserving packages and distfiles
-	if [[ -d "${portagedir}/.git" ]]; then
+	if [[ -d "${PORTAGE_MAIN_DIR}/.git" ]]; then
 		einfo "Removing Gentoo portage tree (preserving packages and distfiles)"
-		find "${portagedir}" -mindepth 1 \
+		find "${PORTAGE_MAIN_DIR}" -mindepth 1 \
 			-name "packages" -prune -o \
 			-name "distfiles" -prune -o \
 			-exec rm -rf {} \; >/dev/null 2>&1
@@ -720,9 +721,9 @@ removeoverlays() {
 			rm -rf "${layman_dir}" || die "Failed to remove layman directory"
 		fi
 	elif [[ -e "/var/db/repos/${releasename}-${releasetarget}" ]]; then
-		if [[ -d "${argentdir}/.git" ]]; then
+		if [[ -d "${ARGENT_MAIN_DIR}/.git" ]]; then
 			einfo "Removing Argent overlay tree (preserving packages and distfiles)"
-			find "${argentdir}" -mindepth 1 \
+			find "${ARGENT_MAIN_DIR}" -mindepth 1 \
 				-name "packages" -prune -o \
 				-name "distfiles" -prune -o \
 				-exec rm -rf {} \; >/dev/null 2>&1
@@ -735,16 +736,16 @@ removeportageconfig() {
 	einfo "Removing ${releasename}-${releasetarget} build system"
 	
 	local config_files=(
-		"${confdir}/make.conf"
-		"${confdir}/make.profile"
-		"${confdir}"
+		"${PORTAGE_LINK_CONFDIR}/make.conf"
+		"${PORTAGE_LINK_CONFDIR}/make.profile"
+		"${PORTAGE_LINK_CONFDIR}"
 	)
 	
 	for config_file in "${config_files[@]}"; do
 		rm -f "${config_file}" >/dev/null 2>&1
 	done
 	
-	rm -rf "${clonedir}" >/dev/null 2>&1
+	rm -rf "${PORTAGE_MAIN_CONFDIR}" >/dev/null 2>&1
 }
 
 resetmode() {
@@ -760,19 +761,19 @@ fetchportageconfig() {
 	einfo "Injecting ${releasename}-${releasetarget} build system"
 	
 	pushd /opt >/dev/null 2>&1 || exit 1
-	git clone --branch master https://gitlab.com/argent/argentws-build.git
+	git clone --branch master "${PORTAGE_REPO}"
 	popd >/dev/null 2>&1 || exit 1
 }
 
 fetchfullportagetree() {
 	# Fetch complete Gentoo portage tree for development/source modes
-	if [[ ! -d "${portagedir}/.git" ]]; then
+	if [[ ! -d "${PORTAGE_MAIN_DIR}/.git" ]]; then
 		einfo "Injecting full Gentoo portage tree (devmode/srcmode)"
 		
 		# Ensure directory exists
-		mkdir -p "${portagedir}"
+		mkdir -p "${PORTAGE_MAIN_DIR}"
 		
-		cd "${portagedir}" || exit 1
+		cd "${PORTAGE_MAIN_DIR}" || exit 1
 		git init >/dev/null 2>&1
 		git remote add origin https://gitlab.com/argent/portage.git
 		
@@ -781,7 +782,7 @@ fetchfullportagetree() {
 		git branch -u origin/master master
 		
 		# Clean up unnecessary files
-		rm -rf "${portagedir}/profiles/updates"
+		rm -rf "${PORTAGE_MAIN_DIR}/profiles/updates"
 		
 		einfo "Full portage tree installation completed"
 	else
@@ -791,16 +792,16 @@ fetchfullportagetree() {
 
 fetchfullargentbuilddir() {
 	# Fetch complete Argent build directory for development
-	if [[ ! -e "${clonedir}/.git" ]]; then
+	if [[ ! -e "${PORTAGE_MAIN_CONFDIR}/.git" ]]; then
 		echo
 		einfo "Injecting GIT sync to central Argent overlay..."
 		einfo "This may take a moment, please stand by!"
 		
-		mkdir -p "${clonedir}"
-		cd "${clonedir}" || exit 1
+		mkdir -p "${PORTAGE_MAIN_CONFDIR}"
+		cd "${PORTAGE_MAIN_CONFDIR}" || exit 1
 		
 		git init >/dev/null 2>&1
-		git remote add origin https://gitlab.com/argent/argentws-build.git
+		git remote add origin "${PORTAGE_REPO}"
 		git pull --depth=1 origin master
 		git branch -u origin/master master
 		
@@ -813,15 +814,15 @@ fetchfullargentbuilddir() {
 fetchminimalportagetree() {
 	# Fetch minimal portage tree for user mode
 	# Only includes profiles, metadata, and eclasses - no ebuilds
-	if [[ ! -d "${portagedir}" ]]; then
-		mkdir -p "${portagedir}"
+	if [[ ! -d "${PORTAGE_MAIN_DIR}" ]]; then
+		mkdir -p "${PORTAGE_MAIN_DIR}"
 	fi
 
-	if [[ ! -d "${portagedir}/.git" ]]; then
+	if [[ ! -d "${PORTAGE_MAIN_DIR}/.git" ]]; then
 		einfo "Injecting minimal Gentoo portage tree (usermode)"
 		einfo "This includes only profiles, metadata, and eclasses"
 
-		cd "${portagedir}" || exit 1
+		cd "${PORTAGE_MAIN_DIR}" || exit 1
 		git init >/dev/null 2>&1
 		git remote add origin https://gitlab.com/argent/portage.git
 
@@ -871,14 +872,14 @@ fetchminimalportagetree() {
 fetchminimalargenttree() {
 	# Fetch minimal Argent overlay tree for user mode
 	# Only includes profiles, metadata, and eclasses
-	if [[ ! -d "${argentdir}" ]]; then
-		mkdir -p "${argentdir}"
+	if [[ ! -d "${ARGENT_MAIN_DIR}" ]]; then
+		mkdir -p "${ARGENT_MAIN_DIR}"
 	fi
 
-	if [[ ! -d "${argentdir}/.git" ]]; then
+	if [[ ! -d "${ARGENT_MAIN_DIR}/.git" ]]; then
 		einfo "Injecting minimal Argent overlay tree (usermode)"
 
-		cd "${argentdir}" || exit 1
+		cd "${ARGENT_MAIN_DIR}" || exit 1
 		git init >/dev/null 2>&1
 		git remote add origin https://gitlab.com/argent/argent-ws.git
 
@@ -954,8 +955,8 @@ setbinmodeconfig() {
 	# Uses precompiled packages from binhost exclusively
 	einfo "Configuring binary mode (usermode)"
 	
-	ln -sf "${gitdir}" "${confdir}"
-	ln -sf "${confdir}/make.conf.amd64-user" "${confdir}/make.conf"
+	ln -sf "${PORTAGE_GITDIR}" "${PORTAGE_LINK_CONFDIR}"
+	ln -sf "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-user" "${PORTAGE_LINK_CONFDIR}/make.conf"
 	
 	# Set appropriate Gentoo profile
 	eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
@@ -972,8 +973,8 @@ setmixedmodeconfig() {
 	# Prefers binary packages but falls back to source when needed
 	einfo "Configuring mixed mode (development)"
 	
-	ln -sf "${gitdir}" "${confdir}"
-	ln -sf "${confdir}/make.conf.amd64-devel" "${confdir}/make.conf"
+	ln -sf "${PORTAGE_GITDIR}" "${PORTAGE_LINK_CONFDIR}"
+	ln -sf "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-devel" "${PORTAGE_LINK_CONFDIR}/make.conf"
 	
 	# Set appropriate Gentoo profile  
 	eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
@@ -990,8 +991,8 @@ setsrcmodeconfig() {
 	# Uses source ebuilds exclusively, ignores binary packages
 	einfo "Configuring source mode"
 	
-	ln -sf "${gitdir}" "${confdir}"
-	ln -sf "${confdir}/make.conf.amd64-srcmode" "${confdir}/make.conf"
+	ln -sf "${PORTAGE_GITDIR}" "${PORTAGE_LINK_CONFDIR}"
+	ln -sf "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-srcmode" "${PORTAGE_LINK_CONFDIR}/make.conf"
 	
 	# Set appropriate Gentoo profile
 	eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
@@ -1008,8 +1009,8 @@ setsrcmodecustom() {
 	# Full control over USE flags and compilation options
 	einfo "Configuring custom source mode"
 	
-	ln -sf "${gitdir}" "${confdir}"
-	ln -sf "${confdir}/make.conf.amd64-custom" "${confdir}/make.conf"
+	ln -sf "${PORTAGE_GITDIR}" "${PORTAGE_LINK_CONFDIR}"
+	ln -sf "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-custom" "${PORTAGE_LINK_CONFDIR}/make.conf"
 	
 	# Set appropriate Gentoo profile
 	eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
@@ -1094,18 +1095,18 @@ srccustom() {
 	fetchoverlays
 	
 	echo
-	if [[ -e "${clonedir}" ]]; then
+	if [[ -e "${PORTAGE_MAIN_CONFDIR}" ]]; then
 		# Create custom configuration if it doesn't exist
-		if [[ ! -e "${confdir}/make.conf.amd64-custom" ]]; then
-			cp "${confdir}/make.conf.amd64-devel" "${confdir}/make.conf.amd64-custom"
+		if [[ ! -e "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-custom" ]]; then
+			cp "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-devel" "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-custom"
 		fi
 		
 		# Clean up git history for custom configuration
-		rm -rf "${clonedir}/.git"
+		rm -rf "${PORTAGE_MAIN_CONFDIR}/.git"
 		
 		# Remove default package configuration
-		rm -rf "${clonedir}/conf/intel/portage/package.keywords/"*
-		rm -rf "${clonedir}/conf/intel/portage/package.use/"*
+		rm -rf "${PORTAGE_MAIN_CONFDIR}/conf/intel/portage/package.keywords/"*
+		rm -rf "${PORTAGE_MAIN_CONFDIR}/conf/intel/portage/package.use/"*
 	fi
 	echo
 	
@@ -1122,11 +1123,11 @@ decentralized_user() {
 	# Configure decentralized user mode - independent precompiled system
 	einfo "Configuring decentralized user mode"
 	
-	if [[ -e "${clonedir}" ]]; then
+	if [[ -e "${PORTAGE_MAIN_CONFDIR}" ]]; then
 		# Configure for binary packages
-		rm -f "${confdir}/make.conf"
-		ln -sf "${confdir}/make.conf.amd64-user" "${confdir}/make.conf"
-		ln -sf "${confdir}/binhost-main.conf" "${confdir}/binhost.conf"
+		rm -f "${PORTAGE_LINK_CONFDIR}/make.conf"
+		ln -sf "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-user" "${PORTAGE_LINK_CONFDIR}/make.conf"
+		ln -sf "${PORTAGE_LINK_CONFDIR}/binhost-main.conf" "${PORTAGE_LINK_CONFDIR}/binhost.conf"
 		
 		# Set Gentoo profile
 		eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
@@ -1137,7 +1138,7 @@ decentralized_user() {
 		
 		einfo "Decentralized user mode configured"
 	else
-		ewarn "Clone directory not found: ${clonedir}"
+		ewarn "Clone directory not found: ${PORTAGE_MAIN_CONFDIR}"
 	fi
 }
 
@@ -1145,10 +1146,10 @@ decentralized_devel() {
 	# Configure decentralized development mode
 	einfo "Configuring decentralized development mode"
 	
-	if [[ -e "${clonedir}" ]]; then
+	if [[ -e "${PORTAGE_MAIN_CONFDIR}" ]]; then
 		# Configure for mixed binary/source usage
-		ln -sf "${confdir}/make.conf.amd64-devel" "${confdir}/make.conf"
-		ln -sf "${confdir}/binhost-main.conf" "${confdir}/binhost.conf"
+		ln -sf "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-devel" "${PORTAGE_LINK_CONFDIR}/make.conf"
+		ln -sf "${PORTAGE_LINK_CONFDIR}/binhost-main.conf" "${PORTAGE_LINK_CONFDIR}/binhost.conf"
 		
 		# Set Gentoo profile
 		eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
@@ -1159,7 +1160,7 @@ decentralized_devel() {
 		
 		einfo "Decentralized development mode configured"
 	else
-		ewarn "Clone directory not found: ${clonedir}"
+		ewarn "Clone directory not found: ${PORTAGE_MAIN_CONFDIR}"
 	fi
 }
 
@@ -1167,10 +1168,10 @@ decentralized_source() {
 	# Configure decentralized source-only mode
 	einfo "Configuring decentralized source mode"
 	
-	if [[ -e "${clonedir}" ]]; then
+	if [[ -e "${PORTAGE_MAIN_CONFDIR}" ]]; then
 		# Configure for source-only compilation
-		ln -sf "${confdir}/make.conf.amd64-srcmode" "${confdir}/make.conf"
-		ln -sf "${confdir}/binhost-main.conf" "${confdir}/binhost.conf"
+		ln -sf "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-srcmode" "${PORTAGE_LINK_CONFDIR}/make.conf"
+		ln -sf "${PORTAGE_LINK_CONFDIR}/binhost-main.conf" "${PORTAGE_LINK_CONFDIR}/binhost.conf"
 		
 		# Set Gentoo profile
 		eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
@@ -1181,7 +1182,7 @@ decentralized_source() {
 		
 		einfo "Decentralized source mode configured"
 	else
-		ewarn "Clone directory not found: ${clonedir}"
+		ewarn "Clone directory not found: ${PORTAGE_MAIN_CONFDIR}"
 	fi
 }
 
@@ -1189,15 +1190,15 @@ decentralized_custom() {
 	# Configure decentralized custom mode
 	einfo "Configuring decentralized custom mode"
 	
-	if [[ -e "${clonedir}" ]]; then
+	if [[ -e "${PORTAGE_MAIN_CONFDIR}" ]]; then
 		# Create custom configuration if needed
-		if [[ ! -e "${confdir}/make.conf.amd64-custom" ]]; then
-			cp "${confdir}/make.conf.amd64-devel" "${confdir}/make.conf.amd64-custom"
+		if [[ ! -e "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-custom" ]]; then
+			cp "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-devel" "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-custom"
 		fi
 		
 		# Configure for custom usage
-		ln -sf "${confdir}/make.conf.amd64-custom" "${confdir}/make.conf"
-		ln -sf "${confdir}/binhost-main.conf" "${confdir}/binhost.conf"
+		ln -sf "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-custom" "${PORTAGE_LINK_CONFDIR}/make.conf"
+		ln -sf "${PORTAGE_LINK_CONFDIR}/binhost-main.conf" "${PORTAGE_LINK_CONFDIR}/binhost.conf"
 		
 		# Set Gentoo profile
 		eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
@@ -1208,7 +1209,7 @@ decentralized_custom() {
 		
 		einfo "Decentralized custom mode configured"
 	else
-		ewarn "Clone directory not found: ${clonedir}"
+		ewarn "Clone directory not found: ${PORTAGE_MAIN_CONFDIR}"
 	fi
 }
 
@@ -1216,15 +1217,15 @@ decentralized_gentoo() {
 	# Configure pure Gentoo mode - complete independence from Argent
 	ewarn "Configuring pure Gentoo mode (one-way operation!)"
 	
-	if [[ -e "${clonedir}" ]]; then
+	if [[ -e "${PORTAGE_MAIN_CONFDIR}" ]]; then
 		# Create custom configuration if needed
-		if [[ ! -e "${confdir}/make.conf.amd64-custom" ]]; then
-			cp "${confdir}/make.conf.amd64-devel" "${confdir}/make.conf.amd64-custom"
+		if [[ ! -e "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-custom" ]]; then
+			cp "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-devel" "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-custom"
 		fi
 		
 		# Configure for pure Gentoo
-		ln -sf "${confdir}/make.conf.amd64-custom" "${confdir}/make.conf"
-		ln -sf "${confdir}/binhost-main.conf" "${confdir}/binhost.conf"
+		ln -sf "${PORTAGE_LINK_CONFDIR}/make.conf.amd64-custom" "${PORTAGE_LINK_CONFDIR}/make.conf"
+		ln -sf "${PORTAGE_LINK_CONFDIR}/binhost-main.conf" "${PORTAGE_LINK_CONFDIR}/binhost.conf"
 		
 		# Set Gentoo profile
 		eselect profile set "default/linux/amd64/23.0/desktop/plasma/systemd"
@@ -1235,17 +1236,17 @@ decentralized_gentoo() {
 	fi
 	
 	# Remove Argent-specific git configuration
-	rm -rf "${confdir}/.git"
+	rm -rf "${PORTAGE_LINK_CONFDIR}/.git"
 	
 	# Clean up Argent-specific package configurations
-	local gitignore_keywords="${clonedir}/conf/intel/portage/package.keywords/.gitignore"
-	local gitignore_use="${clonedir}/conf/intel/portage/package.use/.gitignore"
+	local gitignore_keywords="${PORTAGE_MAIN_CONFDIR}/conf/intel/portage/package.keywords/.gitignore"
+	local gitignore_use="${PORTAGE_MAIN_CONFDIR}/conf/intel/portage/package.use/.gitignore"
 	
 	if [[ -f "${gitignore_keywords}" ]]; then
 		sed -i 's|!||g' "${gitignore_keywords}"
 		while IFS= read -r keyword_file; do
 			if [[ "${keyword_file}" == *"keyword"* ]]; then
-				rm -f "${clonedir}/conf/intel/portage/package.keywords/${keyword_file}"
+				rm -f "${PORTAGE_MAIN_CONFDIR}/conf/intel/portage/package.keywords/${keyword_file}"
 			fi
 		done < "${gitignore_keywords}"
 	fi
@@ -1254,7 +1255,7 @@ decentralized_gentoo() {
 		sed -i 's|!||g' "${gitignore_use}"
 		while IFS= read -r use_file; do
 			if [[ "${use_file}" == *"use"* ]]; then
-				rm -f "${clonedir}/conf/intel/portage/package.use/${use_file}"
+				rm -f "${PORTAGE_MAIN_CONFDIR}/conf/intel/portage/package.use/${use_file}"
 			fi
 		done < "${gitignore_use}"
 	fi
@@ -1400,7 +1401,7 @@ showhelp() {
 	echo -e "		"
 	echo -e "		To return to centralized Argent:"
 	echo -e "			cd /etc/portage && git init"
-	echo -e "			git remote add origin https://gitlab.com/argent/argentws-build.git"
+	echo -e "			git remote add origin ${PORTAGE_REPO}"
 	echo -e "			git pull --depth=1 origin master"
 	echo -e "			git branch -u origin/master master"
 	echo
