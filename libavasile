@@ -496,12 +496,19 @@ prepareiso() {
 	einfo "Creating base filesystem image (20GB)..."
 	dd if=/dev/zero of="${ISO_RSYNC_TARGET}.img" bs=50M count=400 status=progress
 	mkfs.ext4 -F "${ISO_RSYNC_TARGET}.img"
-	
+
 	# Mount and sync core squashfs contents
 	einfo "Mounting core squashfs and syncing contents..."
 	mount -t squashfs "${chrootx64}" "${ISO_RSYNC_SOURCE}"
 	mount -t ext4 "${ISO_RSYNC_TARGET}.img" "${ISO_RSYNC_TARGET}"
-	rsync -aHAXr --progress "${ISO_RSYNC_SOURCE}/" "${ISO_RSYNC_TARGET}/"
+
+	einfo "Syncing filesystem contents..."
+	if rsync -aHAXr "${ISO_RSYNC_SOURCE}/" "${ISO_RSYNC_TARGET}/"; then
+		einfo "Filesystem sync completed successfully"
+	else
+		eerror "Failed to sync filesystem contents"
+		exit 1
+	fi
 	
 	# Handle kernel for live boot
 	einfo "Preparing kernel for live boot..."
