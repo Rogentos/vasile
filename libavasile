@@ -323,7 +323,7 @@ makepkg() {
 isostart() {
 	# Mount ISO image core filesystems
 	local mount_points=(
-		"packages:${ISO_RSYNC_TARGET}/usr/portage/packages:bind"
+		"packages:${ISO_RSYNC_TARGET}/var/cache/binpkgs:bind"
 		"proc:${ISO_RSYNC_TARGET}/proc:proc"
 		"sysfs:${ISO_RSYNC_TARGET}/sys:sysfs"
 		"devtmpfs:${ISO_RSYNC_TARGET}/dev:devtmpfs:-o relatime,size=3055348k,nr_inodes=763837,mode=755"
@@ -337,7 +337,11 @@ isostart() {
 		if [[ -n "${options}" ]]; then
 			mount -t "${fstype}" ${options} none "${target}"
 		elif [[ "${fstype}" == "bind" ]]; then
-			mount -o bind "${source}" "${target}"
+			if [[ "${target}" == *"/var/cache/binpkgs" ]]; then
+				mount -o bind,ro "${source}" "${target}"
+			else
+				mount -o bind "${source}" "${target}"
+			fi
 		else
 			mount -t "${fstype}" "${fstype}" "${target}"
 		fi
