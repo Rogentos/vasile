@@ -848,19 +848,15 @@ fetchminimalportagetree() {
 			".gitignore"
 		)
 
-		{
-			for path in "${sparse_paths[@]}"; do
-				echo "${path}"
-			done
-		} > .git/info/sparse-checkout
-
 		# Fetch and configure
 		git fetch --depth=1 origin master
 		git checkout master
 		git branch -u origin/master master
 
+		# Configure sparse checkout properly
 		git sparse-checkout init --cone
-		git sparse-checkout set profiles metadata eclass .gitignore
+		git sparse-checkout set profiles metadata eclass
+		echo ".gitignore" >> .git/info/sparse-checkout
 
 		# Cleanup to save space
 		git reflog expire --expire=now --all
@@ -905,19 +901,15 @@ fetchminimalargenttree() {
 			".gitignore"
 		)
 
-		{
-			for path in "${sparse_paths[@]}"; do
-				echo "${path}"
-			done
-		} > .git/info/sparse-checkout
-
 		# Fetch and configure repository
 		git fetch --depth=1 origin master
 		git checkout master
 		git branch -u origin/master master
 
+		# Configure sparse checkout properly
 		git sparse-checkout init --cone
-		git sparse-checkout set profiles metadata eclass .gitignore
+		git sparse-checkout set profiles metadata eclass
+		echo ".gitignore" >> .git/info/sparse-checkout
 
 		# Initialize and update submodules with minimal depth
 		git submodule update --init --recursive --depth=1
