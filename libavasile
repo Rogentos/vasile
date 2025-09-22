@@ -195,14 +195,12 @@ chrootprepare() {
 	local directories=("${rodir}" "${rwdir}" "${workdir}" "${overlaydir}")
 	
 	while true; do
-		# Create required directories
 		for dir in "${directories[@]}"; do
 			if [[ ! -d "${dir}" ]]; then
 				mkdir -p "${dir}"
 			fi
 		done
 		
-		# Verify all directories exist
 		local all_exist=true
 		for dir in "${directories[@]}"; do
 			if [[ ! -d "${dir}" ]]; then
@@ -246,31 +244,32 @@ chrootstop() {
 }
 
 chrootstart() {
-	# Mount core squashfs in overlay configuration
-	mount -t squashfs "${chrootx64}" "${rodir}"
-	mount -t overlay \
-		-o lowerdir="${rodir}",upperdir="${rwdir}",workdir="${workdir}" \
-		overlay "${overlaydir}"
-	
-	# Bind mount package and distfile caches
-	mount -o bind packages "${overlaydir}/var/cache/binpkgs"
-	mount -o bind distfiles "${overlaydir}/var/cache/distfiles"
-	
-	# Mount virtual filesystems
-	mount -t proc proc "${overlaydir}/proc"
-	mount -t sysfs sysfs "${overlaydir}/sys"
-	mount -t devtmpfs \
-		-o relatime,size=3055348k,nr_inodes=763837,mode=755 \
-		none "${overlaydir}/dev"
-	mount -t devpts \
-		-o nosuid,noexec,relatime,gid=5,mode=620 \
-		none "${overlaydir}/dev/pts"
-	mount -t tmpfs \
-		-o nosuid,nodev \
-		none "${overlaydir}/dev/shm"
-	mount -t tmpfs \
-		-o nosuid,nodev,noexec \
-		none "${overlaydir}/tmp"
+    # Mount core squashfs in overlay configuration
+    mount -t squashfs "${chrootx64}" "${rodir}"
+    mount -t overlay \
+        -o lowerdir="${rodir}",upperdir="${rwdir}",workdir="${workdir}" \
+        overlay "${overlaydir}"
+    
+    mkdir -p "${overlaydir}/var/cache/binpkgs"
+    mkdir -p "${overlaydir}/var/cache/distfiles"
+    mount -o bind,ro packages "${overlaydir}/var/cache/binpkgs"
+    mount -o bind,ro distfiles "${overlaydir}/var/cache/distfiles"
+    
+    # Mount virtual filesystems
+    mount -t proc proc "${overlaydir}/proc"
+    mount -t sysfs sysfs "${overlaydir}/sys"
+    mount -t devtmpfs \
+        -o relatime,size=3055348k,nr_inodes=763837,mode=755 \
+        none "${overlaydir}/dev"
+    mount -t devpts \
+        -o nosuid,noexec,relatime,gid=5,mode=620 \
+        none "${overlaydir}/dev/pts"
+    mount -t tmpfs \
+        -o nosuid,nodev \
+        none "${overlaydir}/dev/shm"
+    mount -t tmpfs \
+        -o nosuid,nodev,noexec \
+        none "${overlaydir}/tmp"
 }
 
 chrootdevtree() {
@@ -478,49 +477,52 @@ isochroot() {
 }
 
 prepareiso() {
-	# Prepare ISO image layout and filesystem
-	einfo "========================================"
-	einfo "PREPARING ISO IMAGE LAYOUT"
-	einfo "========================================"
-	
-	# Create directory structure
-	local iso_directories=(
-		"${ISO_RSYNC_TARGET}"
-		"${ISO_RSYNC_SOURCE}"
-		"${ISO_CDROOT_DIR}"
-		"${ISO_SQUASHFS_DIR}"
-		"${ISO_REALFS_DIR}"
-		"${ISO_GRUB_DIR}"
-		"${ISO_EFI_DIR}"
-	)
-	
-	for dir in "${iso_directories[@]}"; do
-		mkdir -p "${dir}"
-	done
-	
-	# Create base filesystem image
-	einfo "Creating base filesystem image (20GB)..."
-	dd if=/dev/zero of="${ISO_RSYNC_TARGET}.img" bs=50M count=400 status=progress
-	mkfs.ext4 -F "${ISO_RSYNC_TARGET}.img"
+    # Prepare ISO image layout and filesystem
+    einfo "========================================"
+    einfo "PREPARING ISO IMAGE LAYOUT"
+    einfo "========================================"
+    
+    # Create directory structure
+    local iso_directories=(
+        "${ISO_RSYNC_TARGET}"
+        "${ISO_RSYNC_SOURCE}"
+        "${ISO_CDROOT_DIR}"
+        "${ISO_SQUASHFS_DIR}"
+        "${ISO_REALFS_DIR}"
+        "${ISO_GRUB_DIR}"
+        "${ISO_EFI_DIR}"
+    )
+    
+    for dir in "${iso_directories[@]}"; do
+        mkdir -p "${dir}"
+    done
+    
+    local source_size
+    source_size=$(du -sb "${chrootx64}" | cut -f1)
+    local image_size=$(( (source_size * 120) / 100 / 1048576 ))
+    
+    einfo "Creating base filesystem image (${image_size}MB based on source size)..."
+    dd if=/dev/zero of="${ISO_RSYNC_TARGET}.img" bs=1M count="${image_size}" status=progress
+    mkfs.ext4 -F -m 0 "${ISO_RSYNC_TARGET}.img"
 
-	# Mount and sync core squashfs contents
-	einfo "Mounting core squashfs and syncing contents..."
-	mount -t squashfs "${chrootx64}" "${ISO_RSYNC_SOURCE}"
-	mount -t ext4 "${ISO_RSYNC_TARGET}.img" "${ISO_RSYNC_TARGET}"
+    # Mount and sync core squashfs contents
+    einfo "Mounting core squashfs and syncing contents..."
+    mount -t squashfs "${chrootx64}" "${ISO_RSYNC_SOURCE}"
+    mount -t ext4 "${ISO_RSYNC_TARGET}.img" "${ISO_RSYNC_TARGET}"
 
-	einfo "Syncing filesystem contents..."
-	if rsync -aHAXr "${ISO_RSYNC_SOURCE}/" "${ISO_RSYNC_TARGET}/"; then
-		einfo "Filesystem sync completed successfully"
-	else
-		eerror "Failed to sync filesystem contents"
-		exit 1
-	fi
-	
-	# Handle kernel for live boot
-	einfo "Preparing kernel for live boot..."
-	if [[ ! -f "${ISO_RSYNC_TARGET}/boot/${isokernelname}" ]]; then
-		ewarn "Kernel not found, generating with dracut..."
-		dracut -H -f \
+    einfo "Syncing filesystem contents..."
+    if rsync -aHAXr --inplace --no-whole-file "${ISO_RSYNC_SOURCE}/" "${ISO_RSYNC_TARGET}/"; then
+        einfo "Filesystem sync completed successfully"
+    else
+        eerror "Failed to sync filesystem contents"
+        exit 1
+    fi
+    
+    # Handle kernel for live boot
+    einfo "Preparing kernel for live boot..."
+    if [[ ! -f "${ISO_RSYNC_TARGET}/boot/${isokernelname}" ]]; then
+        ewarn "Kernel not found, generating with dracut..."
+        dracut -H -f \
 			-o systemd -o systemd-initrd -o systemd-networkd \
 			-o dracut-systemd -o plymouth \
 			--early-microcode --kver="${kernelver}" \
@@ -532,87 +534,88 @@ prepareiso() {
 			eerror "Failed to generate kernel"
 			exit 1
 		fi
-	else
-		einfo "Using existing kernel..."
-		cp -avx "${ISO_RSYNC_TARGET}/boot/${isokernelname}" "${ISO_ROOT_DIR}/boot/vmlinuz"
-	fi
-	
-	# Generate initramfs
-	einfo "Generating initramfs for live boot..."
-	isostart
-	isoramfs
-	isostop
-	
-	if [[ -f "${ISO_RSYNC_TARGET}/boot/${isoramfsname}" ]]; then
-		einfo "Moving initramfs to final location..."
-		mv "${ISO_RSYNC_TARGET}/boot/${isoramfsname}" "${ISO_ROOT_DIR}/boot/initrd"
-	else
-		eerror "Failed to generate initramfs"
-		exit 1
-	fi
-	
-	# Generate EFI bootloader
-	einfo "Generating EFI bootloader..."
-	isostart
-	isoefiimg
-	isostop
-	
-	if [[ -e "${ISO_RSYNC_TARGET}/root/bootx64.efi" ]]; then
-		mv "${ISO_RSYNC_TARGET}/root/bootx64.efi" "${ISO_EFI_DIR}/"
-		chmod 755 "${ISO_EFI_DIR}/bootx64.efi"
-		einfo "EFI bootloader installed successfully"
-	else
-		ewarn "EFI bootloader not generated - you may need to create it manually"
-	fi
-	
-	einfo "Generating GRUB chainloader..."
-	isostart
-	isochainloader
-	isostop
-	
-	if [[ -e "${ISO_RSYNC_TARGET}/root/core.img" ]]; then
-		mv "${ISO_RSYNC_TARGET}/root/core.img" "${ISO_GRUB_DIR}/"
-		einfo "GRUB chainloader installed successfully"
-	else
-		ewarn "GRUB chainloader not generated - you may need to create it manually"
-	fi
-	
-	# Copy additional GRUB files
-	if [[ -e "${ISO_RSYNC_TARGET}/usr/lib/grub/i386-pc/lnxboot.img" ]]; then
-		cp -avx "${ISO_RSYNC_TARGET}/usr/lib/grub/i386-pc/lnxboot.img" "${ISO_GRUB_DIR}/"
-	else
-		ewarn "lnxboot.img not found - some boot features may not work"
-	fi
-	
-	einfo "Configuring live ISO system services..."
-	isostart
-	isousertree
-	isochroot "$@"
-	isostop
-	
-	isostart
-	isoservices
-	isostop
-	
-	einfo "Finalizing ISO filesystem..."
-	umount -l "${ISO_RSYNC_TARGET}" >/dev/null 2>&1
-	
-	# Move real filesystem to proper location
-	mv "${ISO_RSYNC_TARGET}.img" "${ISO_REALFS_DIR}/rootfs.img"
-	
-	einfo "Creating compressed squashfs overlay..."
-	mksquashfs "${ISO_CDROOT_DIR}" "${ISO_ROOT_DIR}/squashfs.img" \
-		-b 1048576 -comp xz -Xdict-size 100%
-	mv "${ISO_ROOT_DIR}/squashfs.img" "${ISO_SQUASHFS_DIR}/"
-	
-	einfo "========================================"
-	einfo "ISO PREPARATION COMPLETE"
-	einfo "========================================"
-	einfo "Filesystem structure:"
-	einfo "- Real filesystem: ${ISO_REALFS_DIR}/rootfs.img"
-	einfo "- Compressed overlay: ${ISO_SQUASHFS_DIR}/squashfs.img"
-	einfo "- Boot files: ${ISO_ROOT_DIR}/boot/"
-	einfo "========================================"
+    else
+        einfo "Using existing kernel..."
+        cp -avx "${ISO_RSYNC_TARGET}/boot/${isokernelname}" "${ISO_ROOT_DIR}/boot/vmlinuz"
+    fi
+    
+    # Generate initramfs
+    einfo "Generating initramfs for live boot..."
+    isostart
+    isoramfs
+    isostop
+    
+    if [[ -f "${ISO_RSYNC_TARGET}/boot/${isoramfsname}" ]]; then
+        einfo "Moving initramfs to final location..."
+        mv "${ISO_RSYNC_TARGET}/boot/${isoramfsname}" "${ISO_ROOT_DIR}/boot/initrd"
+    else
+        eerror "Failed to generate initramfs"
+        exit 1
+    fi
+    
+    # Generate EFI bootloader
+    einfo "Generating EFI bootloader..."
+    isostart
+    isoefiimg
+    isostop
+    
+    if [[ -e "${ISO_RSYNC_TARGET}/root/bootx64.efi" ]]; then
+        mv "${ISO_RSYNC_TARGET}/root/bootx64.efi" "${ISO_EFI_DIR}/"
+        chmod 755 "${ISO_EFI_DIR}/bootx64.efi"
+        einfo "EFI bootloader installed successfully"
+    else
+        ewarn "EFI bootloader not generated - you may need to create it manually"
+    fi
+    
+    einfo "Generating GRUB chainloader..."
+    isostart
+    isochainloader
+    isostop
+    
+    if [[ -e "${ISO_RSYNC_TARGET}/root/core.img" ]]; then
+        mv "${ISO_RSYNC_TARGET}/root/core.img" "${ISO_GRUB_DIR}/"
+        einfo "GRUB chainloader installed successfully"
+    else
+        ewarn "GRUB chainloader not generated - you may need to create it manually"
+    fi
+    
+    # Copy additional GRUB files
+    if [[ -e "${ISO_RSYNC_TARGET}/usr/lib/grub/i386-pc/lnxboot.img" ]]; then
+        cp -avx "${ISO_RSYNC_TARGET}/usr/lib/grub/i386-pc/lnxboot.img" "${ISO_GRUB_DIR}/"
+    else
+        ewarn "lnxboot.img not found - some boot features may not work"
+    fi
+    
+    einfo "Configuring live ISO system services..."
+    isostart
+    isousertree
+    isochroot "$@"
+    isostop
+    
+    isostart
+    isoservices
+    isostop
+    
+    einfo "Finalizing ISO filesystem..."
+    umount -l "${ISO_RSYNC_TARGET}" >/dev/null 2>&1
+    
+    # Move real filesystem to proper location
+    mv "${ISO_RSYNC_TARGET}.img" "${ISO_REALFS_DIR}/rootfs.img"
+    
+    einfo "Creating compressed squashfs overlay..."
+    mksquashfs "${ISO_CDROOT_DIR}" "${ISO_ROOT_DIR}/squashfs.img" \
+        -b 1048576 -comp xz -Xdict-size 100% -Xbcj x86 \
+        -no-duplicates -no-recovery
+    mv "${ISO_ROOT_DIR}/squashfs.img" "${ISO_SQUASHFS_DIR}/"
+    
+    einfo "========================================"
+    einfo "ISO PREPARATION COMPLETE"
+    einfo "========================================"
+    einfo "Filesystem structure:"
+    einfo "- Real filesystem: ${ISO_REALFS_DIR}/rootfs.img"
+    einfo "- Compressed overlay: ${ISO_SQUASHFS_DIR}/squashfs.img"
+    einfo "- Boot files: ${ISO_ROOT_DIR}/boot/"
+    einfo "========================================"
 }
 
 bootloaderiso() {
@@ -819,116 +822,94 @@ fetchfullargentbuilddir() {
 }
 
 fetchminimalportagetree() {
-	# Fetch minimal portage tree for user mode
-	# Only includes profiles, metadata, and eclasses - no ebuilds
-	if [[ ! -d "${PORTAGE_MAIN_DIR}" ]]; then
-		mkdir -p "${PORTAGE_MAIN_DIR}"
-	fi
+    # Fetch minimal portage tree for user mode
+    # Only includes profiles, metadata, and eclasses - no ebuilds
+    if [[ ! -d "${PORTAGE_MAIN_DIR}" ]]; then
+        mkdir -p "${PORTAGE_MAIN_DIR}"
+    fi
 
-	if [[ ! -d "${PORTAGE_MAIN_DIR}/.git" ]]; then
-		einfo "Injecting minimal Gentoo portage tree (usermode)"
-		einfo "This includes only profiles, metadata, and eclasses"
+    if [[ ! -d "${PORTAGE_MAIN_DIR}/.git" ]]; then
+        einfo "Injecting minimal Gentoo portage tree (usermode)"
+        einfo "This includes only profiles, metadata, and eclasses"
 
-		cd "${PORTAGE_MAIN_DIR}" || exit 1
-		git init >/dev/null 2>&1
-		git remote add origin https://gitlab.com/argent/portage.git
+        cd "${PORTAGE_MAIN_DIR}" || exit 1
+        git init >/dev/null 2>&1
+        git remote add origin https://gitlab.com/argent/portage.git
 
-		# Configure sparse checkout for minimal tree
-		git config core.sparseCheckout true
-		git config extensions.partialClone origin
-		git config remote.origin.promisor true
-		git config fetch.fsckObjects false
-		git config remote.origin.partialCloneFilter blob:none
+        # Use partial cloning to save space
+        git config core.sparseCheckout true
+        git config extensions.partialClone origin
+        git config remote.origin.promisor true
+        git config remote.origin.partialCloneFilter blob:none
 
-		# Define what to include in sparse checkout
-		local sparse_paths=(
-			"profiles/"
-			"metadata/"
-			"eclass/"
-			".gitignore"
-		)
+        git fetch --depth=1 --filter=blob:none origin master
+        git checkout -f master
+        git branch -u origin/master master
 
-		# Fetch and configure
-		git fetch --depth=1 origin master
-		git checkout master
-		git branch -u origin/master master
+        git sparse-checkout init --cone
+        git sparse-checkout set profiles metadata eclass
+        
+        echo ".gitignore" >> .git/info/sparse-checkout
+        git read-tree -m -u HEAD
 
-		# Configure sparse checkout properly
-		git sparse-checkout init --cone
-		git sparse-checkout set profiles metadata eclass
-		echo ".gitignore" >> .git/info/sparse-checkout
+        git reflog expire --expire=now --all
+        git gc --prune=now --aggressive
+        
+        rm -rf .git/hooks/*
+        
+        rm -rf profiles/updates profiles/desc profiles/arch/*/use.* 2>/dev/null
+        find profiles/default/linux/ -mindepth 1 -maxdepth 1 -type d ! -name amd64 -exec rm -rf {} + 2>/dev/null
+        
+        find metadata/ -name "*.xml" ! -name "layout.conf" -delete 2>/dev/null
 
-		# Cleanup to save space
-		git reflog expire --expire=now --all
-		git gc --prune=now --aggressive
-
-		# Remove unnecessary profile updates and architectures
-		rm -rf profiles/updates
-		find profiles/default/linux/ -mindepth 1 -maxdepth 1 -type d ! -name amd64 -exec rm -rf {} + 2>/dev/null
-
-		einfo "Minimal portage tree installation completed"
-	else
-		einfo "Minimal portage tree already exists, skipping..."
-	fi
+        einfo "Minimal portage tree installation completed"
+    else
+        einfo "Minimal portage tree already exists, skipping..."
+    fi
 }
 
 fetchminimalargenttree() {
-	# Fetch minimal Argent overlay tree for user mode
-	# Only includes profiles, metadata, and eclasses
-	if [[ ! -d "${ARGENT_MAIN_DIR}" ]]; then
-		mkdir -p "${ARGENT_MAIN_DIR}"
-	fi
+    # Fetch minimal Argent overlay tree for user mode
+    # Only includes profiles, metadata, and eclasses
+    if [[ ! -d "${ARGENT_MAIN_DIR}" ]]; then
+        mkdir -p "${ARGENT_MAIN_DIR}"
+    fi
 
-	if [[ ! -d "${ARGENT_MAIN_DIR}/.git" ]]; then
-		einfo "Injecting minimal Argent overlay tree (usermode)"
+    if [[ ! -d "${ARGENT_MAIN_DIR}/.git" ]]; then
+        einfo "Injecting minimal Argent overlay tree (usermode)"
 
-		cd "${ARGENT_MAIN_DIR}" || exit 1
-		git init >/dev/null 2>&1
-		git remote add origin https://gitlab.com/argent/argent-ws.git
+        cd "${ARGENT_MAIN_DIR}" || exit 1
+        git init >/dev/null 2>&1
+        git remote add origin https://gitlab.com/argent/argent-ws.git
 
-		# Configure sparse checkout for minimal tree
-		git config core.sparseCheckout true
-		git config extensions.partialClone origin
-		git config remote.origin.promisor true
-		git config fetch.fsckObjects false
-		git config remote.origin.partialCloneFilter blob:none
+        git config core.sparseCheckout true
+        git config extensions.partialClone origin
+        git config remote.origin.promisor true
+        git config remote.origin.partialCloneFilter blob:none
 
-		# Define sparse checkout paths
-		local sparse_paths=(
-			"profiles/"
-			"metadata/"
-			"eclass/"
-			".gitignore"
-		)
+        git fetch --depth=1 --filter=blob:none origin master
+        git checkout -f master
+        git branch -u origin/master master
 
-		# Fetch and configure repository
-		git fetch --depth=1 origin master
-		git checkout master
-		git branch -u origin/master master
+        # Configure sparse checkout properly
+        git sparse-checkout init --cone
+        git sparse-checkout set profiles metadata eclass
+        echo ".gitignore" >> .git/info/sparse-checkout
+        git read-tree -m -u HEAD
 
-		# Configure sparse checkout properly
-		git sparse-checkout init --cone
-		git sparse-checkout set profiles metadata eclass
-		echo ".gitignore" >> .git/info/sparse-checkout
+        # Skip submodules for minimal mode - they're not needed
 
-		# Initialize and update submodules with minimal depth
-		git submodule update --init --recursive --depth=1
+        git reflog expire --expire=now --all
+        git gc --prune=now --aggressive
+        
+        rm -rf .git/hooks/*
+        
+        rm -rf profiles/updates 2>/dev/null
 
-		# Cleanup to minimize disk usage
-		git reflog expire --expire=now --all
-		git gc --prune=now --aggressive
-
-		# Cleanup submodules as well
-		git submodule foreach --recursive \
-			'git reflog expire --expire=now --all && git gc --prune=now --aggressive'
-
-		# Remove unnecessary files
-		rm -rf profiles/updates
-
-		einfo "Minimal Argent overlay tree installation completed"
-	else
-		einfo "Minimal Argent overlay tree already exists, skipping..."
-	fi
+        einfo "Minimal Argent overlay tree installation completed"
+    else
+        einfo "Minimal Argent overlay tree already exists, skipping..."
+    fi
 }
 
 fetchoverlays() {
