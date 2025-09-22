@@ -80,7 +80,9 @@ export PORTAGE_GITDIR="${PORTAGE_GITDIR:-/opt/argentws-build/conf/intel/portage}
 export PORTAGE_MAIN_CONFDIR="${PORTAGE_MAIN_CONFDIR:-/opt/argentws-build}"
 export PORTAGE_REPO="${PORTAGE_REPO:-https://gitlab.com/argent/argentws-build.git}"
 
-# Feature Flags
+export ISO_BINPKGS_SOURCE="${ISO_BINPKGS_SOURCE:-/home/work/packages_argent_making/buildchroot_argentx64/var/cache/binpkgs}"
+
+# Use of sudo for privileged operations
 export ARGENT_USE_SUDO="${ARGENT_USE_SUDO:-0}"
 
 # =============================================================================
@@ -323,7 +325,7 @@ makepkg() {
 isostart() {
 	# Mount ISO image core filesystems
 	local mount_points=(
-		"packages:${ISO_RSYNC_TARGET}/var/cache/binpkgs:bind"
+		"${ISO_BINPKGS_SOURCE}:${ISO_RSYNC_TARGET}/var/cache/binpkgs:bind"
 		"proc:${ISO_RSYNC_TARGET}/proc:proc"
 		"sysfs:${ISO_RSYNC_TARGET}/sys:sysfs"
 		"devtmpfs:${ISO_RSYNC_TARGET}/dev:devtmpfs:-o relatime,size=3055348k,nr_inodes=763837,mode=755"
@@ -357,7 +359,7 @@ isostop() {
 		"${ISO_RSYNC_TARGET}/dev/shm"
 		"${ISO_RSYNC_TARGET}/dev"
 		"${ISO_RSYNC_TARGET}/tmp"
-		"${ISO_RSYNC_TARGET}/usr/portage/packages"
+		"${ISO_RSYNC_TARGET}/var/cache/binpkgs"
 	)
 	
 	for mount_point in "${mount_points[@]}"; do
@@ -563,7 +565,6 @@ prepareiso() {
 		ewarn "EFI bootloader not generated - you may need to create it manually"
 	fi
 	
-	# Generate GRUB chainloader for unetbootin compatibility
 	einfo "Generating GRUB chainloader..."
 	isostart
 	isochainloader
@@ -583,7 +584,6 @@ prepareiso() {
 		ewarn "lnxboot.img not found - some boot features may not work"
 	fi
 	
-	# Configure live ISO environment
 	einfo "Configuring live ISO system services..."
 	isostart
 	isousertree
@@ -594,14 +594,12 @@ prepareiso() {
 	isoservices
 	isostop
 	
-	# Finalize filesystem
 	einfo "Finalizing ISO filesystem..."
 	umount -l "${ISO_RSYNC_TARGET}" >/dev/null 2>&1
 	
 	# Move real filesystem to proper location
 	mv "${ISO_RSYNC_TARGET}.img" "${ISO_REALFS_DIR}/rootfs.img"
 	
-	# Create compressed squashfs overlay
 	einfo "Creating compressed squashfs overlay..."
 	mksquashfs "${ISO_CDROOT_DIR}" "${ISO_ROOT_DIR}/squashfs.img" \
 		-b 1048576 -comp xz -Xdict-size 100%
@@ -618,7 +616,6 @@ prepareiso() {
 }
 
 bootloaderiso() {
-	# Fetch and install GRUB2 live boot configuration
 	einfo "Fetching GRUB2 boot configuration..."
 	
 	if git clone "https://gitlab.com/${releasename}/boot-core.git" "${BOOTLOADER_FETCH_PATH}"; then
@@ -635,7 +632,6 @@ bootloaderiso() {
 }
 
 cleanupiso() {
-	# Clean up temporary files from ISO preparation
 	einfo "Cleaning up temporary files..."
 	
 	local cleanup_targets=(
